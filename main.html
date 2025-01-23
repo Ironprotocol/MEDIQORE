@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header img {
+            width: 100px;
+            height: auto;
+        }
+        .login-section {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+        .login-section input {
+            margin-bottom: 10px;
+            padding: 8px;
+            width: 200px;
+        }
+        .login-section button {
+            margin-bottom: 10px;
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+        .role-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        .role-buttons button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="logo.png" alt="Company Logo">
+        <h1>Hospital Management System</h1>
+    </div>
+    <div class="login-section">
+        <input type="text" placeholder="계정 입력란" id="account">
+        <input type="password" placeholder="비밀번호 입력란" id="password">
+        <button id="login">로그인</button>
+        <button id="contact">문의하기</button>
+    </div>
+    <div class="role-buttons">
+        <button id="doctor">의사</button>
+        <button id="desk">데스크</button>
+        <button id="pharmacist">약사</button>
+    </div>
+</body>
+</html>
