@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>계정 설정</title>
+    <style>
+        body {
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+        }
+    </style>
+</head>
+<body>
+    <h2>새 계정 설정</h2>
+    <div class="form-group">
+        <label>UID:</label>
+        <input type="text" id="uid" placeholder="Authentication의 UID 입력">
+    </div>
+    <div class="form-group">
+        <label>역할:</label>
+        <select id="role">
+            <option value="doctor">Doctor</option>
+            <option value="desk">Desk</option>
+            <option value="chemist">Chemist</option>
+        </select>
+    </div>
+    <button onclick="setupAccount()">계정 생성</button>
+
+    <script type="module">
+        // Firebase SDK 임포트
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+
+        // Firebase 초기화
+        const firebaseConfig = {
+            apiKey: "AIzaSyDfTE5XjQKbaQ7DG4zu_clNyZAZJwrokbk",
+            authDomain: "mediqore-14957.firebaseapp.com",
+            projectId: "mediqore-14957",
+            storageBucket: "mediqore-14957.firebasestorage.app",
+            messagingSenderId: "67288417543",
+            appId: "1:67288417543:web:6bfe844b303a2d3b24b1a2",
+            measurementId: "G-S00R71J8YV"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // 계정 설정 함수
+        window.setupAccount = async function() {
+            const uid = document.getElementById('uid').value;
+            const role = document.getElementById('role').value;
+
+            if (!uid) {
+                alert('UID를 입력해주세요');
+                return;
+            }
+
+            try {
+                const userData = {
+                    status: 'active',
+                    accountInfo: {
+                        region: 'Johannesburg',
+                        type: 'hospital',
+                        category: 'dental',
+                        facilityName: 'MEDIQORE Dental Test',
+                        facilityCode: 'H250124001'
+                    },
+                    role: {
+                        level: role,
+                        code: '001'
+                    },
+                    created: new Date()
+                };
+
+                await setDoc(doc(db, 'users', uid), userData);
+                alert('계정이 성공적으로 생성되었습니다!');
+            } catch (error) {
+                console.error('Error:', error);
+                alert('계정 생성 실패: ' + error.message);
+            }
+        };
+    </script>
+</body>
+</html> 

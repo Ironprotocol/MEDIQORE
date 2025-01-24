@@ -3,71 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hospital Management System</title>
+    <title>MEDIQORE</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
             margin: 0;
-            background-color: #f4f4f9;
+            padding: 0;
+            height: 100vh;
+            background-color: white;
+            overflow-x: hidden;  /* 가로 스크롤 방지 */
+            min-width: 800px;    /* 최소 너비 설정 */
         }
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .header img {
-            width: 100px;
-            height: auto;
-        }
-        .login-section {
-            position: absolute;
-            top: 20px;
-            right: 20px;
+
+        /* 상단 메뉴바 스타일 */
+        .top-menu {
+            width: 100%;
+            height: 60px;
+            background-color: white;
+            border-bottom: 1px solid hsl(0, 0%, 85%);
             display: flex;
-            flex-direction: column;
-            align-items: flex-end;
+            justify-content: space-between;  /* 로고와 로그인 섹션 양쪽 정렬 */
+            align-items: center;
+            padding: 0 20px;
+            box-sizing: border-box;  /* padding이 너비에 포함되도록 */
         }
+
+        /* 로고 컨테이너 스타일 */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .logo-image {
+            width: 30px;
+            height: 30px;
+            object-fit: contain;
+        }
+
+        .logo-text {
+            font-weight: 700;
+            font-size: 16px;
+            color: rgb(0, 102, 255);
+        }
+
+        /* 로그인 섹션 스타일 */
+        .login-section {
+            position: static;  /* absolute 제거 */
+            display: flex;
+            align-items: center;
+            gap: 10px;  /* 요소들 사이 간격 */
+            margin-right: 20px;  /* 우측 여백 추가 */
+        }
+
+        /* 로그인 섹션의 input 스타일 수정 */
         .login-section input {
-            margin-bottom: 10px;
+            margin: 0;
             padding: 8px;
-            width: 200px;
+            height: 36px;  /* 로그인 버튼과 동일한 높이 */
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
         }
+
+        /* 계정 입력 필드만 따로 너비 설정 */
+        .login-section input#account {
+            width: 180px;  /* 기존 150px에서 20% 증가 */
+        }
+
+        /* 비밀번호 입력 필드 */
+        .login-section input#password {
+            width: 150px;
+        }
+
         .login-section button {
-            margin-bottom: 10px;
+            margin: 0;
             padding: 8px 16px;
             cursor: pointer;
+            height: 36px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
         }
-        .role-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-        }
-        .role-buttons button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
+
+        .login-section button#login {
+            background-color: rgb(0, 102, 255);
+            color: white;
+            border: none;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <img src="logo.png" alt="Company Logo">
-        <h1>Hospital Management System</h1>
+    <div class="top-menu">
+        <div class="logo-container">
+            <img src="logo.png" alt="MEDIQORE Logo" class="logo-image">
+            <span class="logo-text">MEDIQORE</span>
+        </div>
+        <div class="login-section">
+            <input type="text" placeholder="Account" id="account">
+            <input type="password" placeholder="Password" id="password">
+            <button id="login">Login</button>
+            <button id="contact">Contact</button>
+        </div>
     </div>
-    <div class="login-section">
-        <input type="text" placeholder="계정 입력란" id="account">
-        <input type="password" placeholder="비밀번호 입력란" id="password">
-        <button id="login">로그인</button>
-        <button id="contact">문의하기</button>
-    </div>
-    <div class="role-buttons">
-        <button id="doctor">의사</button>
-        <button id="desk">데스크</button>
-        <button id="pharmacist">약사</button>
-    </div>
+    <script type="module">
+        // Firebase SDK 임포트
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-analytics.js";
+
+        // Firebase 구성 객체
+        const firebaseConfig = {
+            apiKey: "AIzaSyDfTE5XjQKbaQ7DG4zu_clNyZAZJwrokbk",
+            authDomain: "mediqore-14957.firebaseapp.com",
+            projectId: "mediqore-14957",
+            storageBucket: "mediqore-14957.firebasestorage.app",
+            messagingSenderId: "67288417543",
+            appId: "1:67288417543:web:6bfe844b303a2d3b24b1a2",
+            measurementId: "G-S00R71J8YV"
+        };
+
+        // Firebase 초기화
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const analytics = getAnalytics(app);
+        const db = getFirestore(app);
+
+        // DOM 요소
+        const accountInput = document.getElementById('account');
+        const passwordInput = document.getElementById('password');
+        const loginButton = document.getElementById('login');
+
+        // 엔터 키 이벤트 추가
+        function handleEnterKey(event) {
+            if (event.key === 'Enter') {
+                loginButton.click();  // 로그인 버튼 클릭 이벤트 실행
+            }
+        }
+
+        // 입력 필드에 엔터 키 이벤트 리스너 추가
+        accountInput.addEventListener('keypress', handleEnterKey);
+        passwordInput.addEventListener('keypress', handleEnterKey);
+
+        // 로그인 버튼 이벤트
+        loginButton.addEventListener('click', async () => {
+            try {
+                // 이메일/비밀번호로 로그인
+                const userCredential = await signInWithEmailAndPassword(
+                    auth, 
+                    accountInput.value, 
+                    passwordInput.value
+                );
+
+                // Firestore에서 사용자 정보 확인
+                const userRef = doc(db, 'users', userCredential.user.uid);
+                const userDoc = await getDoc(userRef);
+                const userData = userDoc.data();
+
+                // 계정 상태 확인
+                if (userData.status !== 'active') {
+                    await auth.signOut();
+                    alert('This account is not active. Please contact support.');
+                    return;
+                }
+
+                // lastLogin 업데이트
+                await updateDoc(userRef, {
+                    lastLogin: serverTimestamp()
+                });
+
+                // 로그인 성공 시 data_page.html로 이동
+                window.location.href = 'data_page.html';
+
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Login failed: ' + error.message);
+            }
+        });
+    </script>
 </body>
 </html>
