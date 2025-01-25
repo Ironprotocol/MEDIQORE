@@ -18,22 +18,54 @@
             margin-top: 20px;
             padding: 10px 20px;
         }
+        .form-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
+        h2 {
+            margin-top: 0;
+        }
     </style>
 </head>
 <body>
-    <h2>새 계정 설정</h2>
-    <div class="form-group">
-        <label>UID:</label>
-        <input type="text" id="uid" placeholder="Authentication의 UID 입력">
+    <div class="form-section">
+        <h2>계정 설정</h2>
+        <div class="form-group">
+            <label>UID:</label>
+            <input type="text" id="uid" placeholder="Authentication의 UID 입력">
+        </div>
+        <div class="form-group">
+            <label>역할:</label>
+            <select id="role">
+                <option value="doctor">Doctor</option>
+                <option value="desk">Desk</option>
+                <option value="chemist">Chemist</option>
+            </select>
+        </div>
     </div>
-    <div class="form-group">
-        <label>역할:</label>
-        <select id="role">
-            <option value="doctor">Doctor</option>
-            <option value="desk">Desk</option>
-            <option value="chemist">Chemist</option>
-        </select>
+
+    <div class="form-section">
+        <h2>병원 정보</h2>
+        <div class="form-group">
+            <label>병원 이름:</label>
+            <input type="text" id="hospitalName" placeholder="예: MEDIQORE Dental">
+        </div>
+        <div class="form-group">
+            <label>병원 코드:</label>
+            <input type="text" id="hospitalCode" placeholder="예: H250125001">
+        </div>
+        <div class="form-group">
+            <label>지역:</label>
+            <input type="text" id="region" placeholder="예: Johannesburg">
+        </div>
+        <div class="form-group">
+            <label>병원 유형:</label>
+            <input type="text" id="type" placeholder="예: dental">
+        </div>
     </div>
+
     <button onclick="setupAccount()">계정 생성</button>
 
     <script type="module">
@@ -57,35 +89,62 @@
 
         // 계정 설정 함수
         window.setupAccount = async function() {
-            const uid = document.getElementById('uid').value;
-            const role = document.getElementById('role').value;
-
-            if (!uid) {
-                alert('UID를 입력해주세요');
-                return;
-            }
-
             try {
+                const uid = document.getElementById('uid').value;
+                const role = document.getElementById('role').value;
+                const hospitalName = document.getElementById('hospitalName').value;
+                const hospitalCode = document.getElementById('hospitalCode').value;
+                const region = document.getElementById('region').value;
+                const type = document.getElementById('type').value;
+
+                console.log('입력값 확인:', {
+                    uid, role, hospitalName, hospitalCode, region, type
+                });
+
+                if (!uid || !hospitalName || !hospitalCode || !region || !type) {
+                    alert('모든 필드를 입력해주세요');
+                    return;
+                }
+
+                // 병원 ID는 병원 이름을 소문자로 변환하여 사용
+                const hospitalId = hospitalName.toLowerCase().replace(/\s+/g, '');
+                
+                // 번호는 001부터 자동 생성 (추후 수정 필요)
+                const number = '001';
+                
+                // 이메일 생성
+                const email = `${hospitalId}.${role}.${number}@mediqore.com`;
+                
+                console.log('생성된 정보:', { hospitalId, number, email });
+
                 const userData = {
+                    role: role,
                     status: 'active',
-                    accountInfo: {
-                        region: 'Johannesburg',
-                        type: 'hospital',
-                        category: 'dental',
-                        facilityName: 'MEDIQORE Dental Test',
-                        facilityCode: 'H250124001'
-                    },
-                    role: {
-                        level: role,
-                        code: '001'
-                    },
+                    number: number,
                     created: new Date()
                 };
+                console.log('사용자 데이터:', userData);
 
-                await setDoc(doc(db, 'users', uid), userData);
+                // staff 정보 저장
+                const staffRef = doc(db, 'hospitals', hospitalId, 'staff', email);
+                await setDoc(staffRef, userData);
+                console.log('직원 정보 저장 완료');
+
+                // 병원 정보 저장
+                const hospitalRef = doc(db, 'hospitals', hospitalId);
+                await setDoc(hospitalRef, {
+                    info: {
+                        name: hospitalName,
+                        code: hospitalCode,
+                        region: region,
+                        type: type
+                    }
+                }, { merge: true });
+                console.log('병원 정보 저장 완료');
+
                 alert('계정이 성공적으로 생성되었습니다!');
             } catch (error) {
-                console.error('Error:', error);
+                console.error('상세 에러:', error);
                 alert('계정 생성 실패: ' + error.message);
             }
         };

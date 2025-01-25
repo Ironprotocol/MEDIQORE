@@ -61,8 +61,8 @@
 
         /* menu-item: 메뉴바 내 각 메뉴 항목 */
         .menu-item {
-            display: none;  /* 기본적으로 모든 메뉴 숨김 */
-            padding: 15px 45px;
+            display: none;
+            padding: 15px 20px 15px 45px;  /* 왼쪽 패딩 조정 */
             margin: 0 10px;
             margin-bottom: 1px;
             cursor: pointer;
@@ -70,6 +70,35 @@
             font-weight: bold;
             font-size: 14px;
             color: rgb(110, 110, 124);
+            position: relative;  /* 아이콘 위치 기준점 */
+        }
+
+        .menu-icon {
+            position: absolute;
+            left: 15px;  /* 왼쪽 여백 */
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;  /* 아이콘 크기 */
+            height: 20px;
+            transition: opacity 0.3s ease;
+        }
+
+        .menu-icon-default {
+            opacity: 1;
+        }
+
+        .menu-icon-active {
+            opacity: 0;
+        }
+
+        .menu-item:hover .menu-icon-default,
+        .menu-item.active .menu-icon-default {
+            opacity: 0;
+        }
+
+        .menu-item:hover .menu-icon-active,
+        .menu-item.active .menu-icon-active {
+            opacity: 1;
         }
 
         /* menu-item:hover: 메뉴 항목 호버 시 스타일 */
@@ -525,26 +554,26 @@
 
         // 메뉴 활성화 처리를 위한 스크립트 추가
         document.addEventListener('DOMContentLoaded', function() {
+            // 메뉴 아이템 클릭 이벤트 처리
             const menuItems = document.querySelectorAll('.menu-item');
             const contentContainers = document.querySelectorAll('.content-container');
-            const closeButtons = document.querySelectorAll('.close-button');
-            
-            // 메뉴 클릭 이벤트
+
             menuItems.forEach(item => {
                 item.addEventListener('click', function() {
-                    // 기존 활성화된 메뉴 비활성화
+                    // 모든 메뉴 아이템에서 active 클래스 제거
                     menuItems.forEach(i => i.classList.remove('active'));
-                    // 클릭된 메뉴 활성화
+                    // 클릭된 메뉴 아이템에 active 클래스 추가
                     this.classList.add('active');
-                    
-                    // 모든 콘텐츠 숨기기
+
+                    // 모든 컨텐츠 숨기기
                     contentContainers.forEach(container => {
                         container.style.display = 'none';
                     });
-                    
-                    // 클릭된 메뉴에 해당하는 콘텐츠 표시
-                    const menuText = this.textContent.toLowerCase();
+
+                    // 이미지를 제외한 텍스트만 가져오기
+                    const menuText = this.textContent.trim().toLowerCase();
                     const contentId = `${menuText}-content`;
+                    console.log('Looking for content:', contentId); // 디버깅용
                     const content = document.getElementById(contentId);
                     if (content) {
                         content.style.display = 'block';
@@ -552,14 +581,15 @@
                 });
             });
 
-            // 닫기 버튼 클릭 이벤트
+            // 닫기 버튼 이벤트 처리
+            const closeButtons = document.querySelectorAll('.close-button');
             closeButtons.forEach(button => {
                 button.addEventListener('click', function() {
-                    // 해당 콘텐츠 컨테이너 숨기기
                     const container = this.closest('.content-container');
-                    container.style.display = 'none';
-                    
-                    // 활성화된 메뉴 비활성화
+                    if (container) {
+                        container.style.display = 'none';
+                    }
+                    // active 클래스 제거
                     menuItems.forEach(item => item.classList.remove('active'));
                 });
             });
@@ -659,20 +689,102 @@
                 });
             });
         });
+
+        async function checkUserPermissions(user) {
+            try {
+                const email = user.email;
+                const [hospitalName, role] = email.split('@')[0].split('.');
+                
+                console.log('Checking permissions for:', email);
+
+                // hospitals/병원명/staff/이메일 에서 사용자 정보 확인
+                const userRef = doc(db, 'hospitals', hospitalName, 'staff', email);
+                const userDoc = await getDoc(userRef);
+
+                if (!userDoc.exists()) {
+                    throw new Error('User document not found');
+                }
+
+                const userData = userDoc.data();
+                if (userData.status !== 'active') {
+                    await auth.signOut();
+                    window.location.href = 'main.html';
+                    return;
+                }
+
+                // 메뉴 접근 권한 적용
+                const menuItems = document.querySelectorAll('.menu-item');
+                menuItems.forEach(item => {
+                    const menuName = item.textContent.trim().toLowerCase();
+
+                    // 모든 메뉴 먼저 숨기기
+                    item.style.display = 'none';
+
+                    // Data 메뉴는 항상 표시
+                    if (menuName === 'data') {
+                        item.style.display = 'block';
+                        return;
+                    }
+
+                    // 나머지 메뉴는 역할에 따라 표시
+                    switch (role) {
+                        case 'doctor':
+                            if (menuName !== 'pharmacy') {
+                                item.style.display = 'block';
+                            }
+                            break;
+                        case 'desk':
+                            if (menuName === 'desk' || menuName === 'reservation') {
+                                item.style.display = 'block';
+                            }
+                            break;
+                        case 'chemist':
+                            if (menuName === 'pharmacy') {
+                                item.style.display = 'block';
+                            }
+                            break;
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error checking user permissions:', error.message);
+                throw error;
+            }
+        }
     </script>
 </head>
 <body>
     <div class="sidebar1">
         <div class="logo-container">
-            <img src="logo.png" alt="MEDIQORE Logo" class="logo-image">
+            <img src="image/logo.png" alt="MEDIQORE Logo" class="logo-image">
             <span class="logo-text">MEDIQORE</span>
         </div>
         <div class="menu-container">
-            <div class="menu-item">Desk</div>
-            <div class="menu-item">Prescription</div>
-            <div class="menu-item">Reservation</div>
-            <div class="menu-item">Pharmacy</div>
-            <div class="menu-item">Data</div>
+            <div class="menu-item">
+                <img src="image/desk_black.png" alt="Desk" class="menu-icon menu-icon-default">
+                <img src="image/desk.png" alt="Desk" class="menu-icon menu-icon-active">
+                Desk
+            </div>
+            <div class="menu-item">
+                <img src="image/prescription_black.png" alt="Prescription" class="menu-icon menu-icon-default">
+                <img src="image/prescription.png" alt="Prescription" class="menu-icon menu-icon-active">
+                Prescription
+            </div>
+            <div class="menu-item">
+                <img src="image/reservation_black.png" alt="Reservation" class="menu-icon menu-icon-default">
+                <img src="image/reservation.png" alt="Reservation" class="menu-icon menu-icon-active">
+                Reservation
+            </div>
+            <div class="menu-item">
+                <img src="image/pharmacy_black.png" alt="Pharmacy" class="menu-icon menu-icon-default">
+                <img src="image/pharmacy.png" alt="Pharmacy" class="menu-icon menu-icon-active">
+                Pharmacy
+            </div>
+            <div class="menu-item">
+                <img src="image/data_black.png" alt="Data" class="menu-icon menu-icon-default">
+                <img src="image/data.png" alt="Data" class="menu-icon menu-icon-active">
+                Data
+            </div>
         </div>
         <div class="version-container">
             <div class="divider"></div>
@@ -726,13 +838,12 @@
                             <input type="text" id="fullName" required>
                         </div>
                         <div class="form-group">
-                            <label for="dateOfBirth">Date of Birth *</label>
+                            <label>Date of Birth *</label>
                             <div class="date-select-group">
-                                <select id="birthDay" required>
+                                <select id="birthDay" name="birthDay" required>
                                     <option value="">Day</option>
-                                    <!-- 1-31 -->
                                 </select>
-                                <select id="birthMonth" required>
+                                <select id="birthMonth" name="birthMonth" required>
                                     <option value="">Month</option>
                                     <option value="01">January</option>
                                     <option value="02">February</option>
@@ -747,9 +858,8 @@
                                     <option value="11">November</option>
                                     <option value="12">December</option>
                                 </select>
-                                <select id="birthYear" required>
+                                <select id="birthYear" name="birthYear" required>
                                     <option value="">Year</option>
-                                    <!-- 1900-현재 -->
                                 </select>
                             </div>
                         </div>
@@ -773,11 +883,12 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="address">Address *</label>
+                            <label>Address *</label>
                             <div class="address-select-group">
                                 <div class="address-input">
                                     <input type="text" 
                                            id="suburbSearch" 
+                                           name="suburb"
                                            placeholder="Enter suburb (min. 2 characters)"
                                            autocomplete="off">
                                     <select id="suburbSelect" class="search-results" size="5" style="display: none;">
@@ -786,12 +897,14 @@
                                 <div class="address-input">
                                     <input type="text" 
                                            id="districtInput" 
+                                           name="district"
                                            placeholder="District" 
                                            readonly>
                                 </div>
                                 <div class="address-input">
                                     <input type="text" 
                                            id="provinceInput" 
+                                           name="province"
                                            placeholder="Province" 
                                            readonly>
                                 </div>
@@ -805,15 +918,15 @@
                     <div class="form-section">
                         <h3>Insurance & Payment Information</h3>
                         <div class="form-group">
-                            <label>Medical Aid Membership</label>
+                            <label for="hasMedicalAid">Medical Aid Membership</label>
                             <div class="checkbox-group">
-                                <input type="checkbox" id="hasMedicalAid">
+                                <input type="checkbox" id="hasMedicalAid" name="hasMedicalAid">
                                 <label for="hasMedicalAid">Yes, I have medical aid</label>
                             </div>
                         </div>
                         <div class="form-group" id="insuranceDetails">
                             <label for="insuranceProvider">Insurance Provider</label>
-                            <select id="insuranceProvider">
+                            <select id="insuranceProvider" name="insuranceProvider">
                                 <option value="">Select provider</option>
                                 <option value="discovery">Discovery</option>
                                 <option value="momentum">Momentum</option>
@@ -823,7 +936,7 @@
                         </div>
                         <div class="form-group">
                             <label for="paymentMethod">Preferred Payment Method *</label>
-                            <select id="paymentMethod" required>
+                            <select id="paymentMethod" name="paymentMethod" required>
                                 <option value="">Select payment method</option>
                                 <option value="card">Card</option>
                                 <option value="cash">Cash</option>
@@ -852,7 +965,7 @@
       // Firebase SDK 임포트
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
       import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
-      import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+      import { getFirestore, doc, getDoc, collection, getDocs, setDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
       import { getStorage } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-storage.js";
       import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-analytics.js";
 
@@ -884,32 +997,33 @@
       // 사용자 권한 체크 함수를 별도로 분리
       async function checkUserPermissions(user) {
           try {
-              console.log('Checking permissions for UID:', user.uid);
+              const email = user.email;
+              const [hospitalName, role] = email.split('@')[0].split('.');
               
-              const userRef = doc(db, 'users', user.uid);
+              console.log('Checking permissions for:', email);
+
+              // hospitals/병원명/staff/이메일 에서 사용자 정보 확인
+              const userRef = doc(db, 'hospitals', hospitalName, 'staff', email);
               const userDoc = await getDoc(userRef);
-              
+
               if (!userDoc.exists()) {
-                  console.error('No user document found!');
                   throw new Error('User document not found');
               }
-              
-              const userData = userDoc.data();
-              console.log('User data structure:', JSON.stringify(userData, null, 2));  // 전체 데이터 구조 출력
-              console.log('Access object:', userData.access);  // access 객체만 따로 출력
 
-              // 계정 상태 확인
+              const userData = userDoc.data();
               if (userData.status !== 'active') {
                   await auth.signOut();
                   window.location.href = 'main.html';
                   return;
               }
 
-              // 메뉴 접근 권한 적용 부분 수정
+              // 메뉴 접근 권한 적용
               const menuItems = document.querySelectorAll('.menu-item');
               menuItems.forEach(item => {
-                  const menuName = item.textContent.toLowerCase();
-                  const userRole = userData.role.level;
+                  const menuName = item.textContent.trim().toLowerCase();
+
+                  // 모든 메뉴 먼저 숨기기
+                  item.style.display = 'none';
 
                   // Data 메뉴는 항상 표시
                   if (menuName === 'data') {
@@ -917,8 +1031,8 @@
                       return;
                   }
 
-                  // 나머지 메뉴는 기존 로직 유지
-                  switch (userRole) {
+                  // 나머지 메뉴는 역할에 따라 표시
+                  switch (role) {
                       case 'doctor':
                           if (menuName !== 'pharmacy') {
                               item.style.display = 'block';
