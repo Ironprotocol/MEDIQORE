@@ -47,13 +47,13 @@
     </div>
 
     <div class="form-section">
-        <h2>병원 정보</h2>
+        <h2>병원/약국 정보</h2>
         <div class="form-group">
-            <label>병원 이름:</label>
+            <label>병원/약국 이름:</label>
             <input type="text" id="hospitalName" placeholder="예: MEDIQORE Dental">
         </div>
         <div class="form-group">
-            <label>병원 코드:</label>
+            <label>병원/약국 코드:</label>
             <input type="text" id="hospitalCode" placeholder="예: H250125001">
         </div>
         <div class="form-group">
@@ -61,7 +61,7 @@
             <input type="text" id="region" placeholder="예: Johannesburg">
         </div>
         <div class="form-group">
-            <label>병원 유형:</label>
+            <label>유형:</label>
             <input type="text" id="type" placeholder="예: dental">
         </div>
     </div>
@@ -108,14 +108,8 @@
 
                 // 병원 ID는 병원 이름을 소문자로 변환하여 사용
                 const hospitalId = hospitalName.toLowerCase().replace(/\s+/g, '');
-                
-                // 번호는 001부터 자동 생성 (추후 수정 필요)
                 const number = '001';
-                
-                // 이메일 생성
                 const email = `${hospitalId}.${role}.${number}@mediqore.com`;
-                
-                console.log('생성된 정보:', { hospitalId, number, email });
 
                 const userData = {
                     role: role,
@@ -123,15 +117,16 @@
                     number: number,
                     created: new Date()
                 };
-                console.log('사용자 데이터:', userData);
 
+                // role이 chemist면 pharmacy 컬렉션에, 아니면 hospitals 컬렉션에 저장
+                const collectionName = role === 'chemist' ? 'pharmacy' : 'hospitals';
+                
                 // staff 정보 저장
-                const staffRef = doc(db, 'hospitals', hospitalId, 'staff', email);
+                const staffRef = doc(db, collectionName, hospitalId, 'staff', email);
                 await setDoc(staffRef, userData);
-                console.log('직원 정보 저장 완료');
 
-                // 병원 정보 저장
-                const hospitalRef = doc(db, 'hospitals', hospitalId);
+                // 병원/약국 정보 저장
+                const hospitalRef = doc(db, collectionName, hospitalId);
                 await setDoc(hospitalRef, {
                     info: {
                         name: hospitalName,
@@ -140,7 +135,6 @@
                         type: type
                     }
                 }, { merge: true });
-                console.log('병원 정보 저장 완료');
 
                 alert('계정이 성공적으로 생성되었습니다!');
             } catch (error) {
