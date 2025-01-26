@@ -171,12 +171,15 @@
                 );
 
                 const email = userCredential.user.email;
-                const [hospitalName] = email.split('@')[0].split('.');
+                const [hospitalName, role] = email.split('@')[0].split('.');
 
                 console.log('Checking permissions for:', email);
 
-                // hospitals/병원명/staff/이메일 에서 사용자 정보 확인
-                const userRef = doc(db, 'hospitals', hospitalName, 'staff', email);
+                // role이 chemist면 pharmacy 컬렉션에서, 아니면 hospitals 컬렉션에서 확인
+                const collectionName = role === 'chemist' ? 'pharmacy' : 'hospitals';
+
+                // hospitals/병원명/staff/이메일 또는 pharmacy/약국명/staff/이메일 에서 사용자 정보 확인
+                const userRef = doc(db, collectionName, hospitalName, 'staff', email);
                 const userDoc = await getDoc(userRef);
 
                 if (!userDoc.exists()) {
