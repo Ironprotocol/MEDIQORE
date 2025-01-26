@@ -317,13 +317,31 @@
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
-        /* close-button: 우측 상단 닫기 버튼 */
+        /* 상단 메뉴바 스타일 */
+        .content-header {
+            height: 50px;
+            width: 100%;
+            background-color: white;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        /* Patient Registration 텍스트 스타일 */
+        .content-title {
+            font-size: 15px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        /* close-button 스타일 수정 */
         .close-button {
-            position: absolute;
-            top: 0;
-            right: 10px;
-            padding: 15px;  /* Patient Registration의 padding과 동일하게 */
-            height: 50px;   /* Patient Registration의 높이와 동일하게 */
+            padding: 15px;
+            height: 50px;
             background-color: transparent;
             border: none;
             cursor: pointer;
@@ -333,7 +351,7 @@
             align-items: center;
             gap: 5px;
             transition: color 0.3s ease;
-            box-sizing: border-box;  /* padding을 높이에 포함 */
+            box-sizing: border-box;
         }
 
         .close-button:hover {
@@ -351,9 +369,7 @@
         .patient-registration-form {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
             width: 100%;
-            padding: 15px;  /* Close 버튼과 같은 높이로 조정 */
             box-sizing: border-box;
             align-items: flex-start;
         }
@@ -400,22 +416,21 @@
         /* 입력 폼 컨테이너 스타일 수정 */
         .form-container {
             display: flex;
-            margin-top: 0;  /* 가로선과의 여백 제거 */
+            margin-top: 5px;  /* 가로선과의 여백 제거 */
             height: calc(100% - 51px);  /* 전체 높이에서 제목+가로선 높이 제외 */
             width: 100%;
+
         }
 
         /* 각 섹션 컨테이너 스타일 수정 */
         .section-box {
-            flex: 1;  /* 3등분 */
+            flex: 1;
             background-color: white;
             height: 100%;
+            padding: 0 20px;
+
         }
 
-        /* 첫 번째와 두 번째 섹션의 오른쪽 테두리 */
-        .section-box:not(:last-child) {
-            border-right: 1px solid hsl(0, 0%, 85%);
-        }
 
         /* 첫 번째 섹션의 왼쪽 아래 모서리 */
         .section-box:first-child {
@@ -432,42 +447,38 @@
             border-right: 1px solid hsl(0, 0%, 85%);
         }
 
-        .form-section {
-            margin-bottom: 10px;  /* 여백 축소 */
-            padding: 10px;  /* 여백 축소 */
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 6px;
-        }
-
         .form-section h3 {
-            margin: 0 0 20px 0;
-            color: #495057;
-            font-size: 18px;
+            margin: 0 0 15px 0;
+            font-size: 13px;
+            color: #333;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
+            font-size: 12px;
             color: #495057;
-            font-weight: 500;
+            font-weight: bold;  /* 라벨 텍스트 볼드 처리 */
         }
 
+        /* 입력 필드와 드롭박스 공통 스타일 수정 */
         .form-group input[type="text"],
         .form-group input[type="date"],
         .form-group input[type="tel"],
         .form-group select,
         .form-group textarea {
             width: 100%;
-            padding: 10px;
+            padding: 6px 8px;
             border: 1px solid #ced4da;
             border-radius: 4px;
-            font-size: 14px;
+            font-size: 12px;
             box-sizing: border-box;
+            height: 28px;
+            color: rgb(110, 110, 124);  /* 회색톤으로 변경 */
         }
 
         .form-group textarea {
@@ -489,7 +500,6 @@
         }
 
         .checkbox-group label {
-            margin: 0;
             font-weight: normal;
         }
 
@@ -520,15 +530,16 @@
         /* 날짜 선택 그룹 스타일 */
         .date-select-group {
             display: flex;
-            gap: 10px;
+            gap: 5px;
         }
 
         .date-select-group select {
             flex: 1;
-            padding: 10px;
+            padding: 4px 6px;
             border: 1px solid #ced4da;
             border-radius: 4px;
-            font-size: 14px;
+            font-size: 12px;
+            height: 28px;
         }
 
         .address-select-group {
@@ -537,7 +548,7 @@
         }
 
         .address-input {
-            flex: 1;
+            width: 40%;  /* 첫 번째 입력창 너비 */
             position: relative;
         }
 
@@ -634,9 +645,114 @@
         #doctorSelect option.status-start { color: #4CAF50; }  /* 초록색 */
         #doctorSelect option.status-break { color: #FFC107; }  /* 노란색 */
         #doctorSelect option.status-end { color: #F44336; }    /* 빨간색 */
+
+        /* 주소 검색 결과 스타일 */
+        .address-results {
+            position: absolute;
+            left: 0;
+            width: 135px;  /* district input과 같은 너비 */
+            top: 100%;
+            background: white;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .address-results div {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            color: rgb(110, 110, 124);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 52.22px;  /* 76.22px - (padding-left + padding-right) */
+        }
+
+        .address-results div:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* 주소 상세 정보 스타일 */
+        .address-details {
+            display: flex;
+            gap: 10px;
+            position: relative;  /* 추가: 드롭다운의 기준점 */
+        }
+
+        .address-details select {
+            width: 30%;  /* 나머지 두 선택창의 너비 */
+        }
+
+        /* 드롭박스 옵션 스타일 */
+        .form-group select option {
+            color: rgb(110, 110, 124);  /* 드롭박스 옵션도 동일한 회색톤 적용 */
+        }
+
+        .doctor-select-container {
+            position: relative;
+        }
+
+        .doctor-dropdown {
+            width: 200px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .doctor-dropdown-selected {
+            padding: 6px 8px;
+            font-size: 12px;
+            color: rgb(110, 110, 124);
+        }
+
+        .doctor-dropdown-options {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: white;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .doctor-option {
+            padding: 6px 8px;
+            font-size: 12px;
+            color: rgb(110, 110, 124);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .doctor-option:hover {
+            background-color: #f8f9fa;
+        }
     </style>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Close 버튼 클릭 이벤트 처리
+            const closeButtons = document.querySelectorAll('.close-button');
+            closeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // 현재 버튼이 속한 content-container를 찾아서 숨김
+                    const contentContainer = this.closest('.content-container');
+                    if (contentContainer) {
+                        contentContainer.style.display = 'none';
+                    }
+                    
+                    // 관련된 메뉴 아이템의 active 상태 제거
+                    const menuItems = document.querySelectorAll('.menu-item');
+                    menuItems.forEach(item => item.classList.remove('active'));
+                });
+            });
+
             // 상태 아이콘 설정 수정
             const statusIcons = {
                 login: 'image/login.png',
@@ -679,15 +795,17 @@
                     if (content) {
                         content.style.display = 'block';
                         
-                        // desk 메뉴가 클릭되었을 때만 Primary Complaint 이벤트 리스너 설정
+                        // desk 메뉴가 클릭되었을 때
                         if (menuText === 'desk') {
+                            // 의사 목록 로드
+                            loadDoctors();
+
+                            // Primary Complaint 이벤트 리스너 설정
                             const primaryComplaint = document.getElementById('primaryComplaint');
                             const otherComplaintContainer = document.getElementById('otherComplaintContainer');
 
                             if (primaryComplaint && otherComplaintContainer) {
-                                // 기존 이벤트 리스너 제거 (중복 방지)
                                 primaryComplaint.removeEventListener('change', handleComplaintChange);
-                                // 새 이벤트 리스너 추가
                                 primaryComplaint.addEventListener('change', handleComplaintChange);
                             }
                         }
@@ -751,14 +869,28 @@
                         e.stopPropagation();
                     });
 
+                    // 상태 옵션 클릭 이벤트
                     document.querySelectorAll('.status-option').forEach(option => {
-                        option.addEventListener('click', async (e) => {
-                            const status = e.currentTarget.dataset.status;
+                        option.addEventListener('click', async function() {
+                            const status = this.dataset.status;
+                            const statusIcon = document.querySelector('.current-status img');
                             
-                            // End Work 선택 시 로그아웃 확인
+                            // End Work 선택 시 로그아웃
                             if (status === 'end') {
                                 if (confirm('Do you want to logout?')) {
                                     try {
+                                        const user = auth.currentUser;
+                                        if (!user) return;
+                                        
+                                        const [hospitalName] = user.email.split('@')[0].split('.');
+                                        const userRef = doc(db, 'hospitals', hospitalName, 'staff', user.email);
+                                        
+                                        // work 상태를 'logout'으로 업데이트
+                                        await updateDoc(userRef, {
+                                            work: 'logout',
+                                            lastUpdated: serverTimestamp()
+                                        });
+                                        
                                         await auth.signOut();
                                         window.location.href = 'main.html';
                                         return;
@@ -772,10 +904,29 @@
                                 }
                             }
 
-                            // 다른 상태 선택 시 또는 로그아웃 취소 시
-                            const statusIcon = document.querySelector('.current-status .status-icon');
-                            statusIcon.src = statusIcons[status];
-                            dropdown.style.display = 'none';
+                            try {
+                                // work 상태 업데이트
+                                const user = auth.currentUser;
+                                if (!user) return;
+                                
+                                const [hospitalName] = user.email.split('@')[0].split('.');
+                                const userRef = doc(db, 'hospitals', hospitalName, 'staff', user.email);
+                                
+                                await updateDoc(userRef, {
+                                    work: status,
+                                    lastUpdated: serverTimestamp()
+                                });
+
+                                // 상태 아이콘 변경
+                                statusIcon.src = `image/${status}.png`;
+                                statusIcon.alt = status;
+                                
+                                // 드롭다운 닫기
+                                document.querySelector('.status-dropdown').style.display = 'none';
+                            } catch (error) {
+                                console.error('Error updating work status:', error);
+                                alert('Failed to update status');
+                            }
                         });
                     });
 
@@ -788,21 +939,20 @@
             // 사용자 이름 표시 함수
             async function displayUserName(user) {
                 try {
-                    const [hospitalName, role] = user.email.split('@')[0].split('.');
-                    const collectionName = role === 'chemist' ? 'pharmacy' : 'hospitals';
-                    const userRef = doc(db, collectionName, hospitalName, 'staff', user.email);
+                    const [hospitalName] = user.email.split('@')[0].split('.');
+                    const userRef = doc(db, 'hospitals', hospitalName, 'staff', user.email);
                     const userDoc = await getDoc(userRef);
-                    
+
                     if (userDoc.exists()) {
                         const userData = userDoc.data();
-                        const userNameElements = document.querySelectorAll('.user-name');
-                        userNameElements.forEach(element => {
-                            element.textContent = userData.name;
-                        });
-                        console.log('User name set to:', userData.name);
+                        document.querySelector('.user-name').textContent = userData.name;
+                        // 현재 work 상태에 따라 상태 아이콘 업데이트
+                        const statusIcon = document.querySelector('.current-status img');
+                        statusIcon.src = `image/${userData.work}.png`;
+                        statusIcon.alt = userData.work;
                     }
                 } catch (error) {
-                    console.error('Error loading user data:', error);
+                    console.error('Error displaying user name:', error);
                 }
             }
 
@@ -836,45 +986,189 @@
                     const user = auth.currentUser;
                     if (!user) return;
 
-                    // 현재 로그인된 이메일에서 병원명 추출
                     const [hospitalName] = user.email.split('@')[0].split('.');
-                    
-                    // 해당 병원의 staff 컬렉션에서 doctor role을 가진 직원들 조회
                     const staffRef = collection(db, 'hospitals', hospitalName, 'staff');
-                    const q = query(staffRef, where('email', 'like', `${hospitalName}.doctor%`));
+                    const q = query(staffRef, where('role', '==', 'doctor'));
                     const querySnapshot = await getDocs(q);
 
                     const doctorSelect = document.getElementById('doctorSelect');
+                    const optionsContainer = document.querySelector('.doctor-dropdown-options');
                     
-                    // 기존 옵션 제거 (첫 번째 기본 옵션 제외)
+                    // 기존 옵션 제거
                     while (doctorSelect.options.length > 1) {
                         doctorSelect.remove(1);
                     }
+                    optionsContainer.innerHTML = '';
 
-                    // 각 의사 정보로 옵션 생성
                     querySnapshot.forEach((doc) => {
                         const doctorData = doc.data();
-                        const option = document.createElement('option');
-                        option.value = doc.id;  // 이메일을 value로 사용
-                        option.textContent = `${doctorData.name} ●`;  // 이름과 상태 표시
-                        option.className = `status-${doctorData.status || 'login'}`;  // 상태에 따른 클래스 추가
-                        doctorSelect.appendChild(option);
+                        
+                        // 숨겨진 select용 option
+                        const selectOption = document.createElement('option');
+                        selectOption.value = doc.id;
+                        selectOption.textContent = doctorData.name;
+                        doctorSelect.appendChild(selectOption);
+
+                        // 커스텀 드롭다운용 option
+                        const dropdownOption = document.createElement('div');
+                        dropdownOption.className = 'doctor-option';
+                        dropdownOption.dataset.value = doc.id;
+
+                        let statusImg = 'end.png';
+                        if (doctorData.work === 'login') statusImg = 'login.png';
+                        if (doctorData.work === 'start') statusImg = 'start.png';
+                        if (doctorData.work === 'break') statusImg = 'break.png';
+
+                        dropdownOption.innerHTML = `
+                            <span>${doctorData.name}</span>
+                            <img src="image/${statusImg}" alt="${doctorData.work}" style="width: 12px; height: 12px;">
+                        `;
+
+                        optionsContainer.appendChild(dropdownOption);
                     });
                 } catch (error) {
                     console.error('Error loading doctors:', error);
                 }
             }
 
-            // desk 메뉴 클릭 시 의사 목록 로드
-            document.addEventListener('DOMContentLoaded', function() {
-                const menuItems = document.querySelectorAll('.menu-item');
-                menuItems.forEach(item => {
-                    item.addEventListener('click', function() {
-                        const menuText = this.textContent.trim().toLowerCase();
-                        if (menuText === 'desk') {
-                            loadDoctors();
-                        }
-                    });
+            // 드롭다운 토글 이벤트
+            document.querySelector('.doctor-dropdown').addEventListener('click', function(e) {
+                const options = this.querySelector('.doctor-dropdown-options');
+                options.style.display = options.style.display === 'none' ? 'block' : 'none';
+                if (options.style.display === 'block') {
+                    loadDoctors();
+                }
+            });
+
+            // 옵션 선택 이벤트
+            document.querySelector('.doctor-dropdown-options').addEventListener('click', function(e) {
+                const option = e.target.closest('.doctor-option');
+                if (option) {
+                    const value = option.dataset.value;
+                    const text = option.querySelector('span').textContent;
+                    
+                    // 숨겨진 select 업데이트
+                    const select = document.getElementById('doctorSelect');
+                    select.value = value;
+                    
+                    // 선택된 텍스트 업데이트
+                    document.querySelector('.doctor-dropdown-selected').textContent = text;
+                    
+                    // 드롭다운 닫기
+                    this.style.display = 'none';
+                }
+            });
+
+            // 남아공 지역 데이터
+            const southAfricaLocations = [
+                // Gauteng Province - Pretoria (Tshwane)
+                { district: "Arcadia", city: "Pretoria", state: "Gauteng" },
+                { district: "Brooklyn", city: "Pretoria", state: "Gauteng" },
+                { district: "Hatfield", city: "Pretoria", state: "Gauteng" },
+                { district: "Menlo Park", city: "Pretoria", state: "Gauteng" },
+                { district: "Waterkloof", city: "Pretoria", state: "Gauteng" },
+                { district: "Sunnyside", city: "Pretoria", state: "Gauteng" },
+                { district: "Lynnwood", city: "Pretoria", state: "Gauteng" },
+                { district: "Centurion", city: "Pretoria", state: "Gauteng" },
+
+                // Gauteng Province - Johannesburg
+                { district: "Sandton", city: "Johannesburg", state: "Gauteng" },
+                { district: "Rosebank", city: "Johannesburg", state: "Gauteng" },
+                { district: "Randburg", city: "Johannesburg", state: "Gauteng" },
+                { district: "Fourways", city: "Johannesburg", state: "Gauteng" },
+                { district: "Midrand", city: "Johannesburg", state: "Gauteng" },
+                { district: "Soweto", city: "Johannesburg", state: "Gauteng" },
+
+                
+                // Western Cape Province
+                { district: "Sea Point", city: "Cape Town", state: "Western Cape" },
+                { district: "Green Point", city: "Cape Town", state: "Western Cape" },
+                { district: "Camps Bay", city: "Cape Town", state: "Western Cape" },
+                { district: "Century City", city: "Cape Town", state: "Western Cape" },
+                { district: "Claremont", city: "Cape Town", state: "Western Cape" },
+                { district: "Constantia", city: "Cape Town", state: "Western Cape" },
+                { district: "Bellville", city: "Cape Town", state: "Western Cape" },
+                
+                // KwaZulu-Natal Province
+                { district: "Umhlanga", city: "eThekwini", state: "KwaZulu-Natal" },
+                { district: "Ballito", city: "eThekwini", state: "KwaZulu-Natal" },
+                { district: "Berea", city: "eThekwini", state: "KwaZulu-Natal" },
+                { district: "Morningside", city: "eThekwini", state: "KwaZulu-Natal" },
+                { district: "Westville", city: "eThekwini", state: "KwaZulu-Natal" },
+                { district: "Pinetown", city: "eThekwini", state: "KwaZulu-Natal" },
+
+                // Eastern Cape Province
+                { district: "Summerstrand", city: "Nelson Mandela Bay", state: "Eastern Cape" },
+                { district: "Walmer", city: "Nelson Mandela Bay", state: "Eastern Cape" },
+                { district: "Mill Park", city: "Nelson Mandela Bay", state: "Eastern Cape" },
+                { district: "Newton Park", city: "Nelson Mandela Bay", state: "Eastern Cape" },
+
+                // Free State Province
+                { district: "Westdene", city: "Mangaung", state: "Free State" },
+                { district: "Universitas", city: "Mangaung", state: "Free State" },
+                { district: "Langenhoven Park", city: "Mangaung", state: "Free State" },
+                { district: "Willows", city: "Mangaung", state: "Free State" }
+            ];
+
+            // 주소 검색 이벤트 리스너
+            const districtInput = document.getElementById('district');
+            const addressResults = document.getElementById('addressResults');
+
+            districtInput.addEventListener('input', function() {
+                const searchText = this.value.toLowerCase();
+                
+                if (searchText.length >= 3) {
+                    const matches = southAfricaLocations.filter(location => 
+                        location.district.toLowerCase().startsWith(searchText)
+                    );
+                    
+                    if (matches.length > 0) {
+                        addressResults.style.display = 'block';
+                        addressResults.innerHTML = matches.map(location => {
+                            let displayDistrict = location.district;
+                            if (displayDistrict.length > 10) {  // 10글자 이상이면
+                                displayDistrict = displayDistrict.slice(0, displayDistrict.length - 3) + '...';  // 뒤에서 3글자를 제거하고 ...을 추가
+                            }
+                            return `<div class="address-option" 
+                                data-district="${location.district}" 
+                                data-city="${location.city}" 
+                                data-state="${location.state}">
+                                ${displayDistrict}
+                            </div>`;
+                        }).join('');
+                    }
+                } else {
+                    addressResults.style.display = 'none';
+                }
+            });
+
+            // 주소 선택 이벤트
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('address-option')) {
+                    const district = e.target.dataset.district;
+                    const city = e.target.dataset.city;
+                    const state = e.target.dataset.state;
+                    
+                    document.getElementById('district').value = district;
+                    document.getElementById('city').value = city;
+                    document.getElementById('state').value = state;
+                    addressResults.style.display = 'none';
+                }
+            });
+
+            // 보험 체크박스 이벤트 리스너
+            const insuranceRadios = document.querySelectorAll('input[name="insuranceStatus"]');
+            const insuranceDetails = document.querySelector('.insurance-details');
+            
+            insuranceRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    insuranceDetails.style.display = this.value === 'has' ? 'block' : 'none';
+                    
+                    // 보험 없음 선택 시 입력값 초기화
+                    if (this.value === 'none') {
+                        document.getElementById('insuranceProvider').value = '';
+                        document.getElementById('insuranceNumber').value = '';
+                    }
                 });
             });
         });
@@ -967,32 +1261,171 @@
     </div>
     <div class="main-content">
         <div id="data-content" class="content-container">
-            <button class="close-button">Close</button>
-            <!-- Data 컨텐츠는 나중에 추가 -->
+            <div class="content-header">
+                <div class="content-title">Data</div>
+                <button class="close-button">Close</button>
+            </div>
         </div>
         
         <div id="desk-content" class="content-container">
-            <button class="close-button">Close</button>
+            <div class="content-header">
+                <div class="content-title">Patient Registration</div>
+                <button class="close-button">Close</button>
+            </div>
             <div class="patient-registration-form">
-                <h2>Patient Registration</h2>
                 <div class="form-container">
-                    <div class="section-box"></div>
-                    <div class="section-box"></div>
-                    <div class="section-box"></div>
+                    <div class="section-box">
+                        <h3>Personal Information</h3>
+                        <div class="form-group">
+                            <label for="patientName">Patient Name</label>
+                            <input type="text" id="patientName" name="patientName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="idNumber">ID Card Number</label>
+                            <input type="text" id="idNumber" name="idNumber" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="birthDay">Birth Date</label>
+                            <div class="date-select-group">
+                                <select id="birthDay" name="birthDay" required>
+                                    <option value="">Day</option>
+                                    <script>
+                                        for(let i = 1; i <= 31; i++) {
+                                            document.write(`<option value="${i}">${i}</option>`);
+                                        }
+                                    </script>
+                                </select>
+                                <select id="birthMonth" name="birthMonth" required>
+                                    <option value="">Month</option>
+                                    <option value="1">Jan</option>
+                                    <option value="2">Feb</option>
+                                    <option value="3">Mar</option>
+                                    <option value="4">Apr</option>
+                                    <option value="5">May</option>
+                                    <option value="6">Jun</option>
+                                    <option value="7">Jul</option>
+                                    <option value="8">Aug</option>
+                                    <option value="9">Sep</option>
+                                    <option value="10">Oct</option>
+                                    <option value="11">Nov</option>
+                                    <option value="12">Dec</option>
+                                </select>
+                                <select id="birthYear" name="birthYear" required>
+                                    <option value="">Year</option>
+                                    <script>
+                                        const currentYear = new Date().getFullYear();
+                                        for(let i = currentYear; i >= currentYear - 100; i--) {
+                                            document.write(`<option value="${i}">${i}</option>`);
+                                        }
+                                    </script>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="district">Address</label>
+                            <div class="address-details">
+                                <input type="text" id="district" name="district" placeholder="District">
+                                <input type="text" id="city" name="city" placeholder="City">
+                                <input type="text" id="state" name="state" placeholder="State">
+                                <div id="addressResults" class="address-results" style="display: none;"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="primaryComplaint">Primary Complaint</label>
+                            <select id="primaryComplaint" name="primaryComplaint" required>
+                                <option value="">Select primary complaint</option>
+                                <option value="toothache">Toothache</option>
+                                <option value="sensitivity">Tooth Sensitivity</option>
+                                <option value="bleeding_gums">Bleeding Gums</option>
+                                <option value="swollen_gums">Swollen Gums</option>
+                                <option value="bad_breath">Bad Breath</option>
+                                <option value="loose_tooth">Loose Tooth</option>
+                                <option value="cavity">Cavity/Decay</option>
+                                <option value="broken_tooth">Broken/Chipped Tooth</option>
+                                <option value="wisdom_tooth">Wisdom Tooth Pain</option>
+                                <option value="jaw_pain">Jaw Pain</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="otherComplaintContainer" style="display: none;">
+                            <label for="otherComplaint">Specify Other Complaint</label>
+                            <textarea id="otherComplaint" name="otherComplaint" 
+                                    style="height: 84px; resize: none;"></textarea>
+                        </div>
+                    </div>
+                    <div class="section-box">
+                        <h3>Insurance Information</h3>
+                        <div class="form-group">
+                            <div class="checkbox-group">
+                                <input type="radio" id="hasInsurance" name="insuranceStatus" value="has">
+                                <label for="hasInsurance">Have Medical Insurance</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="radio" id="noInsurance" name="insuranceStatus" value="none">
+                                <label for="noInsurance">No Insurance</label>
+                            </div>
+                        </div>
+                        <div class="insurance-details" style="display: none;">
+                            <div class="form-group">
+                                <label for="insuranceProvider">Insurance Provider</label>
+                                <select id="insuranceProvider" name="insuranceProvider">
+                                    <option value="">Select insurance provider</option>
+                                    <option value="discovery">Discovery Health</option>
+                                    <option value="momentum">Momentum Health</option>
+                                    <option value="bonitas">Bonitas Medical Fund</option>
+                                    <option value="medihelp">Medihelp</option>
+                                    <option value="fedhealth">Fedhealth</option>
+                                    <option value="medshield">Medshield</option>
+                                    <option value="bestmed">Bestmed</option>
+                                    <option value="keyhealth">KeyHealth</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="insuranceNumber">Insurance Card Number</label>
+                                <input type="text" id="insuranceNumber" name="insuranceNumber">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="section-box">
+                        <h3>Doctor Assignment</h3>
+                        <div class="form-group">
+                            <label for="doctorSelect">Select Doctor</label>
+                            <div class="doctor-select-container">
+                                <!-- 실제 form 제출용 숨겨진 select -->
+                                <select id="doctorSelect" name="doctorSelect" required style="display: none;">
+                                    <option value="">Choose a doctor</option>
+                                </select>
+                                <!-- 커스텀 드롭다운 -->
+                                <div class="doctor-dropdown">
+                                    <div class="doctor-dropdown-selected">Choose a doctor</div>
+                                    <div class="doctor-dropdown-options" style="display: none;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
         
         <div id="prescription-content" class="content-container">
-            <button class="close-button">Close</button>
+            <div class="content-header">
+                <div class="content-title">Prescription</div>
+                <button class="close-button">Close</button>
+            </div>
         </div>
 
         <div id="reservation-content" class="content-container">
-            <button class="close-button">Close</button>
+            <div class="content-header">
+                <div class="content-title">Reservation</div>
+                <button class="close-button">Close</button>
+            </div>
         </div>
 
         <div id="pharmacy-content" class="content-container">
-            <button class="close-button">Close</button>
+            <div class="content-header">
+                <div class="content-title">Pharmacy</div>
+                <button class="close-button">Close</button>
+            </div>
         </div>
     </div>
     <!-- Firebase SDK 추가 (닫는 body 태그 바로 위에 추가) -->
@@ -1000,7 +1433,7 @@
       // Firebase SDK 임포트
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
       import { getAuth } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
-      import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+      import { getFirestore, doc, getDoc, collection, query, where, getDocs, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
 
       // Firebase 초기화
       const firebaseConfig = {
@@ -1021,8 +1454,14 @@
       window.app = app;
       window.auth = auth;
       window.db = db;
-      window.doc = doc;     // doc 함수를 전역으로 사용할 수 있게 추가
-      window.getDoc = getDoc; // getDoc 함수도 전역으로 추가
+      window.doc = doc;
+      window.getDoc = getDoc;
+      window.collection = collection;
+      window.query = query;
+      window.where = where;
+      window.getDocs = getDocs;
+      window.updateDoc = updateDoc;
+      window.serverTimestamp = serverTimestamp;
 
       // 사용자 권한 체크 함수를 별도로 분리
       async function checkUserPermissions(user) {

@@ -125,7 +125,7 @@
         // Firebase SDK 임포트
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-analytics.js";
 
         // Firebase 구성 객체
@@ -192,6 +192,12 @@
                     alert('This account is not active. Please contact support.');
                     return;
                 }
+
+                // 로그인 성공 시 work 상태를 'login'으로 업데이트
+                await updateDoc(userRef, {
+                    work: 'login',
+                    lastUpdated: serverTimestamp()
+                });
 
                 window.location.href = 'data_page.html';
 
