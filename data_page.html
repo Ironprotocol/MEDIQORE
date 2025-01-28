@@ -320,15 +320,62 @@
         /* 상단 메뉴바 스타일 */
         .content-header {
             height: 50px;
-            width: 100%;
-            background-color: white;
-            border-top-left-radius: 8px;
-            border-top-right-radius: 8px;
+            border-bottom: 1px solid hsl(0, 0%, 85%);
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
             padding: 0 20px;
-            box-sizing: border-box;
+            border-radius: 8px 8px 0 0;
+        }
+
+        /* 하단 메뉴바 스타일 */
+        .content-footer {
+            height: 50px;
+            border-top: 1px solid hsl(0, 0%, 85%);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;  /* Register 버튼 우측 정렬 */
+            padding: 0 20px;
+            border-radius: 0 0 8px 8px;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+        }
+
+        /* 세로선 스타일 */
+        .vertical-line-left,
+        .vertical-line-right {
+            position: absolute;
+            width: 1px;
+            background-color: hsl(0, 0%, 85%);
+            top: 51px;  /* 상단 메뉴바 아래부터 */
+            bottom: 50px;  /* 하단 메뉴바 위까지 */
+        }
+
+        .vertical-line-left {
+            left: 33.33%;  /* 3등분의 첫 번째 지점 */
+        }
+
+        .vertical-line-right {
+            left: 66.66%;  /* 3등분의 두 번째 지점 */
+        }
+
+        /* Register 버튼 스타일 */
+        .register-btn {
+            padding: 8px 16px;
+            background-color: rgb(0, 102, 255);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .register-btn:hover {
+            background-color: rgb(0, 82, 204);
         }
 
         /* Patient Registration 텍스트 스타일 */
@@ -390,27 +437,6 @@
             right: 0;
             height: 1px;
             background-color: hsl(0, 0%, 85%);
-        }
-
-        /* 세로선 스타일 */
-        .patient-registration-form::before,
-        .patient-registration-form > div::before {
-            content: '';
-            position: absolute;
-            top: 51px;  /* 가로선 바로 아래부터 */
-            width: 1px;
-            height: calc(100% - 51px);  /* 컨텐츠 박스 끝까지 */
-            background-color: hsl(0, 0%, 85%);
-        }
-
-        /* 첫 번째 세로선 */
-        .patient-registration-form::before {
-            left: 33.33%;  /* 3등분의 첫 번째 지점 */
-        }
-
-        /* 두 번째 세로선 */
-        .patient-registration-form > div::before {
-            left: 66.66%;  /* 3등분의 두 번째 지점 */
         }
 
         /* 입력 폼 컨테이너 스타일 수정 */
@@ -662,14 +688,14 @@
         }
 
         .address-results div {
-            padding: 8px 12px;
+            padding: 8px 4px;
             cursor: pointer;
             font-size: 12px;
             color: rgb(110, 110, 124);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 52.22px;  /* 76.22px - (padding-left + padding-right) */
+            max-width: 135px;
         }
 
         .address-results div:hover {
@@ -713,7 +739,7 @@
             position: absolute;
             top: 100%;
             left: 0;
-            width: 100%;
+            width: 200px;  /* doctor-dropdown과 동일한 너비 */
             background: white;
             border: 1px solid #ced4da;
             border-radius: 4px;
@@ -729,10 +755,21 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            width: 100%;
+            box-sizing: border-box;
+            cursor: pointer;
         }
 
-        .doctor-option:hover {
+        /* hover 효과 (disabled 클래스가 없는 경우에만 적용) */
+        .doctor-option:not(.disabled):hover {
             background-color: #f8f9fa;
+        }
+
+        /* logout 상태인 의사 스타일 */
+        .doctor-option.disabled {
+            color: rgb(180, 180, 180);  /* 더 옅은 회색 */
+            cursor: not-allowed;  /* 클릭 불가능한 커서 스타일 */
+            pointer-events: none;  /* 클릭 이벤트 비활성화 */
         }
     </style>
     <script>
@@ -764,14 +801,31 @@
             // 2. 로고 클릭 이벤트
             const logoContainer = document.querySelector('.logo-container');
             if (logoContainer) {
-                logoContainer.addEventListener('click', () => {
+                logoContainer.addEventListener('click', async () => {
                     if (confirm('Do you want to logout?')) {
-                        auth.signOut().then(() => {
-                            window.location.href = 'main.html';
-                        }).catch((error) => {
-                            console.error('Logout error:', error);
-                            alert('Logout failed: ' + error.message);
-                        });
+                        try {
+                            const user = auth.currentUser;
+                            if (user) {
+                                const [hospitalName, role] = user.email.split('@')[0].split('.');
+                                const collectionName = role === 'chemist' ? 'pharmacy' : 'hospitals';
+                                const userRef = doc(db, collectionName, hospitalName, 'staff', user.email);
+                                
+                                // work 상태를 'logout'으로 업데이트
+                                await updateDoc(userRef, {
+                                    work: 'logout',
+                                    lastUpdated: serverTimestamp()
+                                });
+                            }
+                            auth.signOut().then(() => {
+                                window.location.href = 'main.html';
+                            }).catch((error) => {
+                                console.error('Logout error:', error);
+                                alert('Logout failed: ' + error.message);
+                            });
+                        } catch (error) {
+                            console.error('Error updating work status:', error);
+                            alert('Failed to update work status: ' + error.message);
+                        }
                     }
                 });
             }
@@ -1000,19 +1054,46 @@
                     }
                     optionsContainer.innerHTML = '';
 
+                    // 의사 데이터를 배열로 변환하여 정렬
+                    const doctors = [];
                     querySnapshot.forEach((doc) => {
-                        const doctorData = doc.data();
+                        doctors.push({
+                            id: doc.id,
+                            ...doc.data()
+                        });
+                    });
+
+                    // 상태 우선순위 정의
+                    const statusPriority = {
+                        'start': 0,
+                        'break': 1,
+                        'login': 2,
+                        'logout': 3
+                    };
+
+                    // 상태와 계정 번호로 정렬
+                    doctors.sort((a, b) => {
+                        // 먼저 상태로 정렬
+                        const statusDiff = statusPriority[a.work] - statusPriority[b.work];
+                        if (statusDiff !== 0) return statusDiff;
                         
+                        // 상태가 같으면 계정 번호로 정렬
+                        const aNumber = parseInt(a.id.split('.').pop());
+                        const bNumber = parseInt(b.id.split('.').pop());
+                        return aNumber - bNumber;
+                    });
+
+                    doctors.forEach((doctorData) => {
                         // 숨겨진 select용 option
                         const selectOption = document.createElement('option');
-                        selectOption.value = doc.id;
+                        selectOption.value = doctorData.id;
                         selectOption.textContent = doctorData.name;
                         doctorSelect.appendChild(selectOption);
 
                         // 커스텀 드롭다운용 option
                         const dropdownOption = document.createElement('div');
-                        dropdownOption.className = 'doctor-option';
-                        dropdownOption.dataset.value = doc.id;
+                        dropdownOption.className = `doctor-option${doctorData.work === 'logout' ? ' disabled' : ''}`;
+                        dropdownOption.dataset.value = doctorData.id;
 
                         let statusImg = 'end.png';
                         if (doctorData.work === 'login') statusImg = 'login.png';
@@ -1038,6 +1119,7 @@
                 if (options.style.display === 'block') {
                     loadDoctors();
                 }
+                e.stopPropagation();  // 드롭다운 클릭 시 document 클릭 이벤트 전파 방지
             });
 
             // 옵션 선택 이벤트
@@ -1056,6 +1138,20 @@
                     
                     // 드롭다운 닫기
                     this.style.display = 'none';
+                    e.stopPropagation();  // 옵션 선택 시 document 클릭 이벤트 전파 방지
+                }
+            });
+
+            // 화면의 다른 부분 클릭 시 드롭다운 닫기
+            document.addEventListener('click', function(e) {
+                const dropdown = document.querySelector('.doctor-dropdown-options');
+                const doctorDropdown = document.querySelector('.doctor-dropdown');
+                
+                // 클릭된 요소가 드롭다운 내부가 아니고
+                // 드롭다운이 열려있는 경우에만 닫기
+                if (!doctorDropdown.contains(e.target) && 
+                    dropdown.style.display === 'block') {
+                    dropdown.style.display = 'none';
                 }
             });
 
@@ -1114,6 +1210,14 @@
             const districtInput = document.getElementById('district');
             const addressResults = document.getElementById('addressResults');
 
+            // 외부 클릭 시 드롭다운 닫기
+            document.addEventListener('click', function(e) {
+                // 클릭된 요소가 district 입력창이나 드롭다운이 아니면 드롭다운 닫기
+                if (!districtInput.contains(e.target) && !addressResults.contains(e.target)) {
+                    addressResults.style.display = 'none';
+                }
+            });
+
             districtInput.addEventListener('input', function() {
                 const searchText = this.value.toLowerCase();
                 
@@ -1126,8 +1230,8 @@
                         addressResults.style.display = 'block';
                         addressResults.innerHTML = matches.map(location => {
                             let displayDistrict = location.district;
-                            if (displayDistrict.length > 10) {  // 10글자 이상이면
-                                displayDistrict = displayDistrict.slice(0, displayDistrict.length - 3) + '...';  // 뒤에서 3글자를 제거하고 ...을 추가
+                            if (displayDistrict.length > 20) {
+                                displayDistrict = displayDistrict.slice(0, displayDistrict.length - 3) + '...';
                             }
                             return `<div class="address-option" 
                                 data-district="${location.district}" 
@@ -1136,6 +1240,8 @@
                                 ${displayDistrict}
                             </div>`;
                         }).join('');
+                    } else {
+                        addressResults.style.display = 'none';
                     }
                 } else {
                     addressResults.style.display = 'none';
@@ -1170,6 +1276,132 @@
                         document.getElementById('insuranceNumber').value = '';
                     }
                 });
+            });
+
+            // Register 버튼 클릭 이벤트
+            document.querySelector('.register-btn').addEventListener('click', async function() {
+                try {
+                    const user = auth.currentUser;
+                    if (!user) return;
+
+                    // 필수 입력값 확인
+                    const patientName = document.getElementById('patientName').value.trim();
+                    const idNumber = document.getElementById('idNumber').value.trim();
+                    const birthDay = document.getElementById('birthDay').value;
+                    const birthMonth = document.getElementById('birthMonth').value;
+                    const birthYear = document.getElementById('birthYear').value;
+                    const district = document.getElementById('district').value.trim();
+                    const city = document.getElementById('city').value.trim();
+                    const state = document.getElementById('state').value.trim();
+                    const primaryComplaint = document.getElementById('primaryComplaint').value;
+                    const doctorId = document.getElementById('doctorSelect').value;
+
+                    if (!patientName || !idNumber || !birthDay || !birthMonth || !birthYear || !district || 
+                        !city || !state || !primaryComplaint || !doctorId) {
+                        alert('Please fill in all required fields');
+                        return;
+                    }
+
+                    // 병원명 추출
+                    const [hospitalName] = user.email.split('@')[0].split('.');
+
+                    // 환자 문서 ID 생성 (이름.ID번호)
+                    const patientId = `${patientName}.${idNumber}`;
+                    const patientRef = doc(db, 'hospitals', hospitalName, 'patient', patientId);
+
+                    // 환자 문서 존재 여부 확인
+                    const patientDoc = await getDoc(patientRef);
+
+                    // 새로운 환자인 경우에만 info 필드 생성
+                    if (!patientDoc.exists()) {
+                        // insurance 정보 수집
+                        const insuranceStatus = document.querySelector('input[name="insuranceStatus"]:checked')?.value;
+                        let insuranceData = {
+                            status: '',
+                            provider: '',
+                            cardNumber: ''
+                        };
+
+                        if (insuranceStatus === 'has') {
+                            insuranceData = {
+                                status: 'have',
+                                provider: document.getElementById('insuranceProvider').value,
+                                cardNumber: document.getElementById('insuranceNumber').value
+                            };
+                        }
+
+                        // info 필드를 포함한 환자 문서 생성
+                        await setDoc(patientRef, {
+                            info: {
+                                patientName,
+                                idNumber,
+                                birthDate: Timestamp.fromDate(new Date(
+                                    parseInt(birthYear),
+                                    parseInt(birthMonth) - 1,  // JavaScript의 월은 0부터 시작
+                                    parseInt(birthDay),
+                                    0, 0, 0  // 시간, 분, 초는 0으로 고정
+                                )),
+                                address: `${district}, ${city}, ${state}`,
+                                insurance: insuranceData
+                            }
+                        });
+                    }
+
+                    // primary complaint 처리
+                    let complaintData = primaryComplaint;
+                    if (primaryComplaint === 'other') {
+                        const otherComplaint = document.getElementById('otherComplaint').value.trim();
+                        if (!otherComplaint) {
+                            alert('Please specify other complaint');
+                            return;
+                        }
+                        complaintData = `other: ${otherComplaint}`;
+                    }
+
+                    // 의사 이름 가져오기
+                    const doctorRef = doc(db, 'hospitals', hospitalName, 'staff', doctorId);
+                    const doctorDoc = await getDoc(doctorRef);
+                    const doctorName = doctorDoc.data().name;
+
+                    // 현재 날짜시간으로 문서 ID 생성 (DD.MM.YYYY_HHMMSS)
+                    const now = new Date();
+                    const dateId = `${now.toLocaleDateString('en-ZA', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                    }).replace(/\//g, '.')}_${now.getHours().toString().padStart(2,'0')}${now.getMinutes().toString().padStart(2,'0')}${now.getSeconds().toString().padStart(2,'0')}`;
+
+                    // register.date 컬렉션에 방문 기록 문서 생성
+                    const visitRef = doc(patientRef, 'register.date', dateId);
+                    await setDoc(visitRef, {
+                        timestamp: serverTimestamp(),
+                        primaryComplaint: complaintData,
+                        doctor: doctorName
+                    });
+
+                    alert('Patient registration completed successfully');
+
+                    // 폼 초기화
+                    document.getElementById('patientName').value = '';
+                    document.getElementById('idNumber').value = '';
+                    document.getElementById('birthDay').value = '';
+                    document.getElementById('birthMonth').value = '';
+                    document.getElementById('birthYear').value = '';
+                    document.getElementById('district').value = '';
+                    document.getElementById('city').value = '';
+                    document.getElementById('state').value = '';
+                    document.getElementById('primaryComplaint').value = '';
+                    document.getElementById('doctorSelect').value = '';
+                    document.querySelector('.doctor-dropdown-selected').textContent = 'Choose a doctor';
+                    document.querySelectorAll('input[name="insuranceStatus"]').forEach(radio => radio.checked = false);
+                    document.getElementById('insuranceProvider').value = '';
+                    document.getElementById('insuranceNumber').value = '';
+                    document.getElementById('otherComplaint').value = '';
+
+                } catch (error) {
+                    console.error('Error registering patient:', error);
+                    alert('Failed to register patient: ' + error.message);
+                }
             });
         });
     </script>
@@ -1272,6 +1504,8 @@
                 <div class="content-title">Patient Registration</div>
                 <button class="close-button">Close</button>
             </div>
+            <div class="vertical-line-left"></div>
+            <div class="vertical-line-right"></div>
             <div class="patient-registration-form">
                 <div class="form-container">
                     <div class="section-box">
@@ -1281,7 +1515,7 @@
                             <input type="text" id="patientName" name="patientName" required>
                         </div>
                         <div class="form-group">
-                            <label for="idNumber">ID Card Number</label>
+                            <label for="idNumber">ID Card / Passport Number</label>
                             <input type="text" id="idNumber" name="idNumber" required>
                         </div>
                         <div class="form-group">
@@ -1405,6 +1639,9 @@
                     </div>
                 </div>
             </div>
+            <div class="content-footer">
+                <button class="register-btn">Register</button>
+            </div>
         </div>
         
         <div id="prescription-content" class="content-container">
@@ -1433,7 +1670,7 @@
       // Firebase SDK 임포트
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
       import { getAuth } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
-      import { getFirestore, doc, getDoc, collection, query, where, getDocs, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+      import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs, updateDoc, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
 
       // Firebase 초기화
       const firebaseConfig = {
@@ -1456,12 +1693,14 @@
       window.db = db;
       window.doc = doc;
       window.getDoc = getDoc;
+      window.setDoc = setDoc;
       window.collection = collection;
       window.query = query;
       window.where = where;
       window.getDocs = getDocs;
       window.updateDoc = updateDoc;
       window.serverTimestamp = serverTimestamp;
+      window.Timestamp = Timestamp;  // Timestamp를 window 객체에 추가
 
       // 사용자 권한 체크 함수를 별도로 분리
       async function checkUserPermissions(user) {
