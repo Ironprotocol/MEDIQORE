@@ -11,5 +11,20 @@ A web-based medical information management system for healthcare providers.
 - Appointment scheduling
 - Real-time patient status tracking
 
+
+2025-01-28
+    1. base menu layout - desk (85%)
+    2. sidebar2 layout - (85%)
+        - prepare many rooms, we need
+
+2025-01-29
+    1. room server structure
+    2. room Join/Exit button click logic
+    3. logout logic modify, and hospital server data can be modify on realtime.
+    4. drag and text block process block.
+    5. Ctrl + mouse wheel block.
+
+
+
 ## Current Version
 v.0.01 test 
