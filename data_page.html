@@ -863,6 +863,19 @@
             padding: 20px;
             display: none;  /* 초기에는 숨김 */
         }
+
+        /* reservation form 스타일 */
+        .reservation-form {
+            position: absolute;
+            top: 51px;  /* content-header 높이(42px) + 상단 여백(9px) */
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+            border-radius: 8px;
+            margin: 20px;
+            padding: 20px;
+        }
     </style>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -1820,6 +1833,9 @@
             <div class="content-header">
                 <div class="content-title">Reservation</div>
                 <button class="close-button">Close</button>
+            </div>
+            <div class="reservation-form">
+                <!-- 여기에 예약 폼 내용이 들어갈 예정 -->
             </div>
         </div>
 
