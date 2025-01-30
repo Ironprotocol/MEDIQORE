@@ -27,7 +27,12 @@ A web-based medical information management system for healthcare providers.
 2025-01-30
     1. reservation contents box structre modify
     2. reservation calendar added
-
+    3. Join/Exit button hover effect added
+    4. calendar view button hover effect added
+    5. calendar view button click logic added
+    6. calendar view button style added
+    7. reservation contents box style added
+    
 
 ## Current Version
 v.0.01 test 
