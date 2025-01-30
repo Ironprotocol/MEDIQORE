@@ -24,6 +24,9 @@ A web-based medical information management system for healthcare providers.
     4. drag and text block process block.
     5. Ctrl + mouse wheel block.
 
+2025-01-30
+    1. reservation contents box structre modify
+    2. reservation calendar added
 
 
 ## Current Version

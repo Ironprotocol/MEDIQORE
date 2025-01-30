@@ -6,8 +6,6 @@
     <title>MEDIQORE - Data Page</title>
     <!-- Google Fonts 추가 -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
-    <!-- FullCalendar 라이브러리 -->
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     <style>
         /* body: 전체 페이지 컨테이너 */
         body {
@@ -875,15 +873,132 @@
             bottom: 0;
             background: white;
             border-radius: 8px;
-            margin: 20px;
-            padding: 20px;
+            padding: 10px;
             display: flex;  /* 캘린더를 form 안에 꽉 차게 표시 */
         }
 
-        /* 캘린더 스타일 */
-        #calendar {
-            flex-grow: 1;  /* 남은 공간 모두 차지 */
-            height: 100%;  /* 컨테이너 높이에 맞춤 */
+        /* 커스텀 달력 스타일 */
+        .custom-calendar {
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .month-year {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .calendar-nav button {
+            padding: 8px 16px;
+            border: none;
+            background: #f5f5f5;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0;  /* 셀 간격 제거하여 테두리가 연결되도록 */
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;  /* 내부 셀의 테두리가 둥근 모서리를 벗어나지 않도록 */
+        }
+
+        .weekday {
+            text-align: center;
+            font-weight: bold;
+            padding: 5px;
+            border-bottom: 1px solid #e0e0e0;
+            border-right: 1px solid #e0e0e0;
+        }
+
+        /* 마지막 열의 오른쪽 테두리 제거 */
+        .weekday:nth-child(7n) {
+            border-right: none;
+        }
+
+        .date {
+            height: 95px;
+            display: flex;
+            align-items: flex-start;  /* 상단 정렬 */
+            justify-content: center;
+            cursor: pointer;
+            border-bottom: 1px solid #e0e0e0;
+            border-right: 1px solid #e0e0e0;
+            position: relative;  /* 구분선 위치 기준점 */
+            padding : 4px;    /* 상단 여백 */
+            font-size: 12px;     /* 날짜 텍스트 크기 */
+        }
+
+        /* 날짜 아래 구분선 */
+        .date::after {
+            content: '';
+            position: absolute;
+            top: 28px;          /* 날짜 텍스트 아래 위치 */
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background-color: #e0e0e0;
+        }
+
+        /* 빈 셀 스타일 */
+        .date.empty {
+            background-color: #fafafa;
+            cursor: default;
+        }
+
+        /* 빈 셀에는 hover 효과와 구분선 제거 */
+        .date.empty:hover {
+            background-color: #fafafa;  /* 빈 셀은 그대로 유지 */
+        }
+        .date.empty::after {
+            display: none;
+        }
+
+        /* 마지막 열의 오른쪽 테두리 제거 */
+        .date:nth-child(7n) {
+            border-right: none;
+        }
+
+        /* 마지막 행의 하단 테두리 제거 */
+        .date:nth-last-child(-n+7) {
+            border-bottom: none;
+        }
+
+        .date:hover {
+            background: #dcf3fc;
+            color: rgb(0, 102, 255);
+            transition: all 0.3s ease;
+        }
+
+        /* 빈 셀에는 hover 효과와 구분선 제거 */
+        .date.empty:hover {
+            background-color: #fafafa;
+            color: inherit;  /* 빈 셀은 색상 변경 없음 */
+        }
+
+        /* 주말 요일 스타일 */
+        .weekday:first-child,  /* 일요일 */
+        .weekday:last-child {  /* 토요일 */
+            color: #ff0000;
+        }
+
+        /* 주말 날짜 스타일 */
+        .date:nth-child(7n),   /* 토요일 */
+        .date:nth-child(7n+1) { /* 일요일 */
+            color: #ff0000;
         }
     </style>
     <script>
@@ -1557,22 +1672,6 @@
                 }
             });
 
-            var calendarEl = document.getElementById('calendar');
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                },
-                height: '100%',  /* 컨테이너 높이에 맞춤 */
-                editable: true,
-                selectable: true,
-                selectMirror: true,
-                dayMaxEvents: true
-            });
-            calendar.render();
-
             // 메뉴 클릭 이벤트
             document.querySelectorAll('.menu-item').forEach(item => {
                 item.addEventListener('click', async function() {
@@ -1589,25 +1688,8 @@
 
                     // Reservation 메뉴 클릭 시 달력 초기화
                     if (menuText === 'Reservation') {
-                        const calendarEl = document.getElementById('calendar');
-                        const calendar = new FullCalendar.Calendar(calendarEl, {
-                            initialView: 'dayGridMonth',
-                            headerToolbar: {
-                                left: 'prev,next today',
-                                center: 'title',
-                                right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                            },
-                            height: '100%',
-                            editable: true,
-                            selectable: true,
-                            selectMirror: true,
-                            dayMaxEvents: true
-                        });
-                        
-                        // 약간의 지연 후 달력 렌더링
-                        setTimeout(() => {
-                            calendar.render();
-                        }, 100);
+                        // 여기에는 우리가 만든 CustomCalendar만 사용
+                        new CustomCalendar();
                     }
                 });
             });
@@ -1900,7 +1982,26 @@
             </div>
             <div class="reservation-form">
                 <!-- 여기에 예약 폼 내용이 들어갈 예정 -->
-                <div id="calendar"></div>
+                <div class="custom-calendar">
+                    <div class="calendar-header">
+                        <div class="calendar-nav">
+                            <button id="prevMonth">&lt; 이전</button>
+                        </div>
+                        <div class="month-year">2024년 3월</div>
+                        <div class="calendar-nav">
+                            <button id="nextMonth">다음 &gt;</button>
+                        </div>
+                    </div>
+                    <div class="calendar-grid">
+                        <div class="weekday">Sun</div>
+                        <div class="weekday">Mon</div>
+                        <div class="weekday">Tue</div>
+                        <div class="weekday">Wed</div>
+                        <div class="weekday">Thu</div>
+                        <div class="weekday">Fri</div>
+                        <div class="weekday">Sat</div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -2208,6 +2309,71 @@
               });
           });
       });
+
+      // CustomCalendar를 전역 객체(window)에 등록
+      window.CustomCalendar = class {
+          constructor() {
+              this.date = new Date();
+              this.monthYear = document.querySelector('.month-year');
+              this.calendarGrid = document.querySelector('.calendar-grid');
+              this.months = [
+                  'January', 'February', 'March', 'April', 'May', 'June',
+                  'July', 'August', 'September', 'October', 'November', 'December'
+              ];
+              this.init();
+          }
+
+          init() {
+              this.renderCalendar();
+              this.addEventListeners();
+          }
+
+          renderCalendar() {
+              this.monthYear.textContent = `${this.months[this.date.getMonth()]} ${this.date.getFullYear()}`;
+              const dates = this.calendarGrid.querySelectorAll('.date');
+              dates.forEach(date => date.remove());
+
+              const firstDay = new Date(this.date.getFullYear(), this.date.getMonth(), 1);
+              const lastDay = new Date(this.date.getFullYear(), this.date.getMonth() + 1, 0);
+
+              // 이전 달의 날짜들 추가
+              for (let i = 0; i < firstDay.getDay(); i++) {
+                  const dateDiv = document.createElement('div');
+                  dateDiv.className = 'date empty';  // empty 클래스 추가
+                  this.calendarGrid.appendChild(dateDiv);
+              }
+
+              // 현재 달의 날짜들 추가
+              for (let i = 1; i <= lastDay.getDate(); i++) {
+                  const dateDiv = document.createElement('div');
+                  dateDiv.className = 'date';
+                  dateDiv.textContent = i;
+                  this.calendarGrid.appendChild(dateDiv);
+              }
+
+              // 남은 칸을 빈 셀로 채우기
+              const totalCells = 42; // 6주 x 7일
+              const remainingCells = totalCells - (firstDay.getDay() + lastDay.getDate());
+              for (let i = 0; i < remainingCells; i++) {
+                  const dateDiv = document.createElement('div');
+                  dateDiv.className = 'date empty';  // empty 클래스 추가
+                  this.calendarGrid.appendChild(dateDiv);
+              }
+          }
+
+          addEventListeners() {
+              document.getElementById('prevMonth').addEventListener('click', () => {
+                  this.date.setMonth(this.date.getMonth() - 1);
+                  this.renderCalendar();
+              });
+              document.getElementById('nextMonth').addEventListener('click', () => {
+                  this.date.setMonth(this.date.getMonth() + 1);
+                  this.renderCalendar();
+              });
+          }
+      };
+
+      // 나머지 코드...
     </script>
 </body>
 </html>
