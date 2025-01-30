@@ -6,6 +6,8 @@
     <title>MEDIQORE - Data Page</title>
     <!-- Google Fonts 추가 -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- FullCalendar 라이브러리 -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     <style>
         /* body: 전체 페이지 컨테이너 */
         body {
@@ -867,7 +869,7 @@
         /* reservation form 스타일 */
         .reservation-form {
             position: absolute;
-            top: 51px;  /* content-header 높이(42px) + 상단 여백(9px) */
+            top: 51px;
             left: 0;
             right: 0;
             bottom: 0;
@@ -875,6 +877,13 @@
             border-radius: 8px;
             margin: 20px;
             padding: 20px;
+            display: flex;  /* 캘린더를 form 안에 꽉 차게 표시 */
+        }
+
+        /* 캘린더 스타일 */
+        #calendar {
+            flex-grow: 1;  /* 남은 공간 모두 차지 */
+            height: 100%;  /* 컨테이너 높이에 맞춤 */
         }
     </style>
     <script>
@@ -1547,6 +1556,61 @@
                     alert('Failed to register patient: ' + error.message);
                 }
             });
+
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                height: '100%',  /* 컨테이너 높이에 맞춤 */
+                editable: true,
+                selectable: true,
+                selectMirror: true,
+                dayMaxEvents: true
+            });
+            calendar.render();
+
+            // 메뉴 클릭 이벤트
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.addEventListener('click', async function() {
+                    // 모든 content-container 숨기기
+                    document.querySelectorAll('.content-container').forEach(container => {
+                        container.style.display = 'none';
+                    });
+
+                    // 클릭된 메뉴에 해당하는 컨텐츠 표시
+                    const menuText = this.textContent.trim();
+                    const contentId = menuText.toLowerCase() + '-content';
+                    const contentElement = document.getElementById(contentId);
+                    contentElement.style.display = 'block';
+
+                    // Reservation 메뉴 클릭 시 달력 초기화
+                    if (menuText === 'Reservation') {
+                        const calendarEl = document.getElementById('calendar');
+                        const calendar = new FullCalendar.Calendar(calendarEl, {
+                            initialView: 'dayGridMonth',
+                            headerToolbar: {
+                                left: 'prev,next today',
+                                center: 'title',
+                                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                            },
+                            height: '100%',
+                            editable: true,
+                            selectable: true,
+                            selectMirror: true,
+                            dayMaxEvents: true
+                        });
+                        
+                        // 약간의 지연 후 달력 렌더링
+                        setTimeout(() => {
+                            calendar.render();
+                        }, 100);
+                    }
+                });
+            });
         });
 
         // 확대/축소 방지
@@ -1836,6 +1900,7 @@
             </div>
             <div class="reservation-form">
                 <!-- 여기에 예약 폼 내용이 들어갈 예정 -->
+                <div id="calendar"></div>
             </div>
         </div>
 
