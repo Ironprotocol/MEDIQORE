@@ -1032,6 +1032,18 @@
         .calendar-view-btn:hover {
             background-color: rgb(0, 82, 204);
         }
+
+        /* desk-content 전용 스타일 */
+        #desk-content, #desk-content-right {
+            width: calc(50% - 5px);  /* 전체 너비의 절반에서 5px 차감 */
+            margin: 10px;  /* 상하좌우 모두 10px로 설정하여 왼쪽 정렬 */
+        }
+
+        #desk-content-right {
+            position: absolute;
+            left: calc(50% + 5px);  /* 첫 번째 상자 너비 + 10px 간격 */
+            top: 0;
+        }
     </style>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -1111,7 +1123,7 @@
             const contentContainers = document.querySelectorAll('.content-container');
 
             menuItems.forEach(item => {
-                item.addEventListener('click', function() {
+                item.addEventListener('click', async function() {
                     menuItems.forEach(i => i.classList.remove('active'));
                     this.classList.add('active');
 
@@ -1120,23 +1132,29 @@
                     });
 
                     const menuText = this.textContent.trim().toLowerCase();
-                    const contentId = `${menuText}-content`;
-                    const content = document.getElementById(contentId);
-                    if (content) {
-                        content.style.display = 'block';
-                        
-                        // desk 메뉴가 클릭되었을 때
-                        if (menuText === 'desk') {
-                            // 의사 목록 로드
-                            loadDoctors();
-
-                            // Primary Complaint 이벤트 리스너 설정
-                            const primaryComplaint = document.getElementById('primaryComplaint');
-                            const otherComplaintContainer = document.getElementById('otherComplaintContainer');
-
-                            if (primaryComplaint && otherComplaintContainer) {
-                                primaryComplaint.removeEventListener('change', handleComplaintChange);
-                                primaryComplaint.addEventListener('change', handleComplaintChange);
+                    
+                    // 각 메뉴별 컨테이너 ID 매핑
+                    const menuToContainer = {
+                        'prescription': 'prescription-content',
+                        'reservation': 'reservation-content',
+                        'pharmacy': 'pharmacy-content',
+                        'desk': ['desk-content', 'desk-content-right']  // 배열로 여러 ID 저장
+                    };
+                    
+                    const contentIds = menuToContainer[menuText];
+                    if (Array.isArray(contentIds)) {  // desk 메뉴인 경우
+                        contentIds.forEach(id => {
+                            document.getElementById(id).style.display = 'block';
+                        });
+                        return;
+                    } else {  // 다른 메뉴들
+                        const content = document.getElementById(contentIds);
+                        if (content) {
+                            content.style.display = 'block';
+                            
+                            // Reservation 메뉴 클릭 시 달력 초기화
+                            if (menuText === 'reservation') {
+                                new CustomCalendar();
                             }
                         }
                     }
@@ -1728,19 +1746,11 @@
 
             // New Patient 버튼 클릭 시 Desk 메뉴와 동일한 동작 실행
             document.querySelector('.new-patient-btn').addEventListener('click', function() {
-                // 모든 메뉴의 active 상태 제거
-                menuItems.forEach(i => i.classList.remove('active'));
-                
-                // Desk 메뉴에 active 클래스 추가
-                document.querySelector('.menu-item').classList.add('active');
-                
-                // 모든 content-container 숨기기
                 contentContainers.forEach(container => {
                     container.style.display = 'none';
                 });
                 
-                // desk-content 표시 및 관련 기능 실행
-                const content = document.getElementById('desk-content');
+                const content = document.getElementById('patient-registration-content');
                 if (content) {
                     content.style.display = 'block';
                     loadDoctors();
@@ -1884,7 +1894,7 @@
             </div>
         </div>
         
-        <div id="desk-content" class="content-container">
+        <div id="patient-registration-content" class="content-container">
             <div class="content-header">
                 <div class="content-title">Patient Registration</div>
                 <button class="close-button">Close</button>
@@ -2029,6 +2039,14 @@
             </div>
         </div>
         
+        <!-- Desk 메뉴용 컨테이너 -->
+        <div id="desk-content" class="content-container">
+            <!-- 내용이 여기에 추가될 것임 -->
+        </div>
+        <div id="desk-content-right" class="content-container">
+            <!-- 내용이 여기에 추가될 것임 -->
+        </div>
+
         <div id="prescription-content" class="content-container">
             <div class="content-header">
                 <div class="content-title">Prescription</div>
@@ -2437,7 +2455,6 @@
           }
       };
 
-      // 나머지 코드...
     </script>
 </body>
 </html>
