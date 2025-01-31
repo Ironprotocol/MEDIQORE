@@ -1725,6 +1725,35 @@
                     }
                 });
             });
+
+            // New Patient 버튼 클릭 시 Desk 메뉴와 동일한 동작 실행
+            document.querySelector('.new-patient-btn').addEventListener('click', function() {
+                // 모든 메뉴의 active 상태 제거
+                menuItems.forEach(i => i.classList.remove('active'));
+                
+                // Desk 메뉴에 active 클래스 추가
+                document.querySelector('.menu-item').classList.add('active');
+                
+                // 모든 content-container 숨기기
+                contentContainers.forEach(container => {
+                    container.style.display = 'none';
+                });
+                
+                // desk-content 표시 및 관련 기능 실행
+                const content = document.getElementById('desk-content');
+                if (content) {
+                    content.style.display = 'block';
+                    loadDoctors();
+                    
+                    // Primary Complaint 이벤트 리스너 설정
+                    const primaryComplaint = document.getElementById('primaryComplaint');
+                    const otherComplaintContainer = document.getElementById('otherComplaintContainer');
+                    if (primaryComplaint && otherComplaintContainer) {
+                        primaryComplaint.removeEventListener('change', handleComplaintChange);
+                        primaryComplaint.addEventListener('change', handleComplaintChange);
+                    }
+                }
+            });
         });
 
         // 확대/축소 방지
@@ -1822,7 +1851,7 @@
         </div>
     </div>
     <div class="sidebar2">
-        <div class="patient-list-title">Patient List</div>
+        <div class="patient-list-title">Treatment progress list</div>
         <div class="submenu-container">
             <div class="submenu-item active">Waiting</div>
             <div class="submenu-item">RSVD</div>
