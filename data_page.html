@@ -392,7 +392,7 @@
         }
 
         /* 공통 content-container 스타일 */
-        .content-container {
+        .content-container, .content-container-2{
             background-color: white;
             margin: 10px;
             border-radius: 8px;
@@ -400,6 +400,13 @@
             position: relative;
             display: none;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* content-container-2 전용 스타일 */
+        .content-container-2 {
+            position: absolute;
+            left: calc(49.6%);
+            top: 0;
         }
 
         /* 상단 메뉴바 스타일 */
@@ -1034,15 +1041,20 @@
         }
 
         /* desk-content 전용 스타일 */
-        #desk-content, #desk-content-right {
-            width: calc(50% - 5px);  /* 전체 너비의 절반에서 5px 차감 */
-            margin: 10px;  /* 상하좌우 모두 10px로 설정하여 왼쪽 정렬 */
+        #desk-content {
+            width: calc(49%);
         }
 
         #desk-content-right {
             position: absolute;
-            left: calc(50% + 5px);  /* 첫 번째 상자 너비 + 10px 간격 */
-            top: 0;
+            width: calc(49%);
+
+        }
+
+        .current-date {
+            margin-left: 15px;
+            font-size: 0.9em;
+            color: #666;
         }
     </style>
     <script>
@@ -1120,7 +1132,7 @@
 
             // 3. 메뉴 아이템 클릭 이벤트
             const menuItems = document.querySelectorAll('.menu-item');
-            const contentContainers = document.querySelectorAll('.content-container');
+            const contentContainers = document.querySelectorAll('.content-container, .content-container-2');
 
             menuItems.forEach(item => {
                 item.addEventListener('click', async function() {
@@ -1746,10 +1758,15 @@
 
             // New Patient 버튼 클릭 시 Desk 메뉴와 동일한 동작 실행
             document.querySelector('.new-patient-btn').addEventListener('click', function() {
+                // 모든 메뉴 아이템의 active 클래스 제거
+                document.querySelectorAll('.menu-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+
                 contentContainers.forEach(container => {
                     container.style.display = 'none';
                 });
-                
+
                 const content = document.getElementById('patient-registration-content');
                 if (content) {
                     content.style.display = 'block';
@@ -1764,6 +1781,20 @@
                     }
                 }
             });
+
+            function updateDate() {
+                const today = new Date();
+                const day = String(today.getDate()).padStart(2, '0');
+                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                const month = months[today.getMonth()];
+                const year = today.getFullYear();
+                
+                const formattedDate = `${day}.${month}.${year}`;
+                document.querySelector('.current-date').textContent = formattedDate;
+            }
+            
+            // 페이지 로드 시 날짜 업데이트
+            updateDate();
         });
 
         // 확대/축소 방지
@@ -2041,10 +2072,19 @@
         
         <!-- Desk 메뉴용 컨테이너 -->
         <div id="desk-content" class="content-container">
-            <!-- 내용이 여기에 추가될 것임 -->
+            <div class="content-header">
+                <div class="content-title">
+                    Patient List
+                    <span class="current-date"></span>
+                </div>
+                <button class="close-button">Close</button>
+            </div>
         </div>
-        <div id="desk-content-right" class="content-container">
-            <!-- 내용이 여기에 추가될 것임 -->
+        <div id="desk-content-right" class="content-container-2">
+            <div class="content-header">
+                <div class="content-title">Prescript History</div>
+                <button class="close-button">Close</button>
+            </div>
         </div>
 
         <div id="prescription-content" class="content-container">
