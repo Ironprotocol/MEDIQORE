@@ -1056,6 +1056,28 @@
             font-size: 0.9em;
             color: #666;
         }
+
+        .content-header {
+            height: 50px;
+            border-bottom: 1px solid hsl(0, 0%, 85%);
+            border-radius: 8px 8px 0 0;
+        }
+
+        .content-body {
+            height: calc(100% - 100px);  /* 전체 높이에서 헤더와 푸터 높이를 뺌 */
+            overflow-y: auto;  /* 내용이 많을 경우 스크롤 */
+        }
+
+        .content-footer {
+            height: 50px;
+            border-top: 1px solid hsl(0, 0%, 85%);
+            border-radius: 0 0 8px 8px;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+        }
     </style>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -2072,6 +2094,7 @@
         
         <!-- Desk 메뉴용 컨테이너 -->
         <div id="desk-content" class="content-container">
+            <!-- 헤더 영역 -->
             <div class="content-header">
                 <div class="content-title">
                     Patient List
@@ -2079,7 +2102,18 @@
                 </div>
                 <button class="close-button">Close</button>
             </div>
+
+            <!-- 중간 컨테이너 -->
+            <div class="content-body">
+                <!-- 여기에 주요 내용이 들어갈 예정 -->
+            </div>
+
+            <!-- 하단 컨테이너 -->
+            <div class="content-footer">
+                <!-- 여기에 하단 내용이 들어갈 예정 -->
+            </div>
         </div>
+
         <div id="desk-content-right" class="content-container-2">
             <div class="content-header">
                 <div class="content-title">Prescript History</div>
