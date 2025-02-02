@@ -2306,9 +2306,48 @@
 
           try {
               await checkUserPermissions(user);
-
-              // 병원명 추출
+              
+              // 1. hospitalName 추출
               const hospitalName = user.email.split('@')[0].split('.')[0];
+              
+              // 2. 현재 날짜 가져오기
+              const currentDate = document.querySelector('.current-date').textContent;
+              
+              // 3. waiting 컬렉션 참조
+              const waitingRef = collection(db, 'hospitals', hospitalName, 'dates', currentDate, 'waiting');
+              
+              // 4. 실시간 업데이트 리스너
+              onSnapshot(waitingRef, async (snapshot) => {
+                  const patientListBody = document.querySelector('#desk-content .content-body');
+                  patientListBody.innerHTML = '';
+                  
+                  for (const docSnapshot of snapshot.docs) {
+                      const patientData = docSnapshot.data();
+                      const patientId = docSnapshot.id;
+                      
+                      // 5. 환자 정보 가져오기
+                      const patientRef = doc(db, 'hospitals', hospitalName, 'patient', patientId);
+                      const patientDoc = await getDoc(patientRef);
+                      
+                      if (patientDoc.exists()) {
+                          const birthDate = patientDoc.data().info.birthDate.toDate();
+                          const age = new Date().getFullYear() - birthDate.getFullYear();
+                          
+                          const patientElement = document.createElement('div');
+                          patientElement.className = 'patient-info-container';
+                          
+                          patientElement.innerHTML = `
+                              <span>${patientId}</span>
+                              <span>${age}years</span>
+                              <span>${patientData.primaryComplaint}</span>
+                              <span>${patientData.doctor}</span>
+                              <span>${patientData.progress}</span>
+                          `;
+                          
+                          patientListBody.appendChild(patientElement);
+                      }
+                  }
+              });
               const roomContainer = document.querySelector('.patient-list-container');
 
               // treatment.room과 desk 컬렉션 참조
