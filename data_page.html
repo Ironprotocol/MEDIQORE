@@ -815,7 +815,7 @@
         }
 
         .doctor-dropdown {
-            width: 200px;
+            width: 170px;  /* 200px에서 30px 줄임 */
             border: 1px solid #ced4da;
             border-radius: 4px;
             cursor: pointer;
@@ -831,7 +831,7 @@
             position: absolute;
             top: 100%;
             left: 0;
-            width: 200px;  /* doctor-dropdown과 동일한 너비 */
+            width: 170px;  /* dropdown-options도 같이 수정 */
             background: white;
             border: 1px solid #ced4da;
             border-radius: 4px;
@@ -1092,12 +1092,30 @@
             background-color: white;
         }
 
+        /* 기본 span 스타일 - flex 유지 */
         .patient-info-container span {
-            flex: 1;  /* 각 텍스트 요소가 동일한 공간 차지 */
-            text-align: center;  /* 텍스트 중앙 정렬 */
-            padding: 0 10px;  /* 텍스트 간 좌우 간격 */
-            color: rgb(110, 110, 124);  /* 회색 텍스트 */
-            font-size: 12px;  /* 텍스트 크기 */
+
+            text-align: center;
+            padding: 0 10px;
+            color: rgb(110, 110, 124);
+            font-size: 12px;
+        }
+
+        /* progress 이미지 span 스타일 */
+        .patient-info-container .progress-span {
+            flex: none;  /* flex 해제 */
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;  /* 오른쪽 정렬 */
+            width: 81px;  /* 이미지 너비만큼 */
+            margin-left: auto;  /* C와 D 사이 간격 확보 */
+            margin-right: 0;    /* E와의 간격 최소화 */
+        }
+
+        /* 의사 선택 드롭다운 span 스타일 */
+        .patient-info-container .doctor-dropdown-span {
+            flex: none;  /* flex 해제 */
+            width: 170px;  /* 드롭다운 너비 */
         }
 
         /* 로그아웃 상태인 의사 이름 스타일 */
@@ -2374,9 +2392,12 @@
                               <span>${patientId}</span>
                               <span>${age}years</span>
                               <span>${patientData.primaryComplaint}</span>
-                              <span>${patientData.progress}</span>
-                              <span>${patientData.doctor}</span>
-                              <span>
+                              <span class="progress-span">
+                                  <img src="image/${patientData.progress}.png" 
+                                       alt="${patientData.progress}" 
+                                       style="width: 73px; height: 30.5px; object-fit: contain;">
+                              </span>
+                              <span class="doctor-dropdown-span">
                                   <div class="doctor-select-container">
                                       <select class="doctor-select" style="display: none;">
                                           <option value="">Choose a doctor</option>
