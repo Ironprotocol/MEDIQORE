@@ -1746,14 +1746,15 @@
                         hospitalName,
                         'dates',
                         dateString,
-                        'waiting', // waiting 컬렉션 추가
+                        'waiting',
                         `${patientName}.${idNumber}`
                     );
 
                     await setDoc(datesRef, {
                         timestamp: serverTimestamp(),
                         primaryComplaint: complaintData,
-                        doctor: doctorName
+                        doctor: doctorName,
+                        progress: 'waiting'  // progress 필드 추가
                     }, { merge: true });
 
                     alert('Patient registration completed successfully');
