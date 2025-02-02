@@ -815,7 +815,7 @@
         }
 
         .doctor-dropdown {
-            width: 200px;
+            width: 170px;  /* 200px에서 30px 줄임 */
             border: 1px solid #ced4da;
             border-radius: 4px;
             cursor: pointer;
@@ -831,7 +831,7 @@
             position: absolute;
             top: 100%;
             left: 0;
-            width: 200px;  /* doctor-dropdown과 동일한 너비 */
+            width: 170px;  /* dropdown-options도 같이 수정 */
             background: white;
             border: 1px solid #ced4da;
             border-radius: 4px;
@@ -1092,12 +1092,63 @@
             background-color: white;
         }
 
+        /* 기본 span 스타일 - flex 유지 */
         .patient-info-container span {
-            flex: 1;  /* 각 텍스트 요소가 동일한 공간 차지 */
-            text-align: center;  /* 텍스트 중앙 정렬 */
-            padding: 0 10px;  /* 텍스트 간 좌우 간격 */
-            color: rgb(110, 110, 124);  /* 회색 텍스트 */
-            font-size: 12px;  /* 텍스트 크기 */
+            text-align: center;
+            padding: 0 10px;
+            color: rgb(110, 110, 124);
+            font-size: 12px;
+        }
+
+        /* 환자 ID/이름 span - 고정 너비 */
+        .patient-info-container .patient-id-span {
+            display: inline-block;
+            width: 160px;              /* 18자를 수용할 수 있는 너비로 수정 */
+            text-align: left;          /* 왼쪽 정렬 */
+            white-space: nowrap;       /* 줄바꿈 방지 */
+            overflow: hidden;          /* 넘치는 텍스트 숨김 */
+            text-overflow: ellipsis;   /* 말줄임표 처리 */
+        }
+
+        /* 나이 span - 고정 너비 */
+        .patient-info-container .age-span {
+            display: inline-block;
+            width: 70px;               /* "58years" 길이를 수용할 수 있는 너비 */
+            text-align: left;          /* 왼쪽 정렬 */
+            white-space: nowrap;       /* 줄바꿈 방지 */
+        }
+
+        /* 증상 span - 고정 너비 */
+        .patient-info-container .complaint-span {
+            display: inline-block;
+            width: 100px;              /* "swollen_gums" 길이를 수용할 수 있는 너비 */
+            text-align: left;          /* 왼쪽 정렬 */
+            white-space: nowrap;       /* 줄바꿈 방지 */
+            overflow: hidden;          /* 넘치는 텍스트 숨김 */
+            text-overflow: ellipsis;   /* 말줄임표 처리 */
+        }
+
+        /* progress 이미지 span 스타일 */
+        .patient-info-container .progress-span {
+            flex: none;  /* flex 해제 */
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;  /* 오른쪽 정렬 */
+            width: 81px;  /* 이미지 너비만큼 */
+            margin-left: auto;  /* C와 D 사이 간격 확보 */
+            margin-right: 0;    /* E와의 간격 최소화 */
+        }
+
+        /* 의사 선택 드롭다운 span 스타일 */
+        .patient-info-container .doctor-dropdown-span {
+            flex: none;  /* flex 해제 */
+            width: 170px;  /* 드롭다운 너비 */
+        }
+
+        /* 로그아웃 상태인 의사 이름 스타일 */
+        .doctor-option.disabled span,
+        .doctor-option span.disabled {
+            color: rgb(180, 180, 180);  /* 회색 */
         }
     </style>
     <script>
@@ -1122,7 +1173,7 @@
             const statusIcons = {
                 login: 'image/login.png',
                 start: 'image/start.png',
-                end: 'image/end.png',
+                end: 'image/logout.png',
                 break: 'image/break.png'
             };
 
@@ -1468,7 +1519,7 @@
                         dropdownOption.className = `doctor-option${doctorData.work === 'logout' ? ' disabled' : ''}`;
                         dropdownOption.dataset.value = doctorData.id;
 
-                        let statusImg = 'end.png';
+                        let statusImg = 'logout.png';
                         if (doctorData.work === 'login') statusImg = 'login.png';
                         if (doctorData.work === 'start') statusImg = 'start.png';
                         if (doctorData.work === 'break') statusImg = 'break.png';
@@ -1652,12 +1703,12 @@
             });
 
             // Register 버튼 클릭 이벤트
-            document.querySelector('.register-btn').addEventListener('click', async function() {
+            document.querySelector('.register-btn').addEventListener('click', async () => {
                 try {
                     const user = auth.currentUser;
                     if (!user) return;
 
-                    // 필수 입력값 확인
+                    // 필수 입력값 확인 (doctorId 제외)
                     const patientName = document.getElementById('patientName').value.trim();
                     const idNumber = document.getElementById('idNumber').value.trim();
                     const birthDay = document.getElementById('birthDay').value;
@@ -1667,12 +1718,22 @@
                     const city = document.getElementById('city').value.trim();
                     const state = document.getElementById('state').value.trim();
                     const primaryComplaint = document.getElementById('primaryComplaint').value;
-                    const doctorId = document.getElementById('doctorSelect').value;
 
-                    if (!patientName || !idNumber || !birthDay || !birthMonth || !birthYear || !district || 
-                        !city || !state || !primaryComplaint || !doctorId) {
+                    if (!patientName || !idNumber || !birthDay || !birthMonth || !birthYear || 
+                        !district || !city || !state || !primaryComplaint) {
                         alert('Please fill in all required fields');
                         return;
+                    }
+
+                    // 의사 선택은 선택사항으로 처리
+                    const doctorId = document.getElementById('doctorSelect').value;
+                    let doctorName = '';
+                    
+                    if (doctorId) {
+                        const [hospitalName] = user.email.split('@')[0].split('.');
+                        const doctorRef = doc(db, 'hospitals', hospitalName, 'staff', doctorId);
+                        const doctorDoc = await getDoc(doctorRef);
+                        doctorName = doctorDoc.data().name;
                     }
 
                     // 병원명 추출
@@ -1731,11 +1792,6 @@
                         complaintData = `other: ${otherComplaint}`;
                     }
 
-                    // 의사 이름 가져오기
-                    const doctorRef = doc(db, 'hospitals', hospitalName, 'staff', doctorId);
-                    const doctorDoc = await getDoc(doctorRef);
-                    const doctorName = doctorDoc.data().name;
-
                     // 현재 날짜시간으로 문서 ID 생성 (DD.MM.YYYY_HHMMSS)
                     const now = new Date();
                     const dateId = `${now.toLocaleDateString('en-ZA', {
@@ -1749,8 +1805,9 @@
                     await setDoc(visitRef, {
                         timestamp: serverTimestamp(),
                         primaryComplaint: complaintData,
-                        doctor: doctorName
-                    });
+                        doctor: doctorName,  // 빈 문자열이거나 의사 이름
+                        progress: 'waiting'
+                    }, { merge: true });
 
                     // 날짜 형식 수정 및 waiting 경로 추가
                     const today = new Date();
@@ -1774,7 +1831,7 @@
                     await setDoc(datesRef, {
                         timestamp: serverTimestamp(),
                         primaryComplaint: complaintData,
-                        doctor: doctorName,
+                        doctor: doctorName,  // 빈 문자열이거나 의사 이름
                         progress: 'waiting'  // progress 필드 추가
                     }, { merge: true });
 
@@ -1949,7 +2006,7 @@
                         <span>Start</span>
                     </div>
                     <div class="status-option" data-status="end">
-                        <img src="image/end.png" alt="End Work" class="status-icon">
+                        <img src="image/logout.png" alt="End Work" class="status-icon">
                         <span>End</span>
                     </div>
                     <div class="status-option" data-status="break">
@@ -2121,7 +2178,7 @@
                             <label for="doctorSelect">Select Doctor</label>
                             <div class="doctor-select-container">
                                 <!-- 실제 form 제출용 숨겨진 select -->
-                                <select id="doctorSelect" name="doctorSelect" required style="display: none;">
+                                <select id="doctorSelect" name="doctorSelect" style="display: none;">
                                     <option value="">Choose a doctor</option>
                                 </select>
                                 <!-- 커스텀 드롭다운 -->
@@ -2357,14 +2414,170 @@
                           const patientElement = document.createElement('div');
                           patientElement.className = 'patient-info-container';
                           
+                          // 이름 처리 함수
+                          function formatPatientId(id) {
+                              const maxLength = 24; // abcdefghijklmnopqr 길이
+                              const namePart = id.split('.')[0]; // 점(.) 앞부분만 추출
+                              
+                              if (namePart.length > maxLength) {
+                                  return namePart.slice(0, maxLength - 3) + '...';
+                              }
+                              return namePart; // ID 번호 부분 제외하고 이름만 반환
+                          }
+
+                          // 증상 처리 함수
+                          function formatComplaint(complaint) {
+                              const maxLength = 15; // swollen_gums 길이
+                              if (complaint.length > maxLength) {
+                                  return complaint.slice(0, maxLength - 3) + '...';
+                              }
+                              return complaint;
+                          }
+
                           patientElement.innerHTML = `
-                              <span>${patientId}</span>
-                              <span>${age}years</span>
-                              <span>${patientData.primaryComplaint}</span>
-                              <span>${patientData.progress}</span>
-                              <span>${patientData.doctor}</span>
+                              <span class="patient-id-span">${formatPatientId(patientId)}</span>
+                              <span class="age-span">${age}years</span>
+                              <span class="complaint-span">${formatComplaint(patientData.primaryComplaint)}</span>
+                              <span class="progress-span">
+                                  <img src="image/${patientData.progress}.png" 
+                                       alt="${patientData.progress}" 
+                                       style="width: 73px; height: 30.5px; object-fit: contain;">
+                              </span>
+                              <span class="doctor-dropdown-span">
+                                  <div class="doctor-select-container">
+                                      <select class="doctor-select" style="display: none;">
+                                          <option value="">Choose a doctor</option>
+                                      </select>
+                                      <div class="doctor-dropdown">
+                                          <div class="doctor-dropdown-selected" style="color: ${patientData.doctor ? '#000000' : 'rgb(110, 110, 124)'}">
+                                              ${patientData.doctor || 'Choose a doctor'}
+                                          </div>
+                                          <div class="doctor-dropdown-options" style="display: none;"></div>
+                                      </div>
+                                  </div>
+                              </span>
                           `;
+
+                          // 의사 목록 로드 및 드롭다운 이벤트 설정
+                          const doctorContainer = patientElement.querySelector('.doctor-select-container');
+                          const doctorSelect = doctorContainer.querySelector('.doctor-select');
+                          const doctorDropdown = doctorContainer.querySelector('.doctor-dropdown');
+                          const doctorSelected = doctorContainer.querySelector('.doctor-dropdown-selected');
+                          const doctorOptions = doctorContainer.querySelector('.doctor-dropdown-options');
+
+                          // 의사 목록 로드
+                          const staffRef = collection(db, 'hospitals', hospitalName, 'staff');
+                          const q = query(staffRef, where('role', '==', 'doctor'));
+                          const querySnapshot = await getDocs(q);
                           
+                          // 드롭다운 옵션 생성
+                          querySnapshot.forEach(doc => {
+                              const doctorData = doc.data();
+                              const option = document.createElement('div');
+                              option.className = `doctor-option ${doctorData.work === 'logout' ? 'disabled' : ''}`;
+                              option.dataset.value = doc.id;
+                              option.innerHTML = `
+                                  <span>${doctorData.name}</span>
+                                  <img src="image/${doctorData.work}.png" alt="${doctorData.work}" class="status-icon">
+                              `;
+                              doctorOptions.appendChild(option);
+
+                              // select 엘리먼트에도 옵션 추가
+                              const selectOption = document.createElement('option');
+                              selectOption.value = doc.id;
+                              selectOption.textContent = doctorData.name;
+                              doctorSelect.appendChild(selectOption);
+                          });
+
+                          // 드롭다운 토글 및 의사 목록 새로고침
+                          doctorSelected.addEventListener('click', async (e) => {
+                              e.stopPropagation(); // 이벤트 버블링 방지
+                              
+                              // 다른 열린 드롭다운 모두 닫기
+                              document.querySelectorAll('.doctor-dropdown-options').forEach(dropdown => {
+                                  if (dropdown !== doctorOptions) {
+                                      dropdown.style.display = 'none';
+                                  }
+                              });
+
+                              // 의사 목록 새로 불러오기
+                              const staffRef = collection(db, 'hospitals', hospitalName, 'staff');
+                              const q = query(staffRef, where('role', '==', 'doctor'));
+                              const querySnapshot = await getDocs(q);
+                              
+                              // 기존 옵션 제거
+                              doctorOptions.innerHTML = '';
+                              
+                              // 'Choose a doctor' 옵션 먼저 추가
+                              const defaultOption = document.createElement('div');
+                              defaultOption.className = 'doctor-option';
+                              defaultOption.dataset.value = '';
+                              defaultOption.innerHTML = `
+                                  <span>Choose a doctor</span>
+                              `;
+                              doctorOptions.appendChild(defaultOption);
+                              
+                              // 새로운 의사 목록으로 드롭다운 옵션 생성
+                              querySnapshot.forEach(doc => {
+                                  const doctorData = doc.data();
+                                  const option = document.createElement('div');
+                                  option.className = `doctor-option${doctorData.work === 'logout' ? ' disabled' : ''}`;
+                                  option.dataset.value = doc.id;
+                                  option.innerHTML = `
+                                      <span class="${doctorData.work === 'logout' ? 'disabled' : ''}">${doctorData.name}</span>
+                                      <img src="image/${doctorData.work}.png" alt="${doctorData.work}" class="status-icon">
+                                  `;
+                                  doctorOptions.appendChild(option);
+                              });
+
+                              // 드롭다운 표시/숨김 토글
+                              doctorOptions.style.display = doctorOptions.style.display === 'none' ? 'block' : 'none';
+                          });
+
+                          // 외부 클릭 시 드롭다운 닫기
+                          window.addEventListener('click', () => {
+                              doctorOptions.style.display = 'none';
+                          });
+
+                          // 드롭다운 옵션 클릭 이벤트
+                          doctorOptions.addEventListener('click', async (e) => {
+                              e.stopPropagation();
+                              const option = e.target.closest('.doctor-option');
+                              if (option && !option.classList.contains('disabled')) {
+                                  const doctorId = option.dataset.value;
+
+                                  // Choose a doctor 선택한 경우
+                                  if (!doctorId) {
+                                      // 데이터베이스 업데이트 - doctor 필드를 null로
+                                      const waitingDocRef = doc(waitingRef, patientId);
+                                      await updateDoc(waitingDocRef, {
+                                          doctor: null
+                                      });
+
+                                      // UI 업데이트
+                                      doctorSelected.style.color = 'rgb(110, 110, 124)'; // 회색으로
+                                      doctorSelected.textContent = 'Choose a doctor';
+                                  } else {
+                                      // 의사 선택한 경우
+                                      const doctorRef = doc(db, 'hospitals', hospitalName, 'staff', doctorId);
+                                      const doctorDoc = await getDoc(doctorRef);
+                                      const doctorName = doctorDoc.data().name;
+
+                                      // 데이터베이스 업데이트
+                                      const waitingDocRef = doc(waitingRef, patientId);
+                                      await updateDoc(waitingDocRef, {
+                                          doctor: doctorName
+                                      });
+
+                                      // UI 업데이트 - 진한 검정색으로
+                                      doctorSelected.style.color = '#000000';
+                                      doctorSelected.textContent = doctorName;
+                                  }
+                                  
+                                  doctorOptions.style.display = 'none';
+                              }
+                          });
+
                           patientListBody.appendChild(patientElement);
                       }
                   }
