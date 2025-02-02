@@ -1731,6 +1731,31 @@
                         doctor: doctorName
                     });
 
+                    // 날짜 형식 수정 및 waiting 경로 추가
+                    const today = new Date();
+                    const dateString = today.toLocaleDateString('en-GB', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric'
+                    }).replace(/ /g, '.'); // 공백을 .으로 변경
+
+                    // dates 컬렉션 생성 및 데이터 저장 
+                    const datesRef = doc(
+                        db,
+                        'hospitals', 
+                        hospitalName,
+                        'dates',
+                        dateString,
+                        'waiting', // waiting 컬렉션 추가
+                        `${patientName}.${idNumber}`
+                    );
+
+                    await setDoc(datesRef, {
+                        timestamp: serverTimestamp(),
+                        primaryComplaint: complaintData,
+                        doctor: doctorName
+                    }, { merge: true });
+
                     alert('Patient registration completed successfully');
 
                     // 폼 초기화
