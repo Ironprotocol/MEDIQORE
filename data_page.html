@@ -1975,7 +1975,7 @@
 
                     // 날짜 형식 수정 및 waiting 경로 추가
                     const today = new Date();
-                    const dateString = today.toLocaleDateString('en-GB', {
+                    const currentDate = today.toLocaleDateString('en-GB', {
                         day: '2-digit',
                         month: 'short',
                         year: 'numeric'
@@ -1987,7 +1987,7 @@
                         'hospitals', 
                         hospitalName,
                         'dates',
-                        dateString,
+                        currentDate,  // dateString에서 currentDate로 변경
                         'waiting',
                         `${patientName}.${idNumber}`
                     );
@@ -2097,17 +2097,10 @@
             updateDate();
 
             // 정렬된 쿼리로 리스너 설정
-            const waitingRef = collection(db, 'hospitals', hospitalName, 'dates', currentDate, 'waiting');
-            const q = query(waitingRef, orderBy('timestamp', 'asc'));  // 등록 시간 순으로 정렬
+
 
             // onSnapshot에 쿼리 적용
-            window.unsubscribeWaiting = onSnapshot(q, async (snapshot) => {
-                const patientListBody = document.querySelector('#desk-content .content-body');
-                if (!patientListBody) return;
-                patientListBody.innerHTML = '';
-                
-                // ... 기존 코드 ...
-            });
+
         });
 
         // 확대/축소 방지
@@ -2124,7 +2117,7 @@
             }
         }, { passive: false });
 
-        // 기존 코드...
+
     </script>
 </head>
 <body>
