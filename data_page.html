@@ -893,17 +893,18 @@
             background: white;
             border-radius: 8px;
             padding: 10px;
-            display: flex;  /* 캘린더를 form 안에 꽉 차게 표시 */
+            display: flex;
         }
 
         /* 커스텀 달력 스타일 */
         .custom-calendar {
-            width: 100%;
+            width: 800px;  /* 달력 고정 너비 */
             height: 100%;
             background: white;
             border-radius: 8px;
             padding: 20px;
             box-sizing: border-box;
+            margin-right: auto;  /* 왼쪽 정렬 */
         }
 
         .calendar-header {
@@ -931,13 +932,15 @@
             cursor: pointer;
         }
 
+        /* 달력 그리드 스타일 */
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 0;  /* 셀 간격 제거하여 테두리가 연결되도록 */
+            gap: 0;
             border: 1px solid #e0e0e0;
             border-radius: 8px;
-            overflow: hidden;  /* 내부 셀의 테두리가 둥근 모서리를 벗어나지 않도록 */
+            overflow: hidden;
+            width: 100%;  /* 부모(.custom-calendar) 너비에 맞춤 */
         }
 
         .weekday {
@@ -2434,9 +2437,6 @@
                         </div>
                         <div class="month-year">2024년 3월</div>
                         <div class="calendar-nav">
-                            <button class="calendar-view-btn">Month</button>
-                            <button class="calendar-view-btn">Week</button>
-                            <button class="calendar-view-btn">Day</button>
                             <button id="nextMonth">Next &gt;</button>
                         </div>
                     </div>
