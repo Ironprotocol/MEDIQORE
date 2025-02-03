@@ -1160,7 +1160,7 @@
             border: 1px solid #ddd;
             border-radius: 8px;
             padding: 15px;
-            width: 250px;
+            width: 300px;  /* 250px에서 300px로 증가 */
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             z-index: 1000;
             display: none;
@@ -1234,6 +1234,45 @@
             border-style: solid;
             border-color: white transparent transparent transparent;  /* 색상 순서 변경 */
             filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
+        }
+
+        /* 드롭다운 placeholder 색상 */
+        .date-select-group select {
+            color: rgb(110, 110, 124);  /* 기본 텍스트 색상을 회색으로 */
+        }
+
+        .date-select-group select option {
+            color: black;  /* 실제 옵션들은 검정색으로 */
+        }
+
+        /* 입력 폼 간격 수정 */
+        .tooltip-form label {
+            font-size: 12px;
+            color: #000;
+            display: block;
+            margin-top: 0;  /* 라벨 상단 여백 제거 */
+        }
+
+        .tooltip-form input,
+        .date-select-group {
+            margin-bottom: 30px;  /* 입력 요소 아래 여백 통일 */
+            margin-top: 8px;      /* 라벨과 입력 요소 사이 간격 */
+        }
+
+        .tooltip-form label:first-child {
+            margin-top: 0;  /* 첫 번째 라벨은 상단 여백 제거 */
+        }
+
+        .tooltip-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .selected-date {
+            color: rgb(110, 110, 124);
+            font-size: 12px;
         }
     </style>
     <script>
@@ -2967,13 +3006,13 @@
                       <label>Birth Date</label>
                       <div class="date-select-group">
                           <select id="birthDay" name="birthDay" required>
-                              <option value="">Day</option>
+                              <option value="" style="color: rgb(110, 110, 124);">Day</option>
                               ${Array.from({length: 31}, (_, i) => i + 1).map(day => 
                                   `<option value="${day}">${day}</option>`
                               ).join('')}
                           </select>
                           <select id="birthMonth" name="birthMonth" required>
-                              <option value="">Month</option>
+                              <option value="" style="color: rgb(110, 110, 124);">Month</option>
                               <option value="1">Jan</option>
                               <option value="2">Feb</option>
                               <option value="3">Mar</option>
@@ -2988,17 +3027,26 @@
                               <option value="12">Dec</option>
                           </select>
                           <select id="birthYear" name="birthYear" required>
-                              <option value="">Year</option>
+                              <option value="" style="color: rgb(110, 110, 124);">Year</option>
                               ${Array.from({length: 100}, (_, i) => new Date().getFullYear() - i).map(year =>
                                   `<option value="${year}">${year}</option>`
                               ).join('')}
                           </select>
                       </div>
                       
+                      <label>Cell phone number</label>
+                      <input type="tel" class="tooltip-phone" placeholder="Enter phone number">
+                      
                       <label>Primary Complaint</label>
                       <input type="text" class="tooltip-complaint" placeholder="Enter primary complaint">
+
+                      <label>Reservation Time</label>
+                      <input type="time" class="tooltip-time" required>
                   </form>
-                  <button class="tooltip-rsvd">RSVD</button>
+                  <div class="tooltip-footer">
+                      <span class="selected-date">${this.formatDate(date)}</span>
+                      <button class="tooltip-rsvd">RSVD</button>
+                  </div>
               `;
 
               // 툴팁 위치 계산
@@ -3029,16 +3077,27 @@
               // RSVD 버튼 이벤트
               tooltip.querySelector('.tooltip-rsvd').addEventListener('click', () => {
                   const name = tooltip.querySelector('.tooltip-name').value;
-                  const birth = tooltip.querySelector('.tooltip-birth').value;
-                  const symptoms = tooltip.querySelector('.tooltip-complaint').value;
+                  const birthDay = tooltip.querySelector('#birthDay').value;
+                  const birthMonth = tooltip.querySelector('#birthMonth').value;
+                  const birthYear = tooltip.querySelector('#birthYear').value;
+                  const phone = tooltip.querySelector('.tooltip-phone').value;
+                  const complaint = tooltip.querySelector('.tooltip-complaint').value;
+                  const time = tooltip.querySelector('.tooltip-time').value;
                   
-                  if (!name || !birth || !symptoms) {
+                  if (!name || !birthDay || !birthMonth || !birthYear || !phone || !complaint || !time) {
                       alert('Please fill in all fields');
                       return;
                   }
 
                   // TODO: 여기에 예약 데이터 저장 로직 추가
-                  console.log('Reservation:', { date, name, birth, symptoms });
+                  console.log('Reservation:', { 
+                      date: this.formatDate(date), 
+                      name, 
+                      birth: `${birthYear}-${birthMonth}-${birthDay}`,
+                      phone,
+                      complaint,
+                      time
+                  });
                   
                   tooltip.remove();
                   this.currentTooltip = null;
@@ -3055,6 +3114,12 @@
                       this.currentTooltip = null;
                   }
               });
+          }
+
+          formatDate(day) {
+              const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+              const date = new Date(this.date.getFullYear(), this.date.getMonth(), day);
+              return `${String(day).padStart(2, '0')}.${months[date.getMonth()]}.${date.getFullYear()}`;
           }
       };
 
