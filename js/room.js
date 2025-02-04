@@ -1,0 +1,144 @@
+import { auth, db, doc, getDoc, collection, getDocs, updateDoc, onSnapshot } from './firebase-config.js';
+
+export async function initializeRoomManagement(hospitalName) {
+    const roomContainer = document.querySelector('.patient-list-container');
+    const roomsRef = collection(db, 'hospitals', hospitalName, 'treatment.room');
+    const desksRef = collection(db, 'hospitals', hospitalName, 'desk');
+
+    // 실시간 업데이트 리스너
+    onSnapshot(roomsRef, async (roomSnapshot) => {
+        const rooms = [];
+        roomSnapshot.forEach(doc => {
+            rooms.push({ id: doc.id, type: 'room', ...doc.data() });
+        });
+
+        // desk 데이터 가져오기
+        const deskSnapshot = await getDocs(desksRef);
+        const desks = [];
+        deskSnapshot.forEach(doc => {
+            desks.push({ id: doc.id, type: 'desk', ...doc.data() });
+        });
+
+        // 정렬 (Room 먼저, 그 다음 Desk)
+        const allItems = [
+            ...rooms.sort((a, b) => a.id.localeCompare(b.id)),
+            ...desks.sort((a, b) => a.id.localeCompare(b.id))
+        ];
+
+        // UI 업데이트
+        roomContainer.innerHTML = allItems.map(item => `
+            <div class="room-item">
+                <div style="display: flex; align-items: center;">
+                    <span class="room-title">${item.id}</span>
+                    ${item.type === 'room' && item.doctor ? 
+                        `<span class="doctor-name">${item.doctor}</span>` : 
+                        ''}
+                </div>
+                ${item.type === 'room' ? 
+                    (item.doctor ? 
+                        `<button class="exit-btn" data-room="${item.id}">Exit</button>` : 
+                        `<button class="join-btn" data-room="${item.id}">Join</button>`
+                    ) : ''}
+            </div>
+        `).join('');
+
+        // Join 버튼 이벤트 리스너
+        document.querySelectorAll('.join-btn').forEach(btn => {
+            btn.addEventListener('click', async function() {
+                const roomId = this.dataset.room;
+                const userEmail = auth.currentUser.email;
+                const [hospitalName, role] = userEmail.split('@')[0].split('.');
+
+                if (role !== 'doctor') return;
+
+                try {
+                    const userRef = doc(db, 'hospitals', hospitalName, 'staff', userEmail);
+                    const userDoc = await getDoc(userRef);
+                    const userName = userDoc.data().name;
+
+                    // 진료실에 의사 배정 (name과 work 상태 함께 저장)
+                    const roomRef = doc(db, 'hospitals', hospitalName, 'treatment.room', roomId);
+                    await updateDoc(roomRef, {
+                        doctor: userName,
+                        work: 'start'
+                    });
+
+                    // 의사의 work 값 변경
+                    await updateDoc(userRef, {
+                        work: 'start'
+                    });
+
+                    // 상단 상태 원 업데이트
+                    const statusDot = document.querySelector('.status-dot');
+                    if (statusDot) {
+                        statusDot.style.backgroundColor = getStatusColor('start');
+                    }
+                } catch (error) {
+                    console.error('Error joining room:', error);
+                }
+            });
+        });
+
+        // Exit 버튼 이벤트 리스너
+        document.querySelectorAll('.exit-btn').forEach(btn => {
+            btn.addEventListener('click', async function() {
+                if (!confirm('Do you want to leave this room?')) return;
+
+                const roomId = this.dataset.room;
+                const userEmail = auth.currentUser.email;
+                const [hospitalName, role] = userEmail.split('@')[0].split('.');
+
+                if (role !== 'doctor') return;
+
+                try {
+                    const userRef = doc(db, 'hospitals', hospitalName, 'staff', userEmail);
+                    const userDoc = await getDoc(userRef);
+                    const userName = userDoc.data().name;
+
+                    // 진료실에서 의사 제거
+                    await updateDoc(doc(roomsRef, roomId), {
+                        doctor: null,
+                        work: null
+                    });
+
+                    // 의사의 work 값 변경
+                    await updateDoc(userRef, {
+                        work: 'login'
+                    });
+
+                    // 상단 상태 원 업데이트
+                    const statusDot = document.querySelector('.status-dot');
+                    if (statusDot) {
+                        statusDot.style.backgroundColor = getStatusColor('login');
+                    }
+                } catch (error) {
+                    console.error('Error exiting room:', error);
+                }
+            });
+        });
+    });
+}
+
+// 로그아웃 감지 및 처리
+export async function handleRoomLogout() {
+    try {
+        const [hospitalName, role] = auth.currentUser?.email.split('@')[0].split('.') || [];
+        if (role === 'doctor') {
+            const userRef = doc(db, 'hospitals', hospitalName, 'staff', auth.currentUser.email);
+            const userDoc = await getDoc(userRef);
+            
+            const roomsRef = collection(db, 'hospitals', hospitalName, 'treatment.room');
+            const roomsSnapshot = await getDocs(roomsRef);
+            
+            roomsSnapshot.forEach(async (roomDoc) => {
+                if (roomDoc.data().doctor === userDoc.data().name) {
+                    await updateDoc(doc(roomsRef, roomDoc.id), {
+                        doctor: null
+                    });
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error handling logout:', error);
+    }
+}

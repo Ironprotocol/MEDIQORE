@@ -1,0 +1,160 @@
+
+
+      
+
+        /* 툴팁 컨테이너 */
+        .date-tooltip {
+            position: absolute;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            width: 300px;  /* 250px에서 300px로 증가 */
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: none;
+        }
+
+        /* 툴팁 화살표 */
+        .date-tooltip:before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            border-width: 0 10px 10px 10px;
+            border-style: solid;
+            border-color: transparent transparent white transparent;
+            filter: drop-shadow(0 -2px 2px rgba(0,0,0,0.1));
+        }
+
+        /* 닫기 버튼 */
+        .tooltip-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            color: #666;
+        }
+
+        /* RSVD 버튼 */
+        .tooltip-rsvd {
+            padding: 4px 12px;  /* 8px 16px에서 축소 */
+            background-color: rgb(0, 102, 255);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            height: 24px;  /* 버튼 높이 명시적 지정 */
+        }
+
+        /* 입력 폼 스타일 */
+        .tooltip-form {
+            margin-bottom: 40px;  /* RSVD 버튼을 위한 여백 */
+        }
+
+        .tooltip-form input {
+            width: calc(100% - 16px);  /* padding 고려한 너비 */
+            padding: 6px 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .tooltip-form label {
+            font-size: 12px;
+            color: #000;  /* 회색에서 검정색으로 변경 */
+            display: block;
+            margin-top: 8px;
+        }
+
+        /* CSS 추가 - 위쪽 표시일 때의 화살표 스타일 */
+        .tooltip-above:before {
+            content: '';
+            position: absolute;
+            bottom: -10px;  /* top 대신 bottom으로 변경 */
+            left: 20px;
+            border-width: 10px 10px 0 10px;  /* 화살표 방향 반대로 */
+            border-style: solid;
+            border-color: white transparent transparent transparent;  /* 색상 순서 변경 */
+            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
+        }
+
+        /* 드롭다운 placeholder 색상 */
+        .date-select-group select {
+            color: rgb(110, 110, 124);  /* 기본 텍스트 색상을 회색으로 */
+        }
+
+        .date-select-group select option {
+            color: black;  /* 실제 옵션들은 검정색으로 */
+        }
+
+        /* 입력 폼 간격 수정 */
+        .tooltip-form label {
+            font-size: 12px;
+            color: #000;
+            display: block;
+            margin-top: 0;  /* 라벨 상단 여백 제거 */
+        }
+
+        .tooltip-form input,
+        .date-select-group {
+            margin-bottom: 20px;  /* 입력 요소 아래 여백 통일 */
+            margin-top: 8px;      /* 라벨과 입력 요소 사이 간격 */
+        }
+
+        .tooltip-form label:first-child {
+            margin-top: 0;  /* 첫 번째 라벨은 상단 여백 제거 */
+        }
+
+        .tooltip-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .selected-date {
+            color: rgb(110, 110, 124);
+            font-size: 12px;
+        }
+
+        /* 팝업 헤더 스타일 */
+        .tooltip-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 15px;
+        }
+
+        .tooltip-date {
+            color: rgb(110, 110, 124);
+            font-size: 16px;
+        }
+
+        /* 닫기 버튼 위치 조정 */
+        .tooltip-close {
+            position: static;  /* absolute 제거 */
+            cursor: pointer;
+            font-size: 18px;
+            color: #666;
+        }
+
+        /* 입력폼 컨테이너에 패딩 추가 */
+        .tooltip-form {
+            padding: 0 15px;
+        }
+
+        /* RSVD 버튼 컨테이너 */
+        .tooltip-footer {
+            padding: 15px;
+            display: flex;
+            justify-content: flex-end;  /* 버튼 우측 정렬 */
+        }

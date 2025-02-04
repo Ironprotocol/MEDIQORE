@@ -1,0 +1,113 @@
+import { auth, db, doc, getDoc } from './firebase-config.js';
+import { CustomCalendar } from './calendar.js';
+
+// 사용자 권한 체크 함수를 별도로 분리
+export async function checkUserPermissions(user) {
+    try {
+        const email = user.email;
+        const [hospitalName, role] = email.split('@')[0].split('.');
+        
+        console.log('Checking permissions for:', email);
+
+        // role이 chemist면 pharmacy 컬렉션에서, 아니면 hospitals 컬렉션에서 확인
+        const collectionName = role === 'chemist' ? 'pharmacy' : 'hospitals';
+
+        // hospitals/병원명/staff/이메일 또는 pharmacy/약국명/staff/이메일 에서 사용자 정보 확인
+        const userRef = doc(db, collectionName, hospitalName, 'staff', email);
+        const userDoc = await getDoc(userRef);
+
+        if (!userDoc.exists()) {
+            throw new Error('User document not found');
+        }
+
+        const userData = userDoc.data();
+        if (userData.status !== 'active') {
+            await auth.signOut();
+            window.location.href = 'main.html';
+            return;
+        }
+
+        // 메뉴 접근 권한 적용
+        const menuItems = document.querySelectorAll('.menu-item');
+        menuItems.forEach(item => {
+            const menuName = item.textContent.trim().toLowerCase();
+
+            // 모든 메뉴 먼저 숨기기
+            item.style.display = 'none';
+
+            // Data 메뉴는 항상 표시
+            if (menuName === 'data') {
+                item.style.display = 'block';
+                return;
+            }
+
+            // 나머지 메뉴는 역할에 따라 표시
+            switch (role) {
+                case 'doctor':
+                    if (menuName !== 'pharmacy') {
+                        item.style.display = 'block';
+                    }
+                    break;
+                case 'desk':
+                    if (menuName === 'desk' || menuName === 'reservation') {
+                        item.style.display = 'block';
+                    }
+                    break;
+                case 'chemist':
+                    if (menuName === 'pharmacy') {
+                        item.style.display = 'block';
+                    }
+                    break;
+            }
+        });
+
+    } catch (error) {
+        console.error('Error checking user permissions:', error.message);
+        throw error;
+    }
+}
+
+// 메뉴 클릭 이벤트 초기화
+export function initializeMenuEvents() {
+    const menuItems = document.querySelectorAll('.menu-item');
+    const contentContainers = document.querySelectorAll('.content-container, .content-container-2');
+
+    menuItems.forEach(item => {
+        item.addEventListener('click', async function() {
+            menuItems.forEach(i => i.classList.remove('active'));
+            this.classList.add('active');
+
+            contentContainers.forEach(container => {
+                container.style.display = 'none';
+            });
+
+            const menuText = this.textContent.trim().toLowerCase();
+            
+            // 각 메뉴별 컨테이너 ID 매핑
+            const menuToContainer = {
+                'prescription': 'prescription-content',
+                'reservation': 'reservation-content',
+                'pharmacy': 'pharmacy-content',
+                'desk': ['desk-content', 'desk-content-right']
+            };
+            
+            const contentIds = menuToContainer[menuText];
+            if (Array.isArray(contentIds)) {  // desk 메뉴인 경우
+                contentIds.forEach(id => {
+                    document.getElementById(id).style.display = 'block';
+                });
+                return;
+            } else {  // 다른 메뉴들
+                const content = document.getElementById(contentIds);
+                if (content) {
+                    content.style.display = 'block';
+                    
+                    // Reservation 메뉴 클릭 시 달력 초기화
+                    if (menuText === 'reservation') {
+                        new CustomCalendar();
+                    }
+                }
+            }
+        });
+    });
+}

@@ -1,0 +1,128 @@
+      
+        /* sidebar1: 좌측 메뉴바 컨테이너 */
+        /*========================================================여기부터 사이드바1에 속하는 요소들들=========================================================*/
+        .sidebar1 {
+            width: 200px;
+            height: 100vh;
+            background-color: white;
+            border-right: 1px solid hsl(0, 0%, 85%);
+            position: relative;
+            display: flex;        
+            flex-direction: column; /* 세로 방향 정렬 */
+        }
+
+     
+        /*-------------------------로고를 담아두는 컨테이너-------------------- */
+      .logo-container {
+        padding: 10px 20px;
+        display: flex;
+        align-items: center;
+        gap: 5px; 
+        margin-top: 5px;
+        line-height: 1;
+        cursor: pointer
+        }
+
+
+        /*------------로고 이미지 스타일일-------------*/
+        .logo-image {
+            width: 30px;    
+            height: 30px;  
+            object-fit: contain;
+            display: block;  /* 이미지 하단의 여백 제거 */
+        }
+
+        /*------------로고 텍스트트 스타일일-------------*/
+        .logo-text {
+            font-weight: 700;
+            font-size: 16px;
+            color: rgb(0, 102, 255);
+            display: block;  /* 텍스트 정확한 정렬을 위해 */
+        }
+
+        /*-------------------------메뉴를를 담아두는 컨테이너-------------------- */
+        .menu-container {
+            padding-top: 10px;  /* 상단 패딩 더 줄임 */
+            flex-grow: 0;
+        }
+
+        /*------------메뉴마다 적용되는 스타일-------------*/
+        .menu-item {
+            display: none;
+            padding: 15px 20px 15px 45px;  /* 왼쪽 패딩 조정 */
+            margin: 0 10px;
+            margin-bottom: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            font-size: 14px;
+            color: rgb(110, 110, 124);
+            position: relative;  /* 아이콘 위치 기준점 */
+        }
+
+        /*---------메뉴마다 적용되는 아이콘 스타일----------*/
+        .menu-icon {
+            position: absolute;
+            left: 15px;  /* 왼쪽 여백 */
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;  /* 아이콘 크기 */
+            height: 20px;
+            transition: opacity 0.3s ease;
+        }
+        /*---------기본 아이콘 스타일(회색 상태)----------*/
+        .menu-icon-default {
+            opacity: 1;
+        }
+        /*---------활성 아이콘 스타일(파랑 상태)----------*/
+        .menu-icon-active {
+            opacity: 0;
+        }
+
+        /*---------기본 메뉴 텍스트 (회색 상태)----------*/
+        .menu-item:hover .menu-icon-default,
+        .menu-item.active .menu-icon-default {
+            opacity: 0;
+        }
+        /*---------활성 메뉴 텍스트 (파랑 상태)----------*/
+        .menu-item:hover .menu-icon-active,
+        .menu-item.active .menu-icon-active {
+            opacity: 1;
+        }
+
+        /*------------메뉴 항목 호버 시 스타일 ----------*/
+        .menu-item:hover {
+            background-color: #dcf3fc;
+            border-radius: 8px;
+            color: rgb(0, 102, 255); 
+        }
+
+        /*------------메뉴 항목 활성화 시 스타일 ----------*/
+        .menu-item.active {
+            background-color: #dcf3fc;
+            border-radius: 8px;
+            color: rgb(0, 102, 255);  /* 선택 시 파란색으로 변경 */
+        }
+
+        /* version-container: 버전 정보를 감싸는 컨테이너 */
+        .version-container {
+            margin-top: auto;     /* 상단 여백을 자동으로 설정하여 하단에 고정 */
+            padding-bottom: 10px; /* 하단 여백 */
+        }
+
+        /* divider: 버전 정보 위 구분선 */
+        .divider {
+            width: 100%;
+            height: 1px;
+            background-color: hsl(0, 0%, 85%);
+            margin-bottom: 10px; 
+        }
+
+        /* version-info: 하단 버전 정보 텍스트 */
+        .version-info {
+            padding-left: 20px;
+            font-size: 15px;
+            color: #888888;
+        }
+        /*========================================================여기까지 사이드바1에 속하는 요소들들=========================================================*/
+

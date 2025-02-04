@@ -1,0 +1,360 @@
+       /* ================================================메인컨텐츠 영역, Desk , Patient register 영역======================================*/
+        /* Register 버튼 스타일 */
+        .register-btn {
+            padding: 8px 16px;
+            background-color: rgb(0, 102, 255);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .register-btn:hover {
+            background-color: rgb(0, 82, 204);
+        }
+
+        /* Patient Registration 텍스트 스타일 */
+        .content-title {
+            font-size: 15px;
+            color: #333;
+            font-weight: bold;
+        }
+
+
+        /* Patient Registration Form Styles */
+        .patient-registration-form {
+            display: flex;
+            flex-wrap: wrap;
+            width: 100%;
+            box-sizing: border-box;
+            align-items: flex-start;
+        }
+
+        .patient-registration-form h2 {
+            position: relative;
+            margin: 0;
+            width: 100%;
+            font-size: 15px;
+        }
+
+        /* 가로선 스타일 */
+        .patient-registration-form::after {
+            content: '';
+            position: absolute;
+            top: 50px;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background-color: hsl(0, 0%, 85%);
+        }
+
+        /* 입력 폼 컨테이너 스타일 수정 */
+        .form-container {
+            display: flex;
+            margin-top: 5px;  /* 가로선과의 여백 제거 */
+            height: calc(100% - 51px);  /* 전체 높이에서 제목+가로선 높이 제외 */
+            width: 100%;
+
+        }
+
+        /* 각 섹션 컨테이너 스타일 수정 */
+        .section-box {
+            flex: 1;
+            background-color: white;
+            height: 100%;
+            padding: 0 20px;
+
+        }
+
+
+        /* 첫 번째 섹션의 왼쪽 아래 모서리 */
+        .section-box:first-child {
+            border-bottom-left-radius: 8px;  /* 컨텐츠 박스와 동일한 둥근 정도 */
+        }
+
+        /* 마지막 섹션의 오른쪽 아래 모서리 */
+        .section-box:last-child {
+            border-bottom-right-radius: 8px;  /* 컨텐츠 박스와 동일한 둥근 정도 */
+        }
+
+        /* 첫 번째와 두 번째 섹션의 오른쪽 테두리 */
+        .form-section-container:not(:last-child) {
+            border-right: 1px solid hsl(0, 0%, 85%);
+        }
+
+        .form-section h3 {
+            margin: 0 0 15px 0;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            color: #495057;
+            font-weight: bold;  /* 라벨 텍스트 볼드 처리 */
+        }
+
+        /* 입력 필드와 드롭박스 공통 스타일 수정 */
+        .form-group input[type="text"],
+        .form-group input[type="date"],
+        .form-group input[type="tel"],
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 12px;
+            box-sizing: border-box;
+            height: 28px;
+            color: rgb(110, 110, 124);  /* 회색톤으로 변경 */
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            margin: 0;
+            width: 16px;
+            height: 16px;
+        }
+
+        .checkbox-group label {
+            font-weight: normal;
+        }
+
+        /* 필수 입력 필드 표시 */
+        .form-group label[for]::after {
+            color: #dc3545;
+        }
+
+        /* date input 스타일 추가 */
+        input[type="date"] {
+            position: relative;
+            min-height: 40px;
+            padding: 10px;
+        }
+
+        /* date input의 placeholder 스타일 */
+        input[type="date"]::before {
+            content: attr(placeholder);
+            position: absolute;
+            color: #999;
+        }
+
+        input[type="date"]:focus::before,
+        input[type="date"]:valid::before {
+            display: none;
+        }
+
+        /* 날짜 선택 그룹 스타일 */
+        .date-select-group {
+            display: flex;
+            gap: 5px;
+            width: calc(100% - 16px);  /* padding 고려한 너비 */
+            margin: 5px 0;
+        }
+
+        .date-select-group select {
+            flex: 1;
+            padding: 4px 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            height: 28px;
+        }
+
+        .address-select-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .address-input {
+            width: 40%;  /* 첫 번째 입력창 너비 */
+            position: relative;
+        }
+
+        .search-results {
+            width: 100%;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            background: white;
+            margin-top: 5px;
+        }
+
+        .search-results option {
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        .search-results option:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Doctor Selection 스타일 */
+        #doctorSelect option {
+            padding: 8px;
+            display: none;
+        }
+
+        /* 주소 검색 결과 스타일 */
+        .address-results {
+            position: absolute;
+            left: 0;
+            width: 135px;  /* district input과 같은 너비 */
+            top: 100%;
+            background: white;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-height: 200px;
+            overflow-y: auto;
+            display : none;
+        }
+
+        .address-results div {
+            padding: 8px 4px;
+            cursor: pointer;
+            font-size: 12px;
+            color: rgb(110, 110, 124);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 135px;
+        }
+
+        .address-results div:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* 주소 상세 정보 스타일 */
+        .address-details {
+            display: flex;
+            gap: 10px;
+            position: relative;  /* 추가: 드롭다운의 기준점 */
+        }
+
+        .address-details select {
+            width: 30%;  /* 나머지 두 선택창의 너비 */
+        }
+
+        /* 드롭박스 옵션 스타일 */
+        .form-group select option {
+            color: rgb(110, 110, 124);  /* 드롭박스 옵션도 동일한 회색톤 적용 */
+        }
+
+        .doctor-select-container {
+            position: relative;
+        }
+
+        .doctor-dropdown {
+            width: 170px;  /* 200px에서 30px 줄임 */
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .doctor-dropdown-selected {
+            padding: 6px 8px;
+            font-size: 12px;
+            color: rgb(110, 110, 124);
+        }
+
+        .doctor-dropdown-options {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 170px;  /* dropdown-options도 같이 수정 */
+            background: white;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display : none;
+        }
+
+        .doctor-option {
+            padding: 6px 8px;
+            font-size: 12px;
+            color: rgb(110, 110, 124);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            box-sizing: border-box;
+            cursor: pointer;
+        }
+
+        /* hover 효과 (disabled 클래스가 없는 경우에만 적용) */
+        .doctor-option:not(.disabled):hover {
+            background-color: #f8f9fa;
+        }
+
+        /* logout 상태인 의사 스타일 */
+        .doctor-option.disabled {
+            color: rgb(180, 180, 180);  /* 더 옅은 회색 */
+            cursor: not-allowed;  /* 클릭 불가능한 커서 스타일 */
+            pointer-events: none;  /* 클릭 이벤트 비활성화 */
+        }
+
+        .registration-doctor-dropdown {
+            position: relative;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .registration-doctor-selected {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: white;
+        }
+
+        .registration-doctor-options {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            z-index: 1000;
+        }
+
+        .registration-doctor-options .doctor-option {
+            padding: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .registration-doctor-options .doctor-option:hover {
+            background-color: #f5f5f5;
+        }
+
+        .registration-doctor-options .doctor-option.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }

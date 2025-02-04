@@ -1,0 +1,18 @@
+{
+    "workbench.colorCustomizations": {
+
+    },
+    "editor.tokenColorCustomizations": {
+        "comments": "#00ff4c",  // 주석 색상을 초록색으로 변경
+        "textMateRules": [
+            {
+                "scope": "comment",
+                "settings": {
+                    "fontStyle": "",  // 기울임체 제거
+                    "foreground": "#00ff37"  // 주석 색상
+                }
+            }
+        ]
+    },
+    "terminal.integrated.gpuAcceleration": "on"
+}

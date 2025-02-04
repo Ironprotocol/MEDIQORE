@@ -1,0 +1,110 @@
+  /* desk-content 전용 스타일 */
+  #desk-content {
+    width: calc(49%);
+}
+
+#desk-content-right {
+    position: absolute;
+    width: calc(49%);
+
+}
+
+.current-date {
+    margin-left: 15px;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.content-header {
+    height: 50px;
+    border-bottom: 1px solid hsl(0, 0%, 85%);
+    border-radius: 8px 8px 0 0;
+}
+
+.content-body {
+    height: calc(100% - 100px);  /* 전체 높이에서 헤더와 푸터 높이를 뺌 */
+    overflow-y: auto;  /* 내용이 많을 경우 스크롤 */
+}
+
+.content-footer {
+    height: 50px;
+    border-top: 1px solid hsl(0, 0%, 85%);
+    border-radius: 0 0 8px 8px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: white;
+}
+
+/* 환자 정보 카드 스타일 */
+.patient-info-container {
+    width: calc 80%;  /* margin과 padding을 모두 고려한 너비 계산 */
+    margin: 10px;
+    padding: 10px;
+    border: 1px solid hsl(0, 0%, 85%);
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+}
+
+/* 기본 span 스타일 - flex 유지 */
+.patient-info-container span {
+    text-align: center;
+    padding: 0 10px;
+    color: rgb(110, 110, 124);
+    font-size: 12px;
+}
+
+/* 환자 ID/이름 span - 고정 너비 */
+.patient-info-container .patient-id-span {
+    display: inline-block;
+    width: 160px;              /* 18자를 수용할 수 있는 너비로 수정 */
+    text-align: left;          /* 왼쪽 정렬 */
+    white-space: nowrap;       /* 줄바꿈 방지 */
+    overflow: hidden;          /* 넘치는 텍스트 숨김 */
+    text-overflow: ellipsis;   /* 말줄임표 처리 */
+}
+
+/* 나이 span - 고정 너비 */
+.patient-info-container .age-span {
+    display: inline-block;
+    width: 70px;               /* "58years" 길이를 수용할 수 있는 너비 */
+    text-align: left;          /* 왼쪽 정렬 */
+    white-space: nowrap;       /* 줄바꿈 방지 */
+}
+
+/* 증상 span - 고정 너비 */
+.patient-info-container .complaint-span {
+    display: inline-block;
+    width: 100px;              /* "swollen_gums" 길이를 수용할 수 있는 너비 */
+    text-align: left;          /* 왼쪽 정렬 */
+    white-space: nowrap;       /* 줄바꿈 방지 */
+    overflow: hidden;          /* 넘치는 텍스트 숨김 */
+    text-overflow: ellipsis;   /* 말줄임표 처리 */
+}
+
+/* progress 이미지 span 스타일 */
+.patient-info-container .progress-span {
+    flex: none;  /* flex 해제 */
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;  /* 오른쪽 정렬 */
+    width: 81px;  /* 이미지 너비만큼 */
+    margin-left: auto;  /* C와 D 사이 간격 확보 */
+    margin-right: 0;    /* E와의 간격 최소화 */
+}
+
+/* 의사 선택 드롭다운 span 스타일 */
+.patient-info-container .doctor-dropdown-span {
+    flex: none;  /* flex 해제 */
+    width: 170px;  /* 드롭다운 너비 */
+}
+
+/* 로그아웃 상태인 의사 이름 스타일 */
+.doctor-option.disabled span,
+.doctor-option span.disabled {
+    color: rgb(180, 180, 180);  /* 회색 */
+}
