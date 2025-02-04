@@ -33,6 +33,12 @@ A web-based medical information management system for healthcare providers.
     6. calendar view button style added
     7. reservation contents box style added
     
+2025-01-31 ~ 2025-02-03
+    1. complete 50%
+
+2025-02-04
+    1. first time that divide JS, CSS code in HTML
+
 
 ## Current Version
 v.0.01 test 
