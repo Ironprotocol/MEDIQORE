@@ -36,7 +36,7 @@
         import {initializeRoomManagement, handleRoomLogout} from './js/room.js';
         import {initializeSubmenuEvents, initializeSubmenuItemEvents } from './js/sidebar2.js';
         import {CustomCalendar} from './js/calendar.js';
-        import {handleComplaintChange, initializeNewPatientButton, loadDoctors, initializeDoctorDropdown, initializeAddressSearch, initializeInsuranceForm, initializeRegistrationForm} from './js/patient-registration.js';
+        import {handleComplaintChange, initializeNewPatientButton, loadDoctors, initializeAddressSearch, initializeInsuranceForm, initializeRegistrationForm} from './js/patient-registration.js';
         import { initializeUserName } from './js/topbar.js';
 
 
@@ -149,9 +149,6 @@
                 }
                  // 우측 상단 사용자 이름 표기기
                  initializeUserName();
-
-                 // 의사 드롭다운 이벤트 초기화
-                  initializeDoctorDropdown();
 
             // 환자 등록 - patient registration
             initializeAddressSearch();
@@ -426,14 +423,9 @@
                         <div class="form-group">
                             <label for="doctorSelect">Select Doctor</label>
                             <div class="doctor-select-container">
-                                <select id="registration-doctor-select" name="doctorSelect">
+                                <select id="doctorselect" name="doctorSelect">
                                     <option value="">Choose a doctor</option>
                                 </select>
-                                <!-- 커스텀 드롭다운 -->
-                                <div class="registration-doctor-dropdown">
-                                    <div class="registration-doctor-selected">Choose a doctor</div>
-                                    <div class="registration-doctor-options"></div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -459,12 +451,10 @@
 
             <!-- 중간 컨테이너 -->
             <div class="content-body">
-                <!-- 여기에 주요 내용이 들어갈 예정 -->
             </div>
 
             <!-- 하단 컨테이너 -->
             <div class="content-footer">
-                <!-- 여기에 하단 내용이 들어갈 예정 -->
             </div>
         </div>
 

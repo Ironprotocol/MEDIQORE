@@ -1,13 +1,18 @@
-import { db, doc, getDoc, collection, query, where, getDocs, updateDoc, orderBy, onSnapshot } from './firebase-config.js';
- 
+import {  auth, db, collection, query, where, getDocs, 
+    doc, getDoc, setDoc, serverTimestamp, Timestamp,
+    onSnapshot, orderBy, updateDoc } from './firebase-config.js';
 
+// 전역 이벤트 리스너 등록 (한 번만)
+window.addEventListener('click', () => {
+    document.querySelectorAll('.doctor-options').forEach(options => {
+        options.style.display = 'none';
+    });
+});
 
 export async function initializePatientList(hospitalName, currentDate){
 // 3. waiting 컬렉션 참조
 const waitingRef = collection(db, 'hospitals', hospitalName, 'dates', currentDate, 'waiting');
-              
-             
-              
+                     
 // timestamp로 정렬하는 쿼리 추가
 const q = query(waitingRef, orderBy('timestamp', 'asc'));  // 시간 오름차순 정렬
 
@@ -66,10 +71,10 @@ const q = query(waitingRef, orderBy('timestamp', 'asc'));  // 시간 오름차�
                             <option value="">Choose a doctor</option>
                         </select>
                         <div class="doctor-dropdown">
-                            <div class="doctor-dropdown-selected" style="color: ${patientData.doctor ? '#000000' : 'rgb(110, 110, 124)'}">
+                            <div class="doctor-selected" style="color: ${patientData.doctor ? '#000000' : 'rgb(110, 110, 124)'}">
                                 ${patientData.doctor || 'Choose a doctor'}
                             </div>
-                            <div class="doctor-dropdown-options" style="display: none;"></div>
+                            <div class="doctor-options" style="display: none;"></div>
                         </div>
                     </div>
                 </span>
@@ -79,8 +84,8 @@ const q = query(waitingRef, orderBy('timestamp', 'asc'));  // 시간 오름차�
             const doctorContainer = patientElement.querySelector('.doctor-select-container');
             const doctorSelect = doctorContainer.querySelector('.doctor-select');
             const doctorDropdown = doctorContainer.querySelector('.doctor-dropdown');
-            const doctorSelected = doctorContainer.querySelector('.doctor-dropdown-selected');
-            const doctorOptions = doctorContainer.querySelector('.doctor-dropdown-options');
+            const doctorSelected = doctorContainer.querySelector('.doctor-selected');
+            const doctorOptions = doctorContainer.querySelector('.doctor-options');
 
             // 의사 목록 로드
             const staffRef = collection(db, 'hospitals', hospitalName, 'staff');
@@ -111,7 +116,7 @@ const q = query(waitingRef, orderBy('timestamp', 'asc'));  // 시간 오름차�
                 e.stopPropagation(); // 이벤트 버블링 방지
                 
               // 다른 열린 드롭다운 모두 닫기
-              document.querySelectorAll('.doctor-dropdown-options').forEach(dropdown => {
+              document.querySelectorAll('.doctor-options').forEach(dropdown => {
                     if (dropdown !== doctorOptions) {
                         dropdown.style.display = 'none';
                     }
@@ -149,11 +154,6 @@ const q = query(waitingRef, orderBy('timestamp', 'asc'));  // 시간 오름차�
 
                 // 드롭다운 표시/숨김 토글
                 doctorOptions.style.display = doctorOptions.style.display === 'none' ? 'block' : 'none';
-            });
-
-            // 외부 클릭 시 드롭다운 닫기
-            window.addEventListener('click', () => {
-                doctorOptions.style.display = 'none';
             });
 
             // 드롭다운 옵션 클릭 이벤트

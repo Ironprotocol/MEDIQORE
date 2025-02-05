@@ -22,8 +22,8 @@ export async function loadDoctors() {
         const querySnapshot = await getDocs(q);
 
         // registration 페이지의 드롭다운 요소들
-        const doctorSelect = document.getElementById('registration-doctor-select');
-        const optionsContainer = document.querySelector('.registration-doctor-options');
+        const doctorSelect = document.getElementById('doctorselect');
+        const optionsContainer = document.querySelector('.doctor-options');
         
         // 기존 옵션 제거
         while (doctorSelect.options.length > 1) {
@@ -87,79 +87,8 @@ export async function loadDoctors() {
     }
 }
 
-// New Patient 버튼 클릭 이벤트 초기화
-export function initializeNewPatientButton() {
-    document.querySelector('.new-patient-btn').addEventListener('click', function() {
-        const menuItems = document.querySelectorAll('.menu-item');
-        const contentContainers = document.querySelectorAll('.content-container, .content-container-2');
-        
-        // 모든 메뉴 아이템의 active 클래스 제거
-        menuItems.forEach(item => {
-            item.classList.remove('active');
-        });
 
-        contentContainers.forEach(container => {
-            container.style.display = 'none';
-        });
 
-        const content = document.getElementById('patient-registration-content');
-        if (content) {
-            content.style.display = 'block';
-            loadDoctors();
-            
-            // Primary Complaint 이벤트 리스너 설정
-            const primaryComplaint = document.getElementById('primaryComplaint');
-            const otherComplaintContainer = document.getElementById('otherComplaintContainer');
-            if (primaryComplaint && otherComplaintContainer) {
-                primaryComplaint.removeEventListener('change', handleComplaintChange);
-                primaryComplaint.addEventListener('change', handleComplaintChange);
-            }
-        }
-    });
-}
-
-// 의사 드롭다운 이벤트 초기화
-export function initializeDoctorDropdown() {
-    const dropdown = document.querySelector('.registration-doctor-dropdown');
-    const selected = dropdown.querySelector('.registration-doctor-selected');
-    const options = dropdown.querySelector('.registration-doctor-options');
-
-    // 드롭다운 토글 이벤트
-    selected.addEventListener('click', function(e) {
-        options.style.display = options.style.display === 'none' ? 'block' : 'none';
-        if (options.style.display === 'block') {
-            loadDoctors();
-        }
-        e.stopPropagation();
-    });
-
-    // 옵션 선택 이벤트
-    options.addEventListener('click', function(e) {
-        const option = e.target.closest('.doctor-option');
-        if (option && !option.classList.contains('disabled')) {
-            const value = option.dataset.value;
-            const text = option.querySelector('span').textContent;
-            
-            // 숨겨진 select 업데이트
-            const select = document.getElementById('registration-doctor-select');
-            select.value = value;
-            
-            // 선택된 텍스트 업데이트
-            selected.textContent = text;
-            
-            // 드롭다운 닫기
-            options.style.display = 'none';
-            e.stopPropagation();
-        }
-    });
-
-    // 외부 클릭 시 드롭다운 닫기
-    document.addEventListener('click', function(e) {
-        if (!dropdown.contains(e.target)) {
-            options.style.display = 'none';
-        }
-    });
-}
 
 // 남아공 지역 데이터
 const southAfricaLocations = [
@@ -315,7 +244,7 @@ export function initializeRegistrationForm() {
             }
 
             // 의사 선택은 선택사항으로 처리
-            const doctorId = document.getElementById('registration-doctor-select').value;
+            const doctorId = document.getElementById('doctorselect').value;
             let doctorName = '';
             
             if (doctorId) {
@@ -437,8 +366,8 @@ export function initializeRegistrationForm() {
             document.getElementById('city').value = '';
             document.getElementById('state').value = '';
             document.getElementById('primaryComplaint').value = '';
-            document.getElementById('registration-doctor-select').value = '';
-            document.querySelector('.registration-doctor-selected').textContent = 'Choose a doctor';
+            document.getElementById('doctorselect').value = '';
+            document.querySelector('.doctor-selected').textContent = 'Choose a doctor';
             document.querySelectorAll('input[name="insuranceStatus"]').forEach(radio => radio.checked = false);
             document.getElementById('insuranceProvider').value = '';
             document.getElementById('insuranceNumber').value = '';
@@ -457,6 +386,38 @@ export function initializeRegistrationForm() {
         } catch (error) {
             console.error('Error registering patient:', error);
             alert('Failed to register patient: ' + error.message);
+        }
+    });
+}
+
+
+// New Patient 버튼 클릭 이벤트 초기화
+export function initializeNewPatientButton() {
+    document.querySelector('.new-patient-btn').addEventListener('click', function() {
+        const menuItems = document.querySelectorAll('.menu-item');
+        const contentContainers = document.querySelectorAll('.content-container, .content-container-2');
+        
+        // 모든 메뉴 아이템의 active 클래스 제거
+        menuItems.forEach(item => {
+            item.classList.remove('active');
+        });
+
+        contentContainers.forEach(container => {
+            container.style.display = 'none';
+        });
+
+        const content = document.getElementById('patient-registration-content');
+        if (content) {
+            content.style.display = 'block';
+            loadDoctors();
+            
+            // Primary Complaint 이벤트 리스너 설정
+            const primaryComplaint = document.getElementById('primaryComplaint');
+            const otherComplaintContainer = document.getElementById('otherComplaintContainer');
+            if (primaryComplaint && otherComplaintContainer) {
+                primaryComplaint.removeEventListener('change', handleComplaintChange);
+                primaryComplaint.addEventListener('change', handleComplaintChange);
+            }
         }
     });
 }

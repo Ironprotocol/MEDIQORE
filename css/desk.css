@@ -106,5 +106,6 @@
 /* 로그아웃 상태인 의사 이름 스타일 */
 .doctor-option.disabled span,
 .doctor-option span.disabled {
+    cursor: not-allowed;
     color: rgb(180, 180, 180);  /* 회색 */
 }

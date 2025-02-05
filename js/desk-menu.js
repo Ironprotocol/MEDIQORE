@@ -8,19 +8,24 @@ export async function checkUserPermissions(user) {
         const [hospitalName, role] = email.split('@')[0].split('.');
         
         console.log('Checking permissions for:', email);
+        console.log('Hospital:', hospitalName);
+        console.log('Role:', role);
 
         // role이 chemist면 pharmacy 컬렉션에서, 아니면 hospitals 컬렉션에서 확인
         const collectionName = role === 'chemist' ? 'pharmacy' : 'hospitals';
+        console.log('Collection:', collectionName);
 
         // hospitals/병원명/staff/이메일 또는 pharmacy/약국명/staff/이메일 에서 사용자 정보 확인
         const userRef = doc(db, collectionName, hospitalName, 'staff', email);
         const userDoc = await getDoc(userRef);
 
         if (!userDoc.exists()) {
+            console.log('User document not found for:', email);
             throw new Error('User document not found');
         }
 
         const userData = userDoc.data();
+        console.log('User data:', userData);
         if (userData.status !== 'active') {
             await auth.signOut();
             window.location.href = 'main.html';
