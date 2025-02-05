@@ -30,14 +30,13 @@
     </style>
     <script type="module">
         import {app, auth, db, doc, getDoc, setDoc, collection, query, where, getDocs, updateDoc,  serverTimestamp, Timestamp,onSnapshot,orderBy } from './js/firebase-config.js';
-        import {setupCloseButtons, setupLogoLogout, initializeStatusSelector, initializeZoomPrevention} from './js/common.js';
+        import {setupCloseButtons, setupLogoLogout, initializeStatusSelector, initializeZoomPrevention,displayUserName,initializeUserName} from './js/common.js';
         import {checkUserPermissions, initializeMenuEvents} from './js/desk-menu.js';
         import {initializePatientList} from './js/patient-list.js';
         import {initializeRoomManagement, handleRoomLogout} from './js/room.js';
         import {initializeSubmenuEvents, initializeSubmenuItemEvents } from './js/sidebar2.js';
         import {CustomCalendar} from './js/calendar.js';
         import {handleComplaintChange, initializeNewPatientButton, loadDoctors, initializeAddressSearch, initializeInsuranceForm, initializeRegistrationForm} from './js/patient-registration.js';
-        import { initializeUserName } from './js/topbar.js';
 
 
      document.addEventListener('DOMContentLoaded', function() {
@@ -64,7 +63,7 @@
               return;
           } //회원 아니면 돌려보냄
          
-
+          initializeNewPatientButton(); // New Patient 버튼 클릭 시 - 이벤트 초기화
 
           try {
               //자격 확인 후 Desk 메뉴 노출도 조절
@@ -72,6 +71,47 @@
                     const hospitalName = user.email.split('@')[0].split('.')[0]; //hospitalName 추출
                     const currentDate = document.querySelector('.current-date').textContent; //현재 날짜 가져오기
               
+                // 1. 먼저 UI 요소 생성
+                const actionButtons = document.querySelector('.action-buttons');
+                if (actionButtons) {
+                    actionButtons.innerHTML = `
+                        <button class="action-button">
+                            <div class="action-button-placeholder" title="채팅"></div>
+                        </button>
+                        <button class="action-button">
+                            <div class="action-button-placeholder" title="알림"></div>
+                        </button>
+                        <span class="user-name"></span>
+                        <div class="status-selector">
+                            <div class="current-status">
+                                <img src="${statusIcons.login}" alt="Status" class="status-icon">
+                            </div>
+                            <div class="status-dropdown">
+                                <div class="status-option" data-status="login">
+                                    <img src="${statusIcons.login}" alt="Login" class="status-icon">
+                                    <span>Login</span>
+                                </div>
+                                <div class="status-option" data-status="start">
+                                    <img src="${statusIcons.start}" alt="Start Work" class="status-icon">
+                                    <span>Start</span>
+                                </div>
+                                <div class="status-option" data-status="end">
+                                    <img src="${statusIcons.end}" alt="End Work" class="status-icon">
+                                    <span>End</span>
+                                </div>
+                                <div class="status-option" data-status="break">
+                                    <img src="${statusIcons.break}" alt="Break" class="status-icon">
+                                    <span>Break</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // 2. 그 다음 이벤트 리스너 등록
+                initializeStatusSelector();
+                initializeUserName();
+
               //patient list 관리 (auth-patient-list)
               await initializePatientList(hospitalName, currentDate); 
 
@@ -91,6 +131,8 @@
                      }
 
                     initializeSubmenuItemEvents(); // sidebar2 - submenu 클릭 이벤트 처리
+                                
+                    
       });
 //============================================== Sidebar1, Sidebar2, Patient List===============================================
         
@@ -109,47 +151,6 @@
             break: 'image/break.png'
         };
 
-            // 4. 상태 표시 UI 업데이트
-            const actionButtons = document.querySelector('.action-buttons');
-            if (actionButtons) {
-                actionButtons.innerHTML = `
-                    <button class="action-button">
-                        <div class="action-button-placeholder" title="채팅"></div>
-                    </button>
-                    <button class="action-button">
-                        <div class="action-button-placeholder" title="알림"></div>
-                    </button>
-                    <span class="user-name"></span>
-                    <div class="status-selector">
-                        <div class="current-status">
-                            <img src="${statusIcons.login}" alt="Status" class="status-icon">
-                        </div>
-                        <div class="status-dropdown">
-                            <div class="status-option" data-status="login">
-                                <img src="${statusIcons.login}" alt="Login" class="status-icon">
-                                <span>Login</span>
-                            </div>
-                            <div class="status-option" data-status="start">
-                                <img src="${statusIcons.start}" alt="Start Work" class="status-icon">
-                                <span>Start</span>
-                            </div>
-                            <div class="status-option" data-status="end">
-                                <img src="${statusIcons.end}" alt="End Work" class="status-icon">
-                                <span>End</span>
-                            </div>
-                            <div class="status-option" data-status="break">
-                                <img src="${statusIcons.break}" alt="Break" class="status-icon">
-                                <span>Break</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                // 의사 상태 선택기 설정
-                initializeStatusSelector();
-                }
-                 // 우측 상단 사용자 이름 표기기
-                 initializeUserName();
-
             // 환자 등록 - patient registration
             initializeAddressSearch();
             initializeInsuranceForm();
@@ -158,8 +159,7 @@
             // 메뉴 클릭 시 - sidebar1 메뉴 항목 조정
             initializeMenuEvents();
 
-            // New Patient 버튼 클릭 시 - 이벤트 초기화
-            initializeNewPatientButton();
+
 
             function updateDate() {
                 const today = new Date();
@@ -422,10 +422,14 @@
                         <h3>Doctor Assignment</h3>
                         <div class="form-group">
                             <label for="doctorSelect">Select Doctor</label>
-                            <div class="doctor-select-container">
-                                <select id="doctorselect" name="doctorSelect">
+                            <div class="registration-doctor-select-container">
+                                <select id="doctorselect" name="doctorSelect" style="display: none;">
                                     <option value="">Choose a doctor</option>
                                 </select>
+                                <div class="registration-doctor-dropdown">
+                                    <div class="registration-doctor-selected">Choose a doctor</div>
+                                    <div class="registration-doctor-options"></div>
+                                </div>
                             </div>
                         </div>
                     </div>

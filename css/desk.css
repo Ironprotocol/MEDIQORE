@@ -103,9 +103,48 @@
     width: 170px;  /* 드롭다운 너비 */
 }
 
-/* 로그아웃 상태인 의사 이름 스타일 */
+/* 드롭다운 옵션 스타일 */
+.doctor-option {
+    padding: 8px 12px;
+    cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* 호버 효과 (disabled 클래스가 없는 경우에만) */
+.doctor-option:not(.disabled):hover {
+    background-color: #f8f9fa;
+}
+
+/* 옵션 내부 컨텐츠 정렬 */
+.doctor-option-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* 의사 이름 스타일 */
+.doctor-option span {
+    color: rgb(110, 110, 124);
+    font-size: 12px;
+    text-align: left;
+}
+
+/* 상태 아이콘 스타일 */
+.doctor-option .status-icon {
+    width: 12px;
+    height: 12px;
+    object-fit: contain;
+    vertical-align: middle;
+}
+
+/* disabled 상태 스타일 */
+.doctor-option.disabled {
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
 .doctor-option.disabled span,
 .doctor-option span.disabled {
-    cursor: not-allowed;
-    color: rgb(180, 180, 180);  /* 회색 */
+    color: rgb(180, 180, 180);
 }

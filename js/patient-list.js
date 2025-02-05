@@ -96,11 +96,13 @@ const q = query(waitingRef, orderBy('timestamp', 'asc'));  // 시간 오름차�
             querySnapshot.forEach(doc => {
                 const doctorData = doc.data();
                 const option = document.createElement('div');
-                option.className = `doctor-option ${doctorData.work === 'logout' ? 'disabled' : ''}`;
+                option.className = `doctor-option${doctorData.work === 'logout' ? ' disabled' : ''}`;
                 option.dataset.value = doc.id;
                 option.innerHTML = `
-                    <span>${doctorData.name}</span>
-                    <img src="image/${doctorData.work}.png" alt="${doctorData.work}" class="status-icon">
+                    <div class="doctor-option-content">
+                        <span class="${doctorData.work === 'logout' ? 'disabled' : ''}">${doctorData.name}</span>
+                        <img src="image/${doctorData.work}.png" alt="${doctorData.work}" class="status-icon">
+                    </div>
                 `;
                 doctorOptions.appendChild(option);
 
@@ -135,7 +137,9 @@ const q = query(waitingRef, orderBy('timestamp', 'asc'));  // 시간 오름차�
                 defaultOption.className = 'doctor-option';
                 defaultOption.dataset.value = '';
                 defaultOption.innerHTML = `
-                    <span>Choose a doctor</span>
+                    <div class="doctor-option-content">
+                        <span>Choose a doctor</span>
+                    </div>
                 `;
                 doctorOptions.appendChild(defaultOption);
                 
@@ -146,8 +150,10 @@ const q = query(waitingRef, orderBy('timestamp', 'asc'));  // 시간 오름차�
                     option.className = `doctor-option${doctorData.work === 'logout' ? ' disabled' : ''}`;
                     option.dataset.value = doc.id;
                     option.innerHTML = `
-                        <span class="${doctorData.work === 'logout' ? 'disabled' : ''}">${doctorData.name}</span>
-                        <img src="image/${doctorData.work}.png" alt="${doctorData.work}" class="status-icon">
+                        <div class="doctor-option-content">
+                            <span class="${doctorData.work === 'logout' ? 'disabled' : ''}">${doctorData.name}</span>
+                            <img src="image/${doctorData.work}.png" alt="${doctorData.work}" class="status-icon">
+                        </div>
                     `;
                     doctorOptions.appendChild(option);
                 });

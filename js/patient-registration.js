@@ -23,13 +23,14 @@ export async function loadDoctors() {
 
         // registration 페이지의 드롭다운 요소들
         const doctorSelect = document.getElementById('doctorselect');
-        const optionsContainer = document.querySelector('.doctor-options');
+        const doctorSelected = document.querySelector('.registration-doctor-selected');
+        const doctorOptions = document.querySelector('.registration-doctor-options');
         
         // 기존 옵션 제거
         while (doctorSelect.options.length > 1) {
             doctorSelect.remove(1);
         }
-        optionsContainer.innerHTML = '';
+        doctorOptions.innerHTML = '';
 
         // 의사 데이터를 배열로 변환하여 정렬
         const doctors = [];
@@ -50,15 +51,24 @@ export async function loadDoctors() {
 
         // 상태와 계정 번호로 정렬
         doctors.sort((a, b) => {
-            // 먼저 상태로 정렬
             const statusDiff = statusPriority[a.work] - statusPriority[b.work];
             if (statusDiff !== 0) return statusDiff;
             
-            // 상태가 같으면 계정 번호로 정렬
             const aNumber = parseInt(a.id.split('.').pop());
             const bNumber = parseInt(b.id.split('.').pop());
             return aNumber - bNumber;
         });
+
+        // 'Choose a doctor' 옵션 먼저 추가
+        const defaultOption = document.createElement('div');
+        defaultOption.className = 'registration-doctor-option';
+        defaultOption.dataset.value = '';
+        defaultOption.innerHTML = `
+            <div class="registration-doctor-option-content">
+                <span>Choose a doctor</span>
+            </div>
+        `;
+        doctorOptions.appendChild(defaultOption);
 
         doctors.forEach((doctorData) => {
             const selectOption = document.createElement('option');
@@ -67,28 +77,48 @@ export async function loadDoctors() {
             doctorSelect.appendChild(selectOption);
 
             const dropdownOption = document.createElement('div');
-            dropdownOption.className = `doctor-option${doctorData.work === 'logout' ? ' disabled' : ''}`;
+            dropdownOption.className = `registration-doctor-option${doctorData.work === 'logout' ? ' disabled' : ''}`;
             dropdownOption.dataset.value = doctorData.id;
-
-            let statusImg = 'logout.png';
-            if (doctorData.work === 'login') statusImg = 'login.png';
-            if (doctorData.work === 'start') statusImg = 'start.png';
-            if (doctorData.work === 'break') statusImg = 'break.png';
-
             dropdownOption.innerHTML = `
-                <span>${doctorData.name}</span>
-                <img src="image/${statusImg}" alt="${doctorData.work}" style="width: 12px; height: 12px;">
+                <div class="registration-doctor-option-content">
+                    <span class="${doctorData.work === 'logout' ? 'disabled' : ''}">${doctorData.name}</span>
+                    <img src="image/${doctorData.work}.png" alt="${doctorData.work}" class="status-icon">
+                </div>
             `;
-
-            optionsContainer.appendChild(dropdownOption);
+            doctorOptions.appendChild(dropdownOption);
         });
+
+        // 드롭다운 토글 이벤트
+        doctorSelected.addEventListener('click', function(e) {
+            e.stopPropagation();
+            doctorOptions.style.display = doctorOptions.style.display === 'none' ? 'block' : 'none';
+        });
+
+        // 옵션 선택 이벤트
+        doctorOptions.addEventListener('click', function(e) {
+            const option = e.target.closest('.registration-doctor-option');
+            if (option && !option.classList.contains('disabled')) {
+                const value = option.dataset.value;
+                const text = value ? option.querySelector('span').textContent : 'Choose a doctor';
+                
+                doctorSelect.value = value;
+                doctorSelected.textContent = text;
+                doctorOptions.style.display = 'none';
+                e.stopPropagation();
+            }
+        });
+
+        // 외부 클릭 시 드롭다운 닫기
+        document.addEventListener('click', function(e) {
+            if (!doctorSelected.contains(e.target)) {
+                doctorOptions.style.display = 'none';
+            }
+        });
+
     } catch (error) {
         console.error('Error loading doctors:', error);
     }
 }
-
-
-
 
 // 남아공 지역 데이터
 const southAfricaLocations = [
@@ -367,7 +397,7 @@ export function initializeRegistrationForm() {
             document.getElementById('state').value = '';
             document.getElementById('primaryComplaint').value = '';
             document.getElementById('doctorselect').value = '';
-            document.querySelector('.doctor-selected').textContent = 'Choose a doctor';
+            document.querySelector('.registration-doctor-selected').textContent = 'Choose a doctor';
             document.querySelectorAll('input[name="insuranceStatus"]').forEach(radio => radio.checked = false);
             document.getElementById('insuranceProvider').value = '';
             document.getElementById('insuranceNumber').value = '';
@@ -389,7 +419,6 @@ export function initializeRegistrationForm() {
         }
     });
 }
-
 
 // New Patient 버튼 클릭 이벤트 초기화
 export function initializeNewPatientButton() {
