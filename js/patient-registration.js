@@ -88,6 +88,9 @@ export async function loadDoctors() {
             doctorOptions.appendChild(dropdownOption);
         });
 
+        // 드롭다운 초기 상태 명시적 설정
+        doctorOptions.style.display = 'none';  //이게 너무나 중요
+
         // 드롭다운 토글 이벤트
         doctorSelected.addEventListener('click', function(e) {
             e.stopPropagation();

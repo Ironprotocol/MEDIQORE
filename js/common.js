@@ -73,6 +73,7 @@ export function initializeStatusSelector() {
     const dropdown = document.querySelector('.status-dropdown');
     
     if (currentStatus && dropdown) {
+        dropdown.style.display = 'none';  // 초기 상태 명시적 설정
         currentStatus.addEventListener('click', (e) => {
             dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
             e.stopPropagation();
@@ -187,7 +188,6 @@ export function initializeZoomPrevention() {
 }
 
    
-//------------------------------------------ 우측 상단에 표시되는 이름 조정 함수----------------------------------------- 
 export async function displayUserName(user) {
     try {
         const [hospitalName] = user.email.split('@')[0].split('.');
