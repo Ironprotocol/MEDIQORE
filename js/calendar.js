@@ -210,3 +210,44 @@ export class CustomCalendar {
     return `${String(day).padStart(2, '0')}.${months[date.getMonth()]}.${date.getFullYear()}`;
     }
     };
+
+// 스케줄러 초기화 함수 export 추가
+export function initializeScheduler() {
+    const timeGrid = document.querySelector('.time-grid');
+    const currentDate = new Date();
+    
+    // 현재 날짜 표시
+    document.querySelector('.scheduler-header .current-date').textContent = 
+        currentDate.toLocaleDateString('ko-KR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        });
+    
+    // 시간대 생성 (06:00 ~ 18:00)
+    for (let hour = 8; hour <= 16; hour++) {
+        // 정시
+        const timeSlot = document.createElement('div');
+        timeSlot.className = 'time-slot';
+        timeSlot.textContent = `${hour.toString().padStart(2, '0')}:00`;
+        
+        const scheduleCell = document.createElement('div');
+        scheduleCell.className = 'schedule-cell';
+        
+        timeGrid.appendChild(timeSlot);
+        timeGrid.appendChild(scheduleCell);
+        
+        // 30분
+        if (hour < 18) {
+            const halfHourSlot = document.createElement('div');
+            halfHourSlot.className = 'time-slot half-hour';
+            halfHourSlot.textContent = `${hour.toString().padStart(2, '0')}:30`;
+            
+            const halfHourCell = document.createElement('div');
+            halfHourCell.className = 'schedule-cell';
+            
+            timeGrid.appendChild(halfHourSlot);
+            timeGrid.appendChild(halfHourCell);
+        }
+    }
+}

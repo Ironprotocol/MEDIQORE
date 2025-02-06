@@ -35,7 +35,7 @@
         import {initializePatientList} from './js/patient-list.js';
         import {initializeRoomManagement, handleRoomLogout} from './js/room.js';
         import {initializeSubmenuEvents, initializeSubmenuItemEvents } from './js/sidebar2.js';
-        import {CustomCalendar} from './js/calendar.js';
+        import {CustomCalendar,initializeScheduler} from './js/calendar.js';
         import {handleComplaintChange, initializeNewPatientButton, loadDoctors, initializeAddressSearch, initializeInsuranceForm, initializeRegistrationForm} from './js/patient-registration.js';
 
         // 전역 함수
@@ -152,7 +152,7 @@
             
             updateDate();               // 페이지 로드 시 날짜 업데이트
             initializeZoomPrevention(); // 확대/축소 방지 기능 초기화
-
+            initializeScheduler();
 
 
     </script>
@@ -457,7 +457,6 @@
                 <button class="close-button">Close</button>
             </div>
             <div class="reservation-form">
-                <!-- 여기에 예약 폼 내용이 들어갈 예정 -->
                 <div class="custom-calendar">
                     <div class="calendar-header">
                         <div class="calendar-nav">
@@ -476,6 +475,15 @@
                         <div class="weekday">Thu</div>
                         <div class="weekday">Fri</div>
                         <div class="weekday">Sat</div>
+                    </div>
+                </div>
+                
+                <div class="daily-scheduler">
+                    <div class="scheduler-header">
+                        <span class="current-date"></span>
+                    </div>
+                    <div class="time-grid">
+                        <!-- 시간대별 행 (JS로 동적 생성) -->
                     </div>
                 </div>
             </div>
