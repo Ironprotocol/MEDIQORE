@@ -39,6 +39,8 @@ A web-based medical information management system for healthcare providers.
 2025-02-04
     1. first time that divide JS, CSS code in HTML
 
+2025-02-06
+    1. finish dividing work
 
 ## Current Version
 v.0.01 test 
