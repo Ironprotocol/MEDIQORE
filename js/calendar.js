@@ -216,38 +216,40 @@ export function initializeScheduler() {
     const timeGrid = document.querySelector('.time-grid');
     const currentDate = new Date();
     
-    // 현재 날짜 표시
-    document.querySelector('.scheduler-header .current-date').textContent = 
-        currentDate.toLocaleDateString('ko-KR', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit'
-        });
+    // 날짜 표시 형식 변경
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const formattedDate = `${currentDate.getDate().toString().padStart(2, '0')} ${months[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
     
-    // 시간대 생성 (06:00 ~ 18:00)
-    for (let hour = 8; hour <= 16; hour++) {
+    document.querySelector('.scheduler-header .current-date').textContent = formattedDate;
+    
+    // 시간대 생성 (8:00 ~ 16:00)
+    for (let hour = 8; hour <= 15; hour++) {
         // 정시
         const timeSlot = document.createElement('div');
         timeSlot.className = 'time-slot';
         timeSlot.textContent = `${hour.toString().padStart(2, '0')}:00`;
-        
-        const scheduleCell = document.createElement('div');
-        scheduleCell.className = 'schedule-cell';
-        
         timeGrid.appendChild(timeSlot);
-        timeGrid.appendChild(scheduleCell);
+        
+        // 10개의 셀 추가
+        for (let i = 0; i < 10; i++) {
+            const scheduleCell = document.createElement('div');
+            scheduleCell.className = 'schedule-cell';
+            timeGrid.appendChild(scheduleCell);
+        }
         
         // 30분
-        if (hour < 18) {
+        if (hour < 15) {
             const halfHourSlot = document.createElement('div');
             halfHourSlot.className = 'time-slot half-hour';
             halfHourSlot.textContent = `${hour.toString().padStart(2, '0')}:30`;
-            
-            const halfHourCell = document.createElement('div');
-            halfHourCell.className = 'schedule-cell';
-            
             timeGrid.appendChild(halfHourSlot);
-            timeGrid.appendChild(halfHourCell);
+            
+            // 30분대의 10개 셀 추가
+            for (let i = 0; i < 10; i++) {
+                const halfHourCell = document.createElement('div');
+                halfHourCell.className = 'schedule-cell';
+                timeGrid.appendChild(halfHourCell);
+            }
         }
     }
 }
