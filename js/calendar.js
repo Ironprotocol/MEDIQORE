@@ -7,6 +7,7 @@ export class CustomCalendar {
         'January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December'
         ];
+        this.selectedDate = null;  // 선택된 날짜 추적
         this.init();
         this.currentTooltip = null;  // 현재 열린 툴팁 추적
         }
@@ -36,8 +37,35 @@ export class CustomCalendar {
         dateDiv.className = 'date';
         dateDiv.textContent = i;
         
+        // 오늘 날짜이거나 이전에 선택된 날짜인 경우 selected 클래스 추가
+        const currentDate = new Date();
+        if ((this.selectedDate === null && 
+             i === currentDate.getDate() && 
+             this.date.getMonth() === currentDate.getMonth() && 
+             this.date.getFullYear() === currentDate.getFullYear()) || 
+            (this.selectedDate && 
+             i === this.selectedDate.getDate() && 
+             this.date.getMonth() === this.selectedDate.getMonth() && 
+             this.date.getFullYear() === this.selectedDate.getFullYear())) {
+            dateDiv.classList.add('selected');
+        }
+        
         // 날짜 클릭 이벤트
-        dateDiv.addEventListener('click', (e) => this.handleDateClick(e, i));
+        dateDiv.addEventListener('click', (e) => {
+            // 이전 선택 제거
+            const prevSelected = this.calendarGrid.querySelector('.date.selected');
+            if (prevSelected) {
+                prevSelected.classList.remove('selected');
+            }
+            
+            // 새로운 선택 추가
+            dateDiv.classList.add('selected');
+            this.selectedDate = new Date(this.date.getFullYear(), this.date.getMonth(), i);
+            
+            // 기존의 날짜 클릭 핸들러 호출
+            this.handleDateClick(e, i);
+        });
+        
         this.calendarGrid.appendChild(dateDiv);
     }
 
@@ -217,7 +245,7 @@ function handleCellClick(hour, minute, column) {
     });
 
     // 의사 목록 로드 및 드롭다운 설정
-    const doctorSelect = tooltip.querySelector('.tooltip-doctor-select');
+    const doctorSelect = tooltip.querySelector('.tooltip-doctor-select'); //변수가 사용되지 않고있음
     const doctorSelected = tooltip.querySelector('.tooltip-doctor-selected');
     const doctorOptions = tooltip.querySelector('.tooltip-doctor-options');
 
@@ -250,7 +278,8 @@ function handleCellClick(hour, minute, column) {
     }
 
     // 드롭다운 토글
-    doctorSelected.addEventListener('click', () => {
+    doctorSelected.addEventListener('click', (e) => {
+        e.stopPropagation();  // 이벤트 버블링 방지
         doctorOptions.style.display = doctorOptions.style.display === 'none' ? 'block' : 'none';
     });
 
@@ -259,16 +288,28 @@ function handleCellClick(hour, minute, column) {
         if (e.target.classList.contains('tooltip-doctor-option')) {
             doctorSelected.textContent = e.target.textContent;
             doctorOptions.style.display = 'none';
+            e.stopPropagation();  // 이벤트 버블링 방지
         }
     });
-
     // 닫기 버튼 이벤트
     tooltip.querySelector('.tooltip-close').addEventListener('click', () => {
         tooltip.remove();
     });
-
-    // 외부 클릭 시 툴팁 닫기
+    // 외부 클릭 시 드롭다운 닫기
     document.addEventListener('click', (e) => {
+        // tooltip 내부의 모든 드롭다운 닫기
+        if (!doctorSelected.contains(e.target) && !doctorOptions.contains(e.target)) {
+            doctorOptions.style.display = 'none';
+        }
+        
+        // birth date 드롭다운들도 닫기
+        if (!e.target.closest('.tooltip-birth-select')) {
+            birthSelects.forEach(select => {
+                select.querySelector('.birth-options').style.display = 'none';
+            });
+        }
+        
+        // tooltip 자체 닫기 (기존 코드)
         if (!tooltip.contains(e.target) && !e.target.classList.contains('schedule-cell')) {
             tooltip.remove();
         }
