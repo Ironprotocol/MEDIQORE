@@ -63,146 +63,10 @@ export class CustomCalendar {
             }
 
     handleDateClick(e, date) {
-    // 이미 열린 툴팁이 있다면 제거
-    if (this.currentTooltip) {
-        this.currentTooltip.remove();
-        this.currentTooltip = null;
-        }
-
-    const tooltip = document.createElement('div');
-    tooltip.className = 'date-tooltip';
-    tooltip.innerHTML = `
-        <div class="tooltip-header">
-            <span class="tooltip-date">${this.formatDate(date)}</span>
-            <span class="tooltip-close">&times;</span>
-        </div>
-        <form class="tooltip-form">
-            <label>Name</label>
-            <input type="text" class="tooltip-name">
-            
-            <label>Birth Date</label>
-            <div class="date-select-group">
-                <select id="birthDay" name="birthDay" required>
-                    <option value="">Day</option>
-                    ${Array.from({length: 31}, (_, i) => i + 1).map(day => 
-                        `<option value="${day}">${day}</option>`
-                    ).join('')}
-                </select>
-                <select id="birthMonth" name="birthMonth" required>
-                    <option value="">Month</option>
-                    <option value="1">Jan</option>
-                    <option value="2">Feb</option>
-                    <option value="3">Mar</option>
-                    <option value="4">Apr</option>
-                    <option value="5">May</option>
-                    <option value="6">Jun</option>
-                    <option value="7">Jul</option>
-                    <option value="8">Aug</option>
-                    <option value="9">Sep</option>
-                    <option value="10">Oct</option>
-                    <option value="11">Nov</option>
-                    <option value="12">Dec</option>
-                </select>
-                <select id="birthYear" name="birthYear" required>
-                    <option value="">Year</option>
-                    ${Array.from({length: 100}, (_, i) => new Date().getFullYear() - i).map(year =>
-                        `<option value="${year}">${year}</option>`
-                    ).join('')}
-                </select>
-            </div>
-            
-            <label>Cell phone number</label>
-            <input type="tel" class="tooltip-phone">
-            
-            <label>Primary Complaint</label>
-            <input type="text" class="tooltip-complaint">
-
-            <label>Reservation Time</label>
-            <div class="date-select-group">
-                <select class="tooltip-time-hour">
-                    <option value="">Hour</option>
-                    ${Array.from({length: 13}, (_, i) => i + 6).map(hour => 
-                        `<option value="${String(hour).padStart(2, '0')}">${String(hour).padStart(2, '0')}</option>`
-                    ).join('')}
-                </select>
-                <select class="tooltip-time-minute">
-                    <option value="">Minute</option>
-                    <option value="00">00</option>
-                    <option value="30">30</option>
-                </select>
-            </div>
-        </form>
-        <div class="tooltip-footer">
-            <button class="tooltip-rsvd">RSVD</button>
-        </div>
-    `;
-
-    // 툴팁 위치 계산
-    const rect = e.target.getBoundingClientRect();
-    const tooltipHeight = 200; // 툴팁의 대략적인 높이
-
-    // 화면 위쪽 공간이 충분한지 확인
-    const hasSpaceAbove = rect.top > tooltipHeight;
-
-    if (hasSpaceAbove) {
-        // 위쪽에 표시
-        tooltip.style.left = `${rect.left}px`;
-        tooltip.style.top = `${rect.top - tooltipHeight - 10}px`;  // 10px 간격
-        tooltip.classList.add('tooltip-above');
-    } else {
-        // 아래쪽에 표시 (기존 방식)
-        tooltip.style.left = `${rect.left}px`;
-        tooltip.style.top = `${rect.bottom + 10}px`;
-        tooltip.classList.remove('tooltip-above');
+        // 기존 툴팁 관련 코드 제거
+        const formattedDate = this.formatDate(date);
+        document.querySelector('.scheduler-header .current-date').textContent = formattedDate;
     }
-
-        // 닫기 버튼 이벤트
-        tooltip.querySelector('.tooltip-close').addEventListener('click', () => {
-        tooltip.remove();
-        this.currentTooltip = null;
-        });
-
-    // RSVD 버튼 이벤트
-    tooltip.querySelector('.tooltip-rsvd').addEventListener('click', () => {
-        const name = tooltip.querySelector('.tooltip-name').value;
-        const birthDay = tooltip.querySelector('#birthDay').value;
-        const birthMonth = tooltip.querySelector('#birthMonth').value;
-        const birthYear = tooltip.querySelector('#birthYear').value;
-        const phone = tooltip.querySelector('.tooltip-phone').value;
-        const complaint = tooltip.querySelector('.tooltip-complaint').value;
-        const time = tooltip.querySelector('.tooltip-time').value;
-        
-        if (!name || !birthDay || !birthMonth || !birthYear || !phone || !complaint || !time) {
-            alert('Please fill in all fields');
-            return;
-        }
-
-        // TODO: 여기에 예약 데이터 저장 로직 추가
-        console.log('Reservation:', { 
-            date: this.formatDate(date), 
-            name, 
-            birth: `${birthYear}-${birthMonth}-${birthDay}`,
-            phone,
-            complaint,
-            time
-        });
-        
-        tooltip.remove();
-        this.currentTooltip = null;
-        });
-
-        document.body.appendChild(tooltip);
-        tooltip.style.display = 'block';
-        this.currentTooltip = tooltip;
-
-        // 외부 클릭 시 툴팁 닫기
-        document.addEventListener('click', (e) => {
-        if (this.currentTooltip && !this.currentTooltip.contains(e.target) && !e.target.classList.contains('date')) {
-            this.currentTooltip.remove();
-            this.currentTooltip = null;
-        }
-        });
-        }
 
     formatDate(day) {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -222,7 +86,7 @@ export function initializeScheduler() {
     
     document.querySelector('.scheduler-header .current-date').textContent = formattedDate;
     
-    // 시간대 생성 (8:00 ~ 16:00)
+    // 시간대 생성 (8:00 ~ 15:00)
     for (let hour = 8; hour <= 15; hour++) {
         // 정시
         const timeSlot = document.createElement('div');
@@ -234,6 +98,7 @@ export function initializeScheduler() {
         for (let i = 0; i < 10; i++) {
             const scheduleCell = document.createElement('div');
             scheduleCell.className = 'schedule-cell';
+            scheduleCell.addEventListener('click', () => handleCellClick(hour, 0, i));
             timeGrid.appendChild(scheduleCell);
         }
         
@@ -248,8 +113,164 @@ export function initializeScheduler() {
             for (let i = 0; i < 10; i++) {
                 const halfHourCell = document.createElement('div');
                 halfHourCell.className = 'schedule-cell';
+                halfHourCell.addEventListener('click', () => handleCellClick(hour, 30, i));
                 timeGrid.appendChild(halfHourCell);
             }
         }
     }
+}
+
+function handleCellClick(hour, minute, column) {
+    // 기존 툴팁이 있다면 제거
+    const existingTooltip = document.querySelector('.schedule-tooltip');
+    if (existingTooltip) {
+        existingTooltip.remove();
+    }
+
+    const tooltip = document.createElement('div');
+    tooltip.className = 'schedule-tooltip';
+    tooltip.innerHTML = `
+        <div class="tooltip-header">
+            <div class="tooltip-datetime">
+                <span class="tooltip-date">${document.querySelector('.current-date').textContent}</span>
+                <span class="tooltip-time">${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}</span>
+            </div>
+            <span class="tooltip-close">&times;</span>
+        </div>
+        <form class="tooltip-form">
+            <label>Name</label>
+            <input type="text" class="tooltip-name">
+            
+            <label>Birth Date</label>
+            <div class="date-select-group">
+                <div class="tooltip-birth-select">
+                    <div class="birth-selected">Day</div>
+                    <div class="birth-options">
+                        ${Array.from({length: 31}, (_, i) => i + 1)
+                            .map(day => `<div class="birth-option">${day}</div>`).join('')}
+                    </div>
+                </div>
+                <div class="tooltip-birth-select">
+                    <div class="birth-selected">Month</div>
+                    <div class="birth-options">
+                        ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+                            .map((month, i) => `<div class="birth-option" data-value="${i+1}">${month}</div>`).join('')}
+                    </div>
+                </div>
+                <div class="tooltip-birth-select">
+                    <div class="birth-selected">Year</div>
+                    <div class="birth-options">
+                        ${Array.from({length: 100}, (_, i) => new Date().getFullYear() - i)
+                            .map(year => `<div class="birth-option">${year}</div>`).join('')}
+                    </div>
+                </div>
+            </div>
+            
+            <label>Cell phone number</label>
+            <input type="tel" class="tooltip-phone">
+            
+            <label>Primary Complaint</label>
+            <input type="text" class="tooltip-complaint">
+
+            <label>Select Doctor</label>
+            <div class="tooltip-doctor-select">
+                <div class="tooltip-doctor-selected">Choose a doctor</div>
+                <div class="tooltip-doctor-options"></div>
+            </div>
+        </form>
+        <div class="tooltip-footer">
+            <button class="tooltip-rsvd">RSVD</button>
+        </div>
+    `;
+
+    document.body.appendChild(tooltip);
+
+    // Birth date 드롭다운 이벤트 설정
+    const birthSelects = tooltip.querySelectorAll('.tooltip-birth-select');
+    birthSelects.forEach(select => {
+        const selected = select.querySelector('.birth-selected');
+        const options = select.querySelector('.birth-options');
+        
+        // 초기 상태 명시적 설정
+        options.style.display = 'none';
+
+        // 드롭다운 토글
+        selected.addEventListener('click', (e) => {
+            // 다른 열린 드롭다운들 닫기
+            birthSelects.forEach(otherSelect => {
+                if (otherSelect !== select) {
+                    otherSelect.querySelector('.birth-options').style.display = 'none';
+                }
+            });
+            options.style.display = options.style.display === 'none' ? 'block' : 'none';
+            e.stopPropagation();
+        });
+
+        // 옵션 선택
+        options.addEventListener('click', (e) => {
+            if (e.target.classList.contains('birth-option')) {
+                selected.textContent = e.target.textContent;
+                options.style.display = 'none';
+                e.stopPropagation();
+            }
+        });
+    });
+
+    // 의사 목록 로드 및 드롭다운 설정
+    const doctorSelect = tooltip.querySelector('.tooltip-doctor-select');
+    const doctorSelected = tooltip.querySelector('.tooltip-doctor-selected');
+    const doctorOptions = tooltip.querySelector('.tooltip-doctor-options');
+
+    // Firebase에서 의사 목록 가져오기
+    const user = auth.currentUser;
+    if (user) {
+        const [hospitalName] = user.email.split('@')[0].split('.');
+        const staffRef = collection(db, 'hospitals', hospitalName, 'staff');
+        const q = query(staffRef, where('role', '==', 'doctor'));
+        
+        getDocs(q).then((querySnapshot) => {
+            // 'Choose a doctor' 옵션 추가
+            const defaultOption = document.createElement('div');
+            defaultOption.className = 'tooltip-doctor-option';
+            defaultOption.textContent = 'Choose a doctor';
+            doctorOptions.appendChild(defaultOption);
+
+            // 의사 목록 추가
+            querySnapshot.forEach((doc) => {
+                const doctorData = doc.data();
+                const option = document.createElement('div');
+                option.className = 'tooltip-doctor-option';
+                option.textContent = doctorData.name;
+                doctorOptions.appendChild(option);
+            });
+
+            // 초기 상태 명시적 설정
+            doctorOptions.style.display = 'none';
+        });
+    }
+
+    // 드롭다운 토글
+    doctorSelected.addEventListener('click', () => {
+        doctorOptions.style.display = doctorOptions.style.display === 'none' ? 'block' : 'none';
+    });
+
+    // 옵션 선택
+    doctorOptions.addEventListener('click', (e) => {
+        if (e.target.classList.contains('tooltip-doctor-option')) {
+            doctorSelected.textContent = e.target.textContent;
+            doctorOptions.style.display = 'none';
+        }
+    });
+
+    // 닫기 버튼 이벤트
+    tooltip.querySelector('.tooltip-close').addEventListener('click', () => {
+        tooltip.remove();
+    });
+
+    // 외부 클릭 시 툴팁 닫기
+    document.addEventListener('click', (e) => {
+        if (!tooltip.contains(e.target) && !e.target.classList.contains('schedule-cell')) {
+            tooltip.remove();
+        }
+    });
 }
