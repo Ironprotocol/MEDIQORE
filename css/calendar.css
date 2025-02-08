@@ -283,6 +283,7 @@
 
         .tooltip-doctor-selected {
             padding: 8px 12px;
+            background: white;  /* 배경색을 흰색으로 변경 */
             border: 1px solid #e0e0e0;
             border-radius: 4px;
             cursor: pointer;
@@ -367,6 +368,7 @@
 
         .birth-selected {
             padding: 8px 12px;
+            background: white;  /* 배경색을 흰색으로 변경 */
             border: 1px solid #e0e0e0;
             border-radius: 4px;
             cursor: pointer;
