@@ -323,25 +323,26 @@ function handleCellClick(hour, minute, column) {
 
     // RSVD 버튼 이벤트 리스너
     const rsvdButton = tooltip.querySelector('.tooltip-rsvd-btn');
-    rsvdButton.addEventListener('click', async () => {
+    rsvdButton.addEventListener('click', async (e) => {
+        e.preventDefault();  // 폼 제출 방지
         try {
             const name = tooltip.querySelector('.tooltip-name').value;
             const birthDay = tooltip.querySelector('.tooltip-birth-select:nth-child(1) .birth-selected').textContent;
             const birthMonth = tooltip.querySelector('.tooltip-birth-select:nth-child(2) .birth-selected').textContent;
             const birthYear = tooltip.querySelector('.tooltip-birth-select:nth-child(3) .birth-selected').textContent;
-            const phoneNumber = tooltip.querySelector('.tooltip-phone').value;
-            const primaryComplaint = tooltip.querySelector('.tooltip-complaint').value;
-            const otherComplaint = tooltip.querySelector('.tooltip-complaint-other').value;
-            const finalComplaint = primaryComplaint === 'other' ? otherComplaint : primaryComplaint;
-            const doctor = tooltip.querySelector('.tooltip-doctor-selected').textContent;
-
-            // 입력 검증
-            if (!name || birthDay === 'Day' || birthMonth === 'Month' || birthYear === 'Year' || 
-                !phoneNumber || !finalComplaint || doctor === 'Choose a doctor' ||
-                (primaryComplaint === 'other' && !otherComplaint)) {
-                alert('Please fill in all fields');
+            
+            // 이름과 생년월일만 필수값으로 체크
+            if (!name || birthDay === 'Day' || birthMonth === 'Month' || birthYear === 'Year') {
+                alert('Please enter name and birth date');
                 return;
             }
+
+            const phoneNumber = tooltip.querySelector('.tooltip-phone').value || null;
+            const primaryComplaint = tooltip.querySelector('.tooltip-complaint').value;
+            const otherComplaint = tooltip.querySelector('.tooltip-complaint-other').value;
+            const finalComplaint = primaryComplaint === 'other' ? otherComplaint : primaryComplaint || null;
+            const doctor = tooltip.querySelector('.tooltip-doctor-selected').textContent;
+            const selectedDoctor = doctor === 'Choose a doctor' ? null : doctor;
 
             const user = auth.currentUser;
             const [hospitalName] = user.email.split('@')[0].split('.');
@@ -349,16 +350,24 @@ function handleCellClick(hour, minute, column) {
 
             // 1. 환자 기본 정보 저장
             const birthDate = new Date(`${birthMonth} ${birthDay} ${birthYear}`);
-            const patientInfoRef = doc(db, 'hospitals', hospitalName, 'patient', patientId, 'info');
+            const patientInfoRef = doc(db, 'hospitals', hospitalName, 'patient', patientId);
             await setDoc(patientInfoRef, {
-                name: name,
-                birthDate: Timestamp.fromDate(birthDate),
-                phoneNumber: phoneNumber
+                info: {
+                    name: name,
+                    birthDate: Timestamp.fromDate(birthDate),
+                    phoneNumber: phoneNumber,
+                    address: null,
+                    insurance: {
+                        status: null,
+                        provider: null,
+                        cardNumber: null
+                    }
+                }
             });
 
             // 선택된 날짜와 시간 가져오기
-            const tooltipDate = tooltip.querySelector('.tooltip-date').textContent; // DD.MMM.YYYY
-            const tooltipTime = tooltip.querySelector('.tooltip-time').textContent; // HH:mm
+            const tooltipDate = tooltip.querySelector('.tooltip-date').textContent;
+            const tooltipTime = tooltip.querySelector('.tooltip-time').textContent;
             const [day, month, year] = tooltipDate.split('.');
             const [hour, minute] = tooltipTime.split(':');
             
@@ -368,8 +377,9 @@ function handleCellClick(hour, minute, column) {
             await setDoc(registerDateRef, {
                 timestamp: serverTimestamp(),
                 primaryComplaint: finalComplaint,
-                doctor: doctor,
-                progress: 'reservation'
+                doctor: selectedDoctor,
+                progress: 'reservation',
+                rsvdTime: tooltipTime
             });
 
             // 3. 병원 날짜별 예약 목록 저장
@@ -377,8 +387,9 @@ function handleCellClick(hour, minute, column) {
             await setDoc(reservationRef, {
                 timestamp: serverTimestamp(),
                 primaryComplaint: finalComplaint,
-                doctor: doctor,
-                progress: 'reservation'
+                doctor: selectedDoctor,
+                progress: 'reservation',
+                rsvdTime: tooltipTime
             });
 
             alert('Reservation completed successfully');
