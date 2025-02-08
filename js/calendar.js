@@ -155,15 +155,18 @@ function handleCellClick(hour, minute, column) {
         existingTooltip.remove();
     }
 
+    // 현재 선택된 날짜 가져오기 (스케줄러 헤더에서)
+    const selectedDate = document.querySelector('.scheduler-header').textContent;
+
     const tooltip = document.createElement('div');
     tooltip.className = 'schedule-tooltip';
     tooltip.innerHTML = `
         <div class="tooltip-header">
             <div class="tooltip-datetime">
-                <span class="tooltip-date">${document.querySelector('.current-date').textContent}</span>
+                <span class="tooltip-date">${selectedDate}</span>
                 <span class="tooltip-time">${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}</span>
             </div>
-            <span class="tooltip-close">&times;</span>
+            <button class="tooltip-close">×</button>
         </div>
         <form class="tooltip-form">
             <label>Name</label>
@@ -198,17 +201,31 @@ function handleCellClick(hour, minute, column) {
             <input type="tel" class="tooltip-phone">
             
             <label>Primary Complaint</label>
-            <input type="text" class="tooltip-complaint">
+            <div class="tooltip-complaint-select">
+                <select class="tooltip-complaint">
+                    <option value="">Select complaint</option>
+                    <option value="toothache">Toothache</option>
+                    <option value="cleaning">Cleaning</option>
+                    <option value="cavity">Cavity</option>
+                    <option value="extraction">Extraction</option>
+                    <option value="implant">Implant</option>
+                    <option value="denture">Denture</option>
+                    <option value="orthodontics">Orthodontics</option>
+                    <option value="other">Other</option>
+                </select>
+                <textarea class="tooltip-complaint-other" placeholder="Specify other complaints"></textarea>
+            </div>
 
             <label>Select Doctor</label>
             <div class="tooltip-doctor-select">
                 <div class="tooltip-doctor-selected">Choose a doctor</div>
                 <div class="tooltip-doctor-options"></div>
             </div>
+
+            <div class="tooltip-buttons">
+                <button class="tooltip-rsvd-btn">RSVD</button>
+            </div>
         </form>
-        <div class="tooltip-footer">
-            <button class="tooltip-rsvd">RSVD</button>
-        </div>
     `;
 
     document.body.appendChild(tooltip);
@@ -291,6 +308,88 @@ function handleCellClick(hour, minute, column) {
             e.stopPropagation();  // 이벤트 버블링 방지
         }
     });
+
+    // Primary Complaint 드롭다운 이벤트 추가
+    const complaintSelect = tooltip.querySelector('.tooltip-complaint');
+    const complaintOther = tooltip.querySelector('.tooltip-complaint-other');
+
+    complaintSelect.addEventListener('change', (e) => {
+        if (e.target.value === 'other') {
+            complaintOther.style.display = 'block';
+        } else {
+            complaintOther.style.display = 'none';
+        }
+    });
+
+    // RSVD 버튼 이벤트 리스너
+    const rsvdButton = tooltip.querySelector('.tooltip-rsvd-btn');
+    rsvdButton.addEventListener('click', async () => {
+        try {
+            const name = tooltip.querySelector('.tooltip-name').value;
+            const birthDay = tooltip.querySelector('.tooltip-birth-select:nth-child(1) .birth-selected').textContent;
+            const birthMonth = tooltip.querySelector('.tooltip-birth-select:nth-child(2) .birth-selected').textContent;
+            const birthYear = tooltip.querySelector('.tooltip-birth-select:nth-child(3) .birth-selected').textContent;
+            const phoneNumber = tooltip.querySelector('.tooltip-phone').value;
+            const primaryComplaint = tooltip.querySelector('.tooltip-complaint').value;
+            const otherComplaint = tooltip.querySelector('.tooltip-complaint-other').value;
+            const finalComplaint = primaryComplaint === 'other' ? otherComplaint : primaryComplaint;
+            const doctor = tooltip.querySelector('.tooltip-doctor-selected').textContent;
+
+            // 입력 검증
+            if (!name || birthDay === 'Day' || birthMonth === 'Month' || birthYear === 'Year' || 
+                !phoneNumber || !finalComplaint || doctor === 'Choose a doctor' ||
+                (primaryComplaint === 'other' && !otherComplaint)) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            const user = auth.currentUser;
+            const [hospitalName] = user.email.split('@')[0].split('.');
+            const patientId = `${name.toLowerCase().replace(/\s+/g, '.')}`;
+
+            // 1. 환자 기본 정보 저장
+            const birthDate = new Date(`${birthMonth} ${birthDay} ${birthYear}`);
+            const patientInfoRef = doc(db, 'hospitals', hospitalName, 'patient', patientId, 'info');
+            await setDoc(patientInfoRef, {
+                name: name,
+                birthDate: Timestamp.fromDate(birthDate),
+                phoneNumber: phoneNumber
+            });
+
+            // 선택된 날짜와 시간 가져오기
+            const tooltipDate = tooltip.querySelector('.tooltip-date').textContent; // DD.MMM.YYYY
+            const tooltipTime = tooltip.querySelector('.tooltip-time').textContent; // HH:mm
+            const [day, month, year] = tooltipDate.split('.');
+            const [hour, minute] = tooltipTime.split(':');
+            
+            // 2. 환자 예약 기록 저장
+            const registerDateId = `${day}.${month}.${year}_${hour}${minute}00`;
+            const registerDateRef = doc(db, 'hospitals', hospitalName, 'patient', patientId, 'register.date', registerDateId);
+            await setDoc(registerDateRef, {
+                timestamp: serverTimestamp(),
+                primaryComplaint: finalComplaint,
+                doctor: doctor,
+                progress: 'reservation'
+            });
+
+            // 3. 병원 날짜별 예약 목록 저장
+            const reservationRef = doc(db, 'hospitals', hospitalName, 'dates', tooltipDate, 'reservation', patientId);
+            await setDoc(reservationRef, {
+                timestamp: serverTimestamp(),
+                primaryComplaint: finalComplaint,
+                doctor: doctor,
+                progress: 'reservation'
+            });
+
+            alert('Reservation completed successfully');
+            tooltip.remove();
+
+        } catch (error) {
+            console.error('Error making reservation:', error);
+            alert('Failed to make reservation: ' + error.message);
+        }
+    });
+
     // 닫기 버튼 이벤트
     tooltip.querySelector('.tooltip-close').addEventListener('click', () => {
         tooltip.remove();
