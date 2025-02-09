@@ -90,15 +90,30 @@ export class CustomCalendar {
     }
 
     addEventListeners() {
-            document.getElementById('prevMonth').addEventListener('click', () => {
-                this.date.setMonth(this.date.getMonth() - 1);
-                this.renderCalendar();
-            });
-            document.getElementById('nextMonth').addEventListener('click', () => {
-                this.date.setMonth(this.date.getMonth() + 1);
-                this.renderCalendar();
-            });
+        document.getElementById('prevMonth').addEventListener('click', async () => {
+            this.date.setMonth(this.date.getMonth() - 1);
+            this.renderCalendar();
+            
+            // 현재 로그인한 사용자의 병원 정보로 달력 예약 정보 업데이트
+            const user = auth.currentUser;
+            if (user) {
+                const [hospitalName] = user.email.split('@')[0].split('.');
+                await updateCalendarReservations(hospitalName);
             }
+        });
+
+        document.getElementById('nextMonth').addEventListener('click', async () => {
+            this.date.setMonth(this.date.getMonth() + 1);
+            this.renderCalendar();
+            
+            // 현재 로그인한 사용자의 병원 정보로 달력 예약 정보 업데이트 
+            const user = auth.currentUser;
+            if (user) {
+                const [hospitalName] = user.email.split('@')[0].split('.');
+                await updateCalendarReservations(hospitalName);
+            }
+        });
+    }
 
     handleDateClick(e, date) {
         const formattedDate = this.formatDate(date);
@@ -402,6 +417,10 @@ function handleCellClick(hour, minute, column) {
 
             alert('Reservation completed successfully');
             tooltip.remove();
+
+            // 예약 완료 후 달력과 스케줄러 업데이트
+            await updateCalendarReservations(hospitalName);
+            await updateSchedulerReservations(tooltipDate);
 
         } catch (error) {
             console.error('Error making reservation:', error);
