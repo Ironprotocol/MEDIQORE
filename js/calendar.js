@@ -1,3 +1,6 @@
+// 월 이름 배열을 전역으로 이동
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
 export class CustomCalendar {
     constructor() {
         this.date = new Date();
@@ -15,7 +18,14 @@ export class CustomCalendar {
     init() {
         this.renderCalendar();
         this.addEventListeners();
+        
+        // 현재 로그인한 사용자의 병원 정보로 달력 예약 정보 업데이트
+        const user = auth.currentUser;
+        if (user) {
+            const [hospitalName] = user.email.split('@')[0].split('.');
+            updateCalendarReservations(hospitalName);
         }
+    }
 
     renderCalendar() {
         this.monthYear.textContent = `${this.months[this.date.getMonth()]} ${this.date.getFullYear()}`;
@@ -91,13 +101,14 @@ export class CustomCalendar {
             }
 
     handleDateClick(e, date) {
-        // 기존 툴팁 관련 코드 제거
         const formattedDate = this.formatDate(date);
         document.querySelector('.scheduler-header .current-date').textContent = formattedDate;
+        
+        // 스케줄러 예약 정보 업데이트
+        updateSchedulerReservations(formattedDate);
     }
 
     formatDate(day) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const date = new Date(this.date.getFullYear(), this.date.getMonth(), day);
     return `${String(day).padStart(2, '0')}.${months[date.getMonth()]}.${date.getFullYear()}`;
     }
@@ -109,7 +120,6 @@ export function initializeScheduler() {
     const currentDate = new Date();
     
     // 날짜 표시 형식 변경
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const formattedDate = `${currentDate.getDate().toString().padStart(2, '0')} ${months[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
     
     document.querySelector('.scheduler-header .current-date').textContent = formattedDate;
@@ -421,5 +431,74 @@ function handleCellClick(hour, minute, column) {
         if (!tooltip.contains(e.target) && !e.target.classList.contains('schedule-cell')) {
             tooltip.remove();
         }
+    });
+}
+
+async function updateCalendarReservations(hospitalName) {
+    const dates = document.querySelectorAll('.date:not(.empty)');
+    
+    dates.forEach(async (dateDiv) => {
+        const day = dateDiv.textContent;
+        const currentDate = new Date(document.querySelector('.month-year').textContent);
+        const formattedDate = `${day.padStart(2, '0')}.${months[currentDate.getMonth()]}.${currentDate.getFullYear()}`;
+        
+        // 해당 날짜의 reservation 컬렉션 조회
+        const reservationRef = collection(db, 'hospitals', hospitalName, 'dates', formattedDate, 'reservation');
+        const snapshot = await getDocs(reservationRef);
+        
+        // 예약 수가 있는 경우에만 표시
+        if (snapshot.size > 0) {
+            // 기존 예약 수 표시 요소가 있으면 제거
+            const existingCount = dateDiv.querySelector('.reservation-count');
+            if (existingCount) existingCount.remove();
+            
+            // 새로운 예약 수 표시
+            const countDiv = document.createElement('div');
+            countDiv.className = 'reservation-count';
+            countDiv.textContent = snapshot.size;
+            dateDiv.appendChild(countDiv);
+        }
+    });
+}
+
+async function updateSchedulerReservations(currentDate) {
+    // 기존 예약 표시 제거
+    document.querySelectorAll('.schedule-cell').forEach(cell => {
+        cell.innerHTML = '';
+    });
+    
+    const user = auth.currentUser;
+    if (!user) return;
+    
+    const [hospitalName] = user.email.split('@')[0].split('.');
+    
+    // 해당 날짜의 예약 정보 조회
+    const reservationRef = collection(db, 'hospitals', hospitalName, 'dates', currentDate, 'reservation');
+    const snapshot = await getDocs(reservationRef);
+    
+    // 시간대별로 예약 정보 정리
+    const timeSlots = {};
+    snapshot.forEach(doc => {
+        const data = doc.data();
+        const time = data.rsvdTime;
+        if (!timeSlots[time]) timeSlots[time] = [];
+        timeSlots[time].push(doc.id); // 환자 ID (이름) 저장
+    });
+    
+    // 스케줄러에 예약 표시
+    Object.entries(timeSlots).forEach(([time, patients]) => {
+        const [hour, minute] = time.split(':');
+        const rowIndex = (parseInt(hour) - 8) * 2 + (minute === '30' ? 1 : 0);
+        const cells = document.querySelectorAll(`.time-grid .schedule-cell`);
+        
+        patients.forEach((patientId, index) => {
+            const cellIndex = rowIndex * 5 + index;
+            if (cells[cellIndex]) {
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'patient-name';
+                nameSpan.textContent = `[${patientId}]`;
+                cells[cellIndex].appendChild(nameSpan);
+            }
+        });
     });
 }
