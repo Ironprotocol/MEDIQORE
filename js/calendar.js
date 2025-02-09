@@ -366,13 +366,11 @@ function handleCellClick(hour, minute, column) {
             });
 
             // 선택된 날짜와 시간 가져오기
-            const tooltipDate = tooltip.querySelector('.tooltip-date').textContent;
+            const tooltipDate = tooltip.querySelector('.tooltip-date').textContent.trim().replace(/\s+/g, '.');
             const tooltipTime = tooltip.querySelector('.tooltip-time').textContent;
-            const [day, month, year] = tooltipDate.split('.');
-            const [hour, minute] = tooltipTime.split(':');
             
             // 2. 환자 예약 기록 저장
-            const registerDateId = `${day}.${month}.${year}_${hour}${minute}00`;
+            const registerDateId = `${tooltipDate}_${tooltipTime}00`;
             const registerDateRef = doc(db, 'hospitals', hospitalName, 'patient', patientId, 'register.date', registerDateId);
             await setDoc(registerDateRef, {
                 timestamp: serverTimestamp(),
