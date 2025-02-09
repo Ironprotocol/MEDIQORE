@@ -202,7 +202,9 @@
         /* 시간 그리드 수정 */
         .time-grid {
             display: grid;
-            grid-template-columns: 80px repeat(10, 1fr);  /* 시간열 + 10개 컬럼 */
+            grid-template-columns: 80px repeat(5, 1fr);
+            width: 100%;
+            border-right: 1px solid #e0e0e0;  /* 전체 그리드 우측 테두리 추가 */
         }
 
         /* 시간 슬롯 높이 조정 */
@@ -212,8 +214,8 @@
             border-right: 1px solid #e0e0e0;
             font-size: 12px;
             text-align: center;
-            height: 40px;  /* 균등 분배된 높이 */
-            line-height: 40px;  /* 텍스트 세로 중앙 정렬 */
+            height: 40px;
+            line-height: 40px;
         }
 
         /* 스케줄 셀 스타일 수정 */
@@ -222,17 +224,17 @@
             border-bottom: 1px solid #e0e0e0;
             border-right: 1px solid #e0e0e0;
             height: 40px;
-            cursor: pointer;  /* 커서 포인터 추가 */
-            transition: background-color 0.2s;  /* 호버 효과 부드럽게 */
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        /* 각 행의 마지막 셀 우측 테두리 제거 */
+        .schedule-cell:nth-child(6n) {  /* 5개 셀 + 1개 time-slot = 6n */
+            border-right: none;
         }
 
         .schedule-cell:hover {
-            background-color: #dcf3fc;  /* 달력 셀과 동일한 호버 색상 */
-        }
-
-        /* 마지막 열의 우측 테두리 제거 */
-        .schedule-cell:nth-child(11n) {
-            border-right: none;
+            background-color: #dcf3fc;
         }
 
  

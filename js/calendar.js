@@ -122,8 +122,8 @@ export function initializeScheduler() {
         timeSlot.textContent = `${hour.toString().padStart(2, '0')}:00`;
         timeGrid.appendChild(timeSlot);
         
-        // 10개의 셀 추가
-        for (let i = 0; i < 10; i++) {
+        // 5개의 셀 추가 (10개에서 변경)
+        for (let i = 0; i < 5; i++) {
             const scheduleCell = document.createElement('div');
             scheduleCell.className = 'schedule-cell';
             scheduleCell.addEventListener('click', () => handleCellClick(hour, 0, i));
@@ -137,8 +137,8 @@ export function initializeScheduler() {
             halfHourSlot.textContent = `${hour.toString().padStart(2, '0')}:30`;
             timeGrid.appendChild(halfHourSlot);
             
-            // 30분대의 10개 셀 추가
-            for (let i = 0; i < 10; i++) {
+            // 30분대의 5개 셀 추가 (10개에서 변경)
+            for (let i = 0; i < 5; i++) {
                 const halfHourCell = document.createElement('div');
                 halfHourCell.className = 'schedule-cell';
                 halfHourCell.addEventListener('click', () => handleCellClick(hour, 30, i));
