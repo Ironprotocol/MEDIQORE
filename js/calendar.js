@@ -505,9 +505,12 @@ async function updateSchedulerReservations(currentDate) {
     const timeSlots = {};
     snapshot.forEach(doc => {
         const data = doc.data();
-        const time = data.rsvdTime;
+        // Timestamp를 시간 문자열로 변환
+        const rsvdDateTime = data.rsvdTime.toDate();
+        const time = `${rsvdDateTime.getHours().toString().padStart(2, '0')}:${rsvdDateTime.getMinutes().toString().padStart(2, '0')}`;
+        
         if (!timeSlots[time]) timeSlots[time] = [];
-        timeSlots[time].push(doc.id); // 환자 ID (이름) 저장
+        timeSlots[time].push(doc.id);
     });
     
     // 스케줄러에 예약 표시
