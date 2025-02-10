@@ -405,14 +405,20 @@ function handleCellClick(hour, minute, column) {
                 rsvdTime: tooltipTime
             });
 
-            // 3. 병원 날짜별 예약 목록 저장
+            // 3. 병원 날짜별 예약 목록 저장 부분 수정
+            const [day, month, year] = tooltipDate.split('.');
+            const monthIndex = months.indexOf(month);
+            const [hour, minute] = tooltipTime.split(':');
+
+            const rsvdDateTime = new Date(year, monthIndex, parseInt(day));
+            rsvdDateTime.setHours(parseInt(hour), parseInt(minute), 0, 0);
+
             const reservationRef = doc(db, 'hospitals', hospitalName, 'dates', tooltipDate, 'reservation', patientId);
             await setDoc(reservationRef, {
-                timestamp: serverTimestamp(),
+                timestamp: serverTimestamp(),  // 예약 등록 시점
                 primaryComplaint: finalComplaint,
                 doctor: selectedDoctor,
-                progress: 'reservation',
-                rsvdTime: tooltipTime
+                rsvdTime: Timestamp.fromDate(rsvdDateTime)  // 실제 예약 시간
             });
 
             alert('Reservation completed successfully');
