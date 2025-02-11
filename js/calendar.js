@@ -129,13 +129,13 @@ export class CustomCalendar {
     }
     };
 
-// 스케줄러 초기화 함수 export 추가
+// 스케줄러 초기화 함수
 export function initializeScheduler() {
     const timeGrid = document.querySelector('.time-grid');
     const currentDate = new Date();
     
-    // 날짜 표시 형식 변경
-    const formattedDate = `${currentDate.getDate().toString().padStart(2, '0')} ${months[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+    // 날짜 표시 형식 변경 - 점(.)을 추가 //2025-02-11 17:05
+    const formattedDate = `${currentDate.getDate().toString().padStart(2, '0')}.${months[currentDate.getMonth()]}.${currentDate.getFullYear()}`;
     
     document.querySelector('.scheduler-header .current-date').textContent = formattedDate;
     
@@ -170,6 +170,17 @@ export function initializeScheduler() {
                 timeGrid.appendChild(halfHourCell);
             }
         }
+    }
+
+    // auth 상태가 준비된 후 예약 정보 업데이트 //2025-02-11 17:05
+    if (auth.currentUser) {
+        updateSchedulerReservations(formattedDate);
+    } else {
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                updateSchedulerReservations(formattedDate);
+            }
+        });
     }
 }
 
