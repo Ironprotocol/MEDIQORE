@@ -435,9 +435,11 @@ function handleCellClick(hour, minute, column) {
             alert('Reservation completed successfully');
             tooltip.remove();
 
-            // 예약 완료 후 달력과 스케줄러 업데이트
-            await updateCalendarReservations(hospitalName);
-            await updateSchedulerReservations(tooltipDate);
+            // 예약 완료 후 달력과 스케줄러 즉시 업데이트 2025-02-12 12:45
+            await Promise.all([
+                updateCalendarReservations(hospitalName),
+                updateSchedulerReservations(tooltipDate)
+            ]);
 
         } catch (error) {
             console.error('Error making reservation:', error);
