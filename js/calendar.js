@@ -252,9 +252,9 @@ function handleCellClick(hour, minute, column) {
                 <textarea class="tooltip-complaint-other" placeholder="Specify other complaints"></textarea>
             </div>
 
-            <label>Select Doctor</label>
+            <!-- <label>Select Doctor</label> 2025-02-12 17:30 주석풀면됨-->
             <div class="tooltip-doctor-select">
-                <div class="tooltip-doctor-selected">Choose a doctor</div>
+                <!-- <div class="tooltip-doctor-selected">Choose a doctor</div> 2025-02-12 17:30 주석풀면됨-->
                 <div class="tooltip-doctor-options"></div>
             </div>
 
