@@ -1,11 +1,8 @@
-  /* desk-content 전용 스타일 */
-  #desk-content {
-    width: calc(49%);
-}
+
 
 #desk-content-right {
     position: absolute;
-    width: calc(49%);
+    width: calc(39%);
 
 }
 

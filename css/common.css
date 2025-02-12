@@ -129,7 +129,7 @@
         }
 
         /* ---------------------공통 content-container 스타일 ------------------*/
-        .content-container, .content-container-2{
+        .content-container {
             background-color: white;
             margin: 10px;
             border-radius: 8px;
@@ -137,12 +137,20 @@
             position: relative;
             display: none;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            width: 59%; /* 왼쪽 컨테이너 너비 증가 */
         }
 
-        /* content-container-2 전용 스타일 */
+        /* content-container-2 전용 스타일 수정 */
         .content-container-2 {
+            background-color: white;
+            margin: 10px;
+            border-radius: 8px;
+            height: calc(100% - 20px);
             position: absolute;
-            left: calc(49.6%);
+            display: none;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            width: 39%; /* 오른쪽 컨테이너 너비 */
+            right: 0; /* 오른쪽 정렬 */
             top: 0;
         }
 
