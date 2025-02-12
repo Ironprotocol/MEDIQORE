@@ -133,15 +133,20 @@
             background-color: white;
             margin: 10px;
             border-radius: 8px;
-            height: calc(100% - 20px);
+            height: calc(100% - 20px); /* 상하 마진 각 10px 고려 */
             position: relative;
             display: none;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            width: 59%; /* 왼쪽 컨테이너 너비 증가 */
+            width: calc(100% - 20px); /* 좌우 마진 각 10px 고려 */
         }
 
-        /* content-container-2 전용 스타일 수정 */
-        .content-container-2 {
+        /* desk 메뉴 전용 스타일 */
+        .content-container.desk-container {
+            width: calc(59%); /* 우측 마진 고려 */
+        }
+
+        /* desk 메뉴 우측 컨테이너 전용 스타일 */
+        .content-container-2.desk-container-right {
             background-color: white;
             margin: 10px;
             border-radius: 8px;
@@ -149,9 +154,29 @@
             position: absolute;
             display: none;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            width: 39%; /* 오른쪽 컨테이너 너비 */
-            right: 0; /* 오른쪽 정렬 */
+            width: calc(39% - 10px); /* 좌측 마진 고려 */
+            right: 0px; /* 우측 마진 */
             top: 0;
+        }
+
+        /* prescription 메뉴 전용 스타일 */
+        .content-container.prescription-container {
+            width: calc(100% - 20px); /* 좌우 마진 고려 */
+        }
+
+        /* reservation 메뉴 전용 스타일 */
+        .content-container.reservation-container {
+            width: calc(100% - 20px); /* 좌우 마진 고려 */
+        }
+
+        /* pharmacy 메뉴 전용 스타일 */
+        .content-container.pharmacy-container {
+            width: calc(100% - 20px); /* 좌우 마진 고려 */
+        }
+
+        /* data 메뉴 전용 스타일 */
+        .content-container.data-container {
+            width: calc(100% - 20px); /* 좌우 마진 고려 */
         }
 
         /* --------------상단 메뉴바 스타일------------- */
