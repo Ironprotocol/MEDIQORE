@@ -49,10 +49,27 @@ async function createPatientElement(hospitalName, patientData, patientId, type) 
         return complaint;
     }
 
+    // 시간 포맷팅 함수 추가
+    function formatTime(timestamp) {
+        const date = timestamp.toDate();
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        return `${hours}:${minutes}`;
+    }
+
+    // 시간 정보 가져오기
+    let timeString = '';
+    if (type === 'waiting') {
+        timeString = formatTime(patientData.timestamp);
+    } else if (type === 'reservation') {
+        timeString = formatTime(patientData.rsvdTime);
+    }
+
     patientElement.innerHTML = `
         <span class="patient-id-span">${formatPatientId(patientId)}</span>
         <span class="age-span">${age}years</span>
         <span class="complaint-span">${formatComplaint(patientData.primaryComplaint)}</span>
+        <span class="time-span">${timeString}</span>
         <span class="progress-span">
             <img src="image/${type === 'reservation' ? 'rsvd' : patientData.progress}.png" 
                  alt="${type === 'reservation' ? 'rsvd' : patientData.progress}" 
