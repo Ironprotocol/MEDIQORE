@@ -211,26 +211,36 @@ export async function initializePatientList(hospitalName, currentDate) {
 
     // 환자 목록 업데이트 및 정렬
     function updatePatientList() {
+        const patientListBody = document.querySelector('#desk-content .content-body');
+        if (!patientListBody) return;
+        
         patientListBody.innerHTML = '';
         
-        // timestamp 기준으로 정렬
-        allPatients.sort((a, b) => {
-            if (a.type === 'waiting' && b.type === 'waiting') {
-                return a.timestamp - b.timestamp;
-            }
-            if (a.type === 'reservation' && b.type === 'reservation') {
-                return a.rsvdTime - b.rsvdTime;
-            }
-            if (a.type === 'waiting') return -1;  // waiting이 항상 먼저
-            return 1;  // reservation이 나중에
-        });
-
-        // 정렬된 목록 렌더링
+        // 중복 제거를 위해 Set 사용
+        const uniquePatients = new Map();
+        
         allPatients.forEach(patient => {
-            if (patient.element) {
-                patientListBody.appendChild(patient.element);
-            }
+            const key = `${patient.type}-${patient.element.querySelector('.patient-id-span').textContent}`;
+            uniquePatients.set(key, patient);
         });
+        
+        // 중복이 제거된 환자 목록을 다시 배열로 변환하여 정렬
+        Array.from(uniquePatients.values())
+            .sort((a, b) => {
+                if (a.type === 'waiting' && b.type === 'waiting') {
+                    return a.timestamp - b.timestamp;
+                }
+                if (a.type === 'reservation' && b.type === 'reservation') {
+                    return a.rsvdTime - b.rsvdTime;
+                }
+                if (a.type === 'waiting') return -1;
+                return 1;
+            })
+            .forEach(patient => {
+                if (patient.element) {
+                    patientListBody.appendChild(patient.element);
+                }
+            });
     }
 
     // waiting 리스너

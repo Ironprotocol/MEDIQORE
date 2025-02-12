@@ -149,7 +149,18 @@
     color: rgb(180, 180, 180);
 }
 
-/* 드롭다운 목록이 열렸을 때 최상위로 표시 */
+/* 드롭다운 컨테이너 스타일 //2025-02-11 17:25 */
+.doctor-dropdown {
+    position: relative;
+}
+
+/* 드롭다운 목록 스타일 //2025-02-11 17:25 */
 .doctor-options {
-    z-index: 1000;  /* 매우 높은 z-index 값 */
+    position: absolute;
+    z-index: 1000;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 100%;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
