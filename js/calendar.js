@@ -252,11 +252,6 @@ function handleCellClick(hour, minute, column) {
                 <textarea class="tooltip-complaint-other" placeholder="Specify other complaints"></textarea>
             </div>
 
-            <!-- <label>Select Doctor</label> 2025-02-12 17:30 주석풀면됨-->
-            <div class="tooltip-doctor-select">
-                <!-- <div class="tooltip-doctor-selected">Choose a doctor</div> 2025-02-12 17:30 주석풀면됨-->
-                <div class="tooltip-doctor-options"></div>
-            </div>
 
             <div class="tooltip-buttons">
                 <button class="tooltip-rsvd-btn">RSVD</button>
@@ -298,69 +293,22 @@ function handleCellClick(hour, minute, column) {
     });
 
     // 의사 목록 로드 및 드롭다운 설정
-    const doctorSelect = tooltip.querySelector('.tooltip-doctor-select'); //변수가 사용되지 않고있음
-    const doctorSelected = tooltip.querySelector('.tooltip-doctor-selected');
-    const doctorOptions = tooltip.querySelector('.tooltip-doctor-options');
+  
+   // Primary Complaint 드롭다운 이벤트 추가
+   const complaintSelect = tooltip.querySelector('.tooltip-complaint');
+   const complaintOther = tooltip.querySelector('.tooltip-complaint-other');
 
-    // Firebase에서 의사 목록 가져오기
-    const user = auth.currentUser;
-    if (user) {
-        const [hospitalName] = user.email.split('@')[0].split('.');
-        const staffRef = collection(db, 'hospitals', hospitalName, 'staff');
-        const q = query(staffRef, where('role', '==', 'doctor'));
-        
-        getDocs(q).then((querySnapshot) => {
-            // 'Choose a doctor' 옵션 추가
-            const defaultOption = document.createElement('div');
-            defaultOption.className = 'tooltip-doctor-option';
-            defaultOption.textContent = 'Choose a doctor';
-            doctorOptions.appendChild(defaultOption);
-
-            // 의사 목록 추가
-            querySnapshot.forEach((doc) => {
-                const doctorData = doc.data();
-                const option = document.createElement('div');
-                option.className = 'tooltip-doctor-option';
-                option.textContent = doctorData.name;
-                doctorOptions.appendChild(option);
-            });
-
-            // 초기 상태 명시적 설정
-            doctorOptions.style.display = 'none';
-        });
-    }
-
-    // 드롭다운 토글
-    doctorSelected.addEventListener('click', (e) => {
-        e.stopPropagation();  // 이벤트 버블링 방지
-        doctorOptions.style.display = doctorOptions.style.display === 'none' ? 'block' : 'none';
-    });
-
-    // 옵션 선택
-    doctorOptions.addEventListener('click', (e) => {
-        if (e.target.classList.contains('tooltip-doctor-option')) {
-            doctorSelected.textContent = e.target.textContent;
-            doctorOptions.style.display = 'none';
-            e.stopPropagation();  // 이벤트 버블링 방지
-        }
-    });
-
-    // Primary Complaint 드롭다운 이벤트 추가
-    const complaintSelect = tooltip.querySelector('.tooltip-complaint');
-    const complaintOther = tooltip.querySelector('.tooltip-complaint-other');
-
-    complaintSelect.addEventListener('change', (e) => {
-        if (e.target.value === 'other') {
-            complaintOther.style.display = 'block';
-        } else {
-            complaintOther.style.display = 'none';
-        }
-    });
-
+   complaintSelect.addEventListener('change', (e) => {
+       if (e.target.value === 'other') {
+           complaintOther.style.display = 'block';
+       } else {
+           complaintOther.style.display = 'none';
+       }
+   });
     // RSVD 버튼 이벤트 리스너
     const rsvdButton = tooltip.querySelector('.tooltip-rsvd-btn');
     rsvdButton.addEventListener('click', async (e) => {
-        e.preventDefault();  // 폼 제출 방지
+        e.preventDefault();
         try {
             const name = tooltip.querySelector('.tooltip-name').value;
             const birthDay = tooltip.querySelector('.tooltip-birth-select:nth-child(1) .birth-selected').textContent;
@@ -377,8 +325,8 @@ function handleCellClick(hour, minute, column) {
             const primaryComplaint = tooltip.querySelector('.tooltip-complaint').value;
             const otherComplaint = tooltip.querySelector('.tooltip-complaint-other').value;
             const finalComplaint = primaryComplaint === 'other' ? otherComplaint : primaryComplaint || null;
-            const doctor = tooltip.querySelector('.tooltip-doctor-selected').textContent;
-            const selectedDoctor = doctor === 'Choose a doctor' ? null : doctor;
+            // 의사 정보 관련 코드 제거하고 항상 null로 설정
+            const selectedDoctor = null;
 
             const user = auth.currentUser;
             const [hospitalName] = user.email.split('@')[0].split('.');
@@ -446,29 +394,26 @@ function handleCellClick(hour, minute, column) {
             alert('Failed to make reservation: ' + error.message);
         }
     });
-
-    // 닫기 버튼 이벤트
-    tooltip.querySelector('.tooltip-close').addEventListener('click', () => {
-        tooltip.remove();
-    });
+    
     // 외부 클릭 시 드롭다운 닫기
     document.addEventListener('click', (e) => {
-        // tooltip 내부의 모든 드롭다운 닫기
-        if (!doctorSelected.contains(e.target) && !doctorOptions.contains(e.target)) {
-            doctorOptions.style.display = 'none';
-        }
-        
-        // birth date 드롭다운들도 닫기
+        // birth date 드롭다운들 닫기
         if (!e.target.closest('.tooltip-birth-select')) {
+            const birthSelects = tooltip.querySelectorAll('.tooltip-birth-select');
             birthSelects.forEach(select => {
                 select.querySelector('.birth-options').style.display = 'none';
             });
         }
         
-        // tooltip 자체 닫기 (기존 코드)
+        // tooltip 자체 닫기
         if (!tooltip.contains(e.target) && !e.target.classList.contains('schedule-cell')) {
             tooltip.remove();
         }
+    });
+
+    // 닫기 버튼 이벤트
+    tooltip.querySelector('.tooltip-close').addEventListener('click', () => {
+        tooltip.remove();
     });
 }
 
