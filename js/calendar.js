@@ -444,7 +444,7 @@ async function updateCalendarReservations(hospitalName) {
     });
 }
 
-async function updateSchedulerReservations(currentDate) {
+export async function updateSchedulerReservations(currentDate) {
     // 기존 예약 표시 제거
     document.querySelectorAll('.schedule-cell').forEach(cell => {
         cell.innerHTML = '';

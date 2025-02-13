@@ -1,5 +1,8 @@
 import { auth, db, doc, getDoc } from './firebase-config.js';
-import { CustomCalendar } from './calendar.js';
+import { CustomCalendar, updateSchedulerReservations } from './calendar.js';
+
+// months 배열 추가
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 // 사용자 권한 체크 함수를 별도로 분리
 export async function checkUserPermissions(user) {
@@ -96,21 +99,40 @@ export function initializeMenuEvents() {
                 'desk': ['desk-content', 'desk-content-right']
             };
             
+            // Reservation 메뉴 클릭 시 특별 처리
+            if (menuText === 'reservation') {
+                const content = document.getElementById('reservation-content');
+                if (content) {
+                    content.style.display = 'block';
+                    
+                    // 달력 초기화 및 오늘 날짜 설정
+                    new CustomCalendar();
+                    
+                    // 오늘 날짜로 스케줄러 업데이트
+                    const today = new Date();
+                    const formattedDate = `${String(today.getDate()).padStart(2, '0')}.${months[today.getMonth()]}.${today.getFullYear()}`;
+                    document.querySelector('.scheduler-header .current-date').textContent = formattedDate;
+                    
+                    // 스케줄러 예약 정보 업데이트
+                    const user = auth.currentUser;
+                    if (user) {
+                        updateSchedulerReservations(formattedDate);
+                    }
+                }
+                return;
+            }
+
+            // 다른 메뉴들
             const contentIds = menuToContainer[menuText];
             if (Array.isArray(contentIds)) {  // desk 메뉴인 경우
                 contentIds.forEach(id => {
                     document.getElementById(id).style.display = 'block';
                 });
                 return;
-            } else {  // 다른 메뉴들
+            } else {
                 const content = document.getElementById(contentIds);
                 if (content) {
                     content.style.display = 'block';
-                    
-                    // Reservation 메뉴 클릭 시 달력 초기화
-                    if (menuText === 'reservation') {
-                        new CustomCalendar();
-                    }
                 }
             }
         });
