@@ -49,12 +49,20 @@ async function createPatientElement(hospitalName, patientData, patientId, type) 
         return complaint;
     }
 
-    // 시간 포맷팅 함수 추가
+    // 시간 포맷팅 함수 수정
     function formatTime(timestamp) {
-        const date = timestamp.toDate();
-        const hours = date.getHours().toString().padStart(2, '0');
-        const minutes = date.getMinutes().toString().padStart(2, '0');
-        return `${hours}:${minutes}`;
+        // timestamp가 null이거나 undefined인 경우 처리
+        if (!timestamp) return '';
+        
+        try {
+            const date = timestamp.toDate();
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            return `${hours}:${minutes}`;
+        } catch (error) {
+            console.error('Error formatting time:', error);
+            return '';
+        }
     }
 
     // 시간 정보 가져오기

@@ -10,117 +10,9 @@ export function handleComplaintChange() {
     }
 }
 
-// Doctor 목록 로드 함수
+// Doctor 목록 로드 함수 - 완전히 비활성화
 export async function loadDoctors() {
-    try {
-        const user = auth.currentUser;
-        if (!user) return;
-
-        const [hospitalName] = user.email.split('@')[0].split('.');
-        const staffRef = collection(db, 'hospitals', hospitalName, 'staff');
-        const q = query(staffRef, where('role', '==', 'doctor'));
-        const querySnapshot = await getDocs(q);
-
-        // registration 페이지의 드롭다운 요소들
-        const doctorSelect = document.getElementById('doctorselect');
-        const doctorSelected = document.querySelector('.registration-doctor-selected');
-        const doctorOptions = document.querySelector('.registration-doctor-options');
-        
-        // 기존 옵션 제거
-        while (doctorSelect.options.length > 1) {
-            doctorSelect.remove(1);
-        }
-        doctorOptions.innerHTML = '';
-
-        // 의사 데이터를 배열로 변환하여 정렬
-        const doctors = [];
-        querySnapshot.forEach((doc) => {
-            doctors.push({
-                id: doc.id,
-                ...doc.data()
-            });
-        });
-
-        // 상태 우선순위 정의
-        const statusPriority = {
-            'start': 0,
-            'break': 1,
-            'login': 2,
-            'logout': 3
-        };
-
-        // 상태와 계정 번호로 정렬
-        doctors.sort((a, b) => {
-            const statusDiff = statusPriority[a.work] - statusPriority[b.work];
-            if (statusDiff !== 0) return statusDiff;
-            
-            const aNumber = parseInt(a.id.split('.').pop());
-            const bNumber = parseInt(b.id.split('.').pop());
-            return aNumber - bNumber;
-        });
-
-        // 'Choose a doctor' 옵션 먼저 추가
-        const defaultOption = document.createElement('div');
-        defaultOption.className = 'registration-doctor-option';
-        defaultOption.dataset.value = '';
-        defaultOption.innerHTML = `
-            <div class="registration-doctor-option-content">
-                <span>Choose a doctor</span>
-            </div>
-        `;
-        doctorOptions.appendChild(defaultOption);
-
-        doctors.forEach((doctorData) => {
-            const selectOption = document.createElement('option');
-            selectOption.value = doctorData.id;
-            selectOption.textContent = doctorData.name;
-            doctorSelect.appendChild(selectOption);
-
-            const dropdownOption = document.createElement('div');
-            dropdownOption.className = `registration-doctor-option${doctorData.work === 'logout' ? ' disabled' : ''}`;
-            dropdownOption.dataset.value = doctorData.id;
-            dropdownOption.innerHTML = `
-                <div class="registration-doctor-option-content">
-                    <span class="${doctorData.work === 'logout' ? 'disabled' : ''}">${doctorData.name}</span>
-                    <img src="image/${doctorData.work}.png" alt="${doctorData.work}" class="status-icon">
-                </div>
-            `;
-            doctorOptions.appendChild(dropdownOption);
-        });
-
-        // 드롭다운 초기 상태 명시적 설정
-        doctorOptions.style.display = 'none';  //이게 너무나 중요
-
-        // 드롭다운 토글 이벤트
-        doctorSelected.addEventListener('click', function(e) {
-            e.stopPropagation();
-            doctorOptions.style.display = doctorOptions.style.display === 'none' ? 'block' : 'none';
-        });
-
-        // 옵션 선택 이벤트
-        doctorOptions.addEventListener('click', function(e) {
-            const option = e.target.closest('.registration-doctor-option');
-            if (option && !option.classList.contains('disabled')) {
-                const value = option.dataset.value;
-                const text = value ? option.querySelector('span').textContent : 'Choose a doctor';
-                
-                doctorSelect.value = value;
-                doctorSelected.textContent = text;
-                doctorOptions.style.display = 'none';
-                e.stopPropagation();
-            }
-        });
-
-        // 외부 클릭 시 드롭다운 닫기
-        document.addEventListener('click', function(e) {
-            if (!doctorSelected.contains(e.target)) {
-                doctorOptions.style.display = 'none';
-            }
-        });
-
-    } catch (error) {
-        console.error('Error loading doctors:', error);
-    }
+    return; // 함수 실행 즉시 종료
 }
 
 // 남아공 지역 데이터
@@ -251,14 +143,14 @@ export function initializeInsuranceForm() {
     });
 }
 
-// 환자 등록 이벤트 초기화
+// 환자 등록 이벤트 초기화 함수 수정
 export function initializeRegistrationForm() {
     document.querySelector('.register-btn').addEventListener('click', async () => {
         try {
             const user = auth.currentUser;
             if (!user) return;
 
-            // 필수 입력값 확인 (doctorId 제외)
+            // 필수 입력값 확인 (의사 선택 제외)
             const patientName = document.getElementById('patientName').value.trim();
             const idNumber = document.getElementById('idNumber').value.trim();
             const birthDay = document.getElementById('birthDay').value;
@@ -274,17 +166,6 @@ export function initializeRegistrationForm() {
                 !district || !city || !state || !primaryComplaint || !phoneNumber) {
                 alert('Please fill in all required fields');
                 return;
-            }
-
-            // 의사 선택은 선택사항으로 처리
-            const doctorId = document.getElementById('doctorselect').value;
-            let doctorName = '';
-            
-            if (doctorId) {
-                const [hospitalName] = user.email.split('@')[0].split('.');
-                const doctorRef = doc(db, 'hospitals', hospitalName, 'staff', doctorId);
-                const doctorDoc = await getDoc(doctorRef);
-                doctorName = doctorDoc.data().name;
             }
 
             // 병원명 추출
@@ -322,13 +203,13 @@ export function initializeRegistrationForm() {
                         idNumber,
                         birthDate: Timestamp.fromDate(new Date(
                             parseInt(birthYear),
-                            parseInt(birthMonth) - 1,  // JavaScript의 월은 0부터 시작
+                            parseInt(birthMonth) - 1,
                             parseInt(birthDay),
-                            0, 0, 0  // 시간, 분, 초는 0으로 고정
+                            0, 0, 0
                         )),
                         address: `${district}, ${city}, ${state}`,
                         insurance: insuranceData,
-                        phoneNumber: phoneNumber  // 전화번호 추가
+                        phoneNumber: phoneNumber
                     }
                 });
             }
@@ -344,7 +225,7 @@ export function initializeRegistrationForm() {
                 complaintData = `other: ${otherComplaint}`;
             }
 
-            // 현재 날짜시간으로 문서 ID 생성 (DD.MM.YYYY_HHMMSS)
+            // 현재 날짜시간으로 문서 ID 생성
             const now = new Date();
             const dateId = `${now.toLocaleDateString('en-ZA', {
                 day: '2-digit',
@@ -357,9 +238,9 @@ export function initializeRegistrationForm() {
             await setDoc(visitRef, {
                 timestamp: serverTimestamp(),
                 primaryComplaint: complaintData,
-                doctor: doctorName,  // 빈 문자열이거나 의사 이름
+                doctor: null,  // 의사 정보 null로 설정
                 progress: 'waiting'
-            }, { merge: true });
+            });
 
             // 날짜 형식 수정 및 waiting 경로 추가
             const today = new Date();
@@ -367,29 +248,29 @@ export function initializeRegistrationForm() {
                 day: '2-digit',
                 month: 'short',
                 year: 'numeric'
-            }).replace(/ /g, '.'); // 공백을 .으로 변경
+            }).replace(/ /g, '.');
 
-            // dates 컬렉션 생성 및 데이터 저장 
+            // dates 컬렉션에 데이터 저장
             const datesRef = doc(
                 db,
                 'hospitals', 
                 hospitalName,
                 'dates',
-                currentDate,  // dateString에서 currentDate로 변경
+                currentDate,
                 'waiting',
-                `${patientName}.${idNumber}`
+                patientId
             );
 
             await setDoc(datesRef, {
                 timestamp: serverTimestamp(),
                 primaryComplaint: complaintData,
-                doctor: doctorName,  // 빈 문자열이거나 의사 이름
-                progress: 'waiting'  // progress 필드 추가
-            }, { merge: true });
+                doctor: null,  // 의사 정보 null로 설정
+                progress: 'waiting'
+            });
 
             alert('Patient registration completed successfully');
 
-            // 폼 초기화
+            // 폼 초기화 (의사 선택 관련 코드 제거)
             document.getElementById('patientName').value = '';
             document.getElementById('idNumber').value = '';
             document.getElementById('birthDay').value = '';
@@ -399,23 +280,20 @@ export function initializeRegistrationForm() {
             document.getElementById('city').value = '';
             document.getElementById('state').value = '';
             document.getElementById('primaryComplaint').value = '';
-            document.getElementById('doctorselect').value = '';
-            document.querySelector('.registration-doctor-selected').textContent = 'Choose a doctor';
+            document.getElementById('otherComplaint').value = '';
+            document.getElementById('phoneNumber').value = '';
             document.querySelectorAll('input[name="insuranceStatus"]').forEach(radio => radio.checked = false);
             document.getElementById('insuranceProvider').value = '';
             document.getElementById('insuranceNumber').value = '';
-            document.getElementById('otherComplaint').value = '';
-            document.getElementById('phoneNumber').value = '';
 
-            // waiting 컬렉션에 환자 추가할 때 timestamp 포함
+            // waiting 컬렉션에 환자 추가할 때
             const waitingRef = doc(collection(db, 'hospitals', hospitalName, 'dates', currentDate, 'waiting'), patientId);
             await setDoc(waitingRef, {
                 primaryComplaint: primaryComplaint,
                 progress: 'waiting',
                 doctor: null,
-                timestamp: serverTimestamp()  // 등록 시점의 timestamp 추가
+                timestamp: serverTimestamp()  // 이 부분이 제대로 저장되는지 확인
             });
-
         } catch (error) {
             console.error('Error registering patient:', error);
             alert('Failed to register patient: ' + error.message);
