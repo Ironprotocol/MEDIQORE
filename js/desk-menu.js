@@ -1,5 +1,6 @@
 import { auth, db, doc, getDoc } from './firebase-config.js';
 import { CustomCalendar, updateSchedulerReservations } from './calendar.js';
+import { clearPatientSelection } from './patient-list.js';
 
 // months 배열 추가
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -135,6 +136,9 @@ export function initializeMenuEvents() {
                     content.style.display = 'block';
                 }
             }
+
+            // 메뉴 변경 시 환자 선택 상태 초기화
+            clearPatientSelection();
         });
     });
 }

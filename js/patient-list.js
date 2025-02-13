@@ -219,6 +219,23 @@ async function createPatientElement(hospitalName, patientData, patientId, type) 
         }
     });
 
+    // 클릭 이벤트 추가
+    patientElement.addEventListener('click', (e) => {
+        // 이미 선택된 요소를 다시 클릭한 경우
+        if (patientElement.classList.contains('selected')) {
+            patientElement.classList.remove('selected');
+            return;
+        }
+
+        // 다른 모든 환자 정보 UI의 selected 클래스 제거
+        document.querySelectorAll('.patient-info-container').forEach(container => {
+            container.classList.remove('selected');
+        });
+        
+        // 클릭된 환자 정보 UI에 selected 클래스 추가
+        patientElement.classList.add('selected');
+    });
+
     return patientElement;
 }
 
@@ -310,4 +327,11 @@ export async function initializePatientList(hospitalName, currentDate) {
         unsubscribeWaiting();
         unsubscribeReservation();
     };
+}
+
+// desk-menu.js의 메뉴 클릭 이벤트에서 selected 상태를 초기화하는 코드 추가
+export function clearPatientSelection() {
+    document.querySelectorAll('.patient-info-container').forEach(container => {
+        container.classList.remove('selected');
+    });
 }
