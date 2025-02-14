@@ -1,4 +1,3 @@
-
         /*==========================================================여기부터 사이드바2에 속하는 요소들들========================================================*/
         /* sidebar2: 두 번째 사이드바 컨테이너 */
         .sidebar2 {
@@ -74,26 +73,50 @@
         /*------------- Room/Desk UI 공통 스타일 ------------*/
          .room-item {
             width: 100%;
-            height: 40px;
+            min-height: 40px;
             background-color: white;
             border: 1px solid hsl(0, 0%, 85%);
             border-radius: 8px;
             margin-bottom: 10px;
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 15px;
+            flex-direction: column;  /* 수직 방향 레이아웃 */
             box-sizing: border-box;
         }
 
-        .room-item:last-child {
-            margin-bottom: 0;
+        .room-header {
+            height: 40px;
+            padding: 0 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
-        /* Room/Desk 텍스트 스타일 */
-        .room-title {
+        .room-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;  /* 제목과 의사 이름 사이 간격 */
+        }
+
+        .patient-list {
+            border-top: 1px solid hsl(0, 0%, 85%);  /* 구분선 추가 */
+        }
+
+        .room-patient-item {
+            padding: 8px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .patient-name {
             font-size: 10px;
             color: rgb(110, 110, 124);
+        }
+
+        .patient-status-icon {
+            width: 73px;
+            height: 30.5px;
+            object-fit: contain;
         }
 
         /* Join 버튼 스타일 */
@@ -162,4 +185,46 @@
         }
 
         /*==========================================================여기까지지 사이드바2에 속하는 요소들들========================================================*/
+       
+        /* Room 환자 목록 스타일 //2024-02-13 15:30 */
+        .room-item.has-patients {
+            height: auto;
+            min-height: 40px;
+        }
+
+        .room-header {
+            height: 40px;
+            padding: 0 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .room-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .patient-list {
+            border-top: 1px solid hsl(0, 0%, 85%);
+        }
+
+        .room-patient-item {
+            padding: 8px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .patient-name {
+            font-size: 10px;
+            color: rgb(110, 110, 124);
+        }
+
+        .patient-status-icon {
+            width: 73px;
+            height: 30.5px;
+            object-fit: contain;
+        }
        

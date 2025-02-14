@@ -199,20 +199,51 @@ async function createPatientElement(hospitalName, patientData, patientId, type) 
                 doctorSelected.style.color = 'rgb(110, 110, 124)'; // 회색으로
                 doctorSelected.textContent = 'Choose a doctor';
             } else {
-                // 의사 선택한 경우
                 const doctorRef = doc(db, 'hospitals', hospitalName, 'staff', doctorId);
                 const doctorDoc = await getDoc(doctorRef);
-                const doctorName = doctorDoc.data().name;
+                const doctorData = doctorDoc.data();
 
-                // 데이터베이스 업데이트
-                const waitingDocRef = doc(waitingRef, patientId);
-                await updateDoc(waitingDocRef, {
-                    doctor: doctorName
+                // 의사가 login 상태일 때 처리 //2024-02-13 15:30
+                if (doctorData.work === 'login') {
+                    alert('Doctor is not ready for patients.');
+                    return;
+                }
+
+                // 의사의 현재 room 찾기 //2024-02-13 15:30
+                const roomsRef = collection(db, 'hospitals', hospitalName, 'treatment.room');
+                const roomsSnapshot = await getDocs(roomsRef);
+                let doctorRoom = null;
+
+                roomsSnapshot.forEach(roomDoc => {
+                    if (roomDoc.data().doctor === doctorData.name) {
+                        doctorRoom = { id: roomDoc.id, ...roomDoc.data() };
+                    }
                 });
 
-                // UI 업데이트 - 진한 검정색으로
+                if (!doctorRoom) {
+                    alert('Cannot find doctor\'s room.');
+                    return;
+                }
+
+                // room에 환자 정보 추가 //2024-02-13 15:30
+                const roomRef = doc(roomsRef, doctorRoom.id);
+                const currentPatients = doctorRoom.patients || [];
+                await updateDoc(roomRef, {
+                    patients: [...currentPatients, {
+                        id: patientId,
+                        name: patientId.split('.')[0],
+                        status: type
+                    }]
+                });
+
+                // waiting 문서 업데이트
+                const waitingDocRef = doc(waitingRef, patientId);
+                await updateDoc(waitingDocRef, {
+                    doctor: doctorData.name
+                });
+
                 doctorSelected.style.color = '#000000';
-                doctorSelected.textContent = doctorName;
+                doctorSelected.textContent = doctorData.name;
             }
             
             doctorOptions.style.display = 'none';

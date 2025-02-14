@@ -26,21 +26,37 @@ export async function initializeRoomManagement(hospitalName) {
         ];
 
         // UI 업데이트
-        roomContainer.innerHTML = allItems.map(item => `
-            <div class="room-item">
-                <div style="display: flex; align-items: center;">
-                    <span class="room-title">${item.id}</span>
-                    ${item.type === 'room' && item.doctor ? 
-                        `<span class="doctor-name">${item.doctor}</span>` : 
+        roomContainer.innerHTML = allItems.map(item => {
+            const hasPatients = item.type === 'room' && item.patients && item.patients.length > 0;
+            return `
+                <div class="room-item ${hasPatients ? 'has-patients' : ''}">
+                    <div class="room-header">
+                        <div class="room-info">
+                            <span class="room-title">${item.id}</span>
+                            ${item.type === 'room' && item.doctor ? 
+                                `<span class="doctor-name">${item.doctor}</span>` : 
+                                ''}
+                        </div>
+                        ${item.type === 'room' ? 
+                            (item.doctor ? 
+                                `<button class="exit-btn" data-room="${item.id}">Exit</button>` : 
+                                `<button class="join-btn" data-room="${item.id}">Join</button>`
+                            ) : ''}
+                    </div>
+                    ${hasPatients ? 
+                        `<div class="patient-list">
+                            ${item.patients.map(patient => `
+                                <div class="room-patient-item">
+                                    <span class="patient-name">${patient.name}</span>
+                                    <img src="image/${patient.status}.png" alt="${patient.status}" 
+                                         class="patient-status-icon">
+                                </div>
+                            `).join('')}
+                        </div>` : 
                         ''}
                 </div>
-                ${item.type === 'room' ? 
-                    (item.doctor ? 
-                        `<button class="exit-btn" data-room="${item.id}">Exit</button>` : 
-                        `<button class="join-btn" data-room="${item.id}">Join</button>`
-                    ) : ''}
-            </div>
-        `).join('');
+            `;
+        }).join('');
 
         // Join 버튼 이벤트 리스너
         document.querySelectorAll('.join-btn').forEach(btn => {
