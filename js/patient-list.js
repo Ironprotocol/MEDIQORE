@@ -180,7 +180,7 @@ async function createPatientElement(hospitalName, patientData, patientId, type) 
         doctorOptions.style.display = doctorOptions.style.display === 'none' ? 'block' : 'none';
     });
 
-    // 드롭다운 옵션 클릭 이벤트
+    // 의사 선택 이벤트
     doctorOptions.addEventListener('click', async (e) => {
         e.stopPropagation();
         const option = e.target.closest('.doctor-option');
@@ -203,13 +203,13 @@ async function createPatientElement(hospitalName, patientData, patientId, type) 
                 const doctorDoc = await getDoc(doctorRef);
                 const doctorData = doctorDoc.data();
 
-                // 의사가 login 상태일 때 처리 //2024-02-13 15:30
+                // 의사가 login 상태일 때 처리
                 if (doctorData.work === 'login') {
                     alert('Doctor is not ready for patients.');
                     return;
                 }
 
-                // 의사의 현재 room 찾기 //2024-02-13 15:30
+                // 의사의 현재 room 찾기
                 const roomsRef = collection(db, 'hospitals', hospitalName, 'treatment.room');
                 const roomsSnapshot = await getDocs(roomsRef);
                 let doctorRoom = null;
@@ -225,9 +225,17 @@ async function createPatientElement(hospitalName, patientData, patientId, type) 
                     return;
                 }
 
-                // room에 환자 정보 추가 //2024-02-13 15:30
-                const roomRef = doc(roomsRef, doctorRoom.id);
+                // 중복 환자 체크 //2024-02-13 15:45
                 const currentPatients = doctorRoom.patients || [];
+                const isDuplicate = currentPatients.some(patient => patient.id === patientId);
+                
+                if (isDuplicate) {
+                    alert('The same patient already exists in the room.');
+                    return;
+                }
+
+                // room에 환자 정보 추가
+                const roomRef = doc(roomsRef, doctorRoom.id);
                 await updateDoc(roomRef, {
                     patients: [...currentPatients, {
                         id: patientId,
