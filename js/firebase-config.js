@@ -14,7 +14,8 @@
           serverTimestamp, 
           Timestamp,
           onSnapshot,
-          orderBy 
+          orderBy,
+          deleteDoc
       } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
                                                                                                                                                                                                     
       // Firebase 초기화
@@ -47,5 +48,6 @@
           serverTimestamp, 
           Timestamp,
           onSnapshot,
-          orderBy 
+          orderBy,
+          deleteDoc
       };

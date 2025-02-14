@@ -227,4 +227,32 @@
             height: 30.5px;
             object-fit: contain;
         }
+
+        /* Patient List 항목 스타일 수정 //2024-02-13 16:20 */
+        .progress-span {
+            margin-right: 20px;  /* 상태 아이콘 오른쪽 여백 추가 */
+        }
+
+        .doctor-dropdown-span {
+            margin-right: 20px;  /* 의사 선택 드롭박스 오른쪽 여백 추가 */
+        }
+
+        /* 삭제 버튼 스타일 */
+        .delete-patient-btn {
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: none;
+            color: #ff4444;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 0;
+            margin-right: 10px;
+            transition: color 0.3s ease;
+        }
+
+        .delete-patient-btn:hover {
+            color: #cc3333;
+        }
        

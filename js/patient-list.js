@@ -1,6 +1,6 @@
 import {  auth, db, collection, query, where, getDocs, 
     doc, getDoc, setDoc, serverTimestamp, Timestamp,
-    onSnapshot, orderBy, updateDoc } from './firebase-config.js';
+    onSnapshot, orderBy, updateDoc, deleteDoc } from './firebase-config.js';
 
 // 전역 상태로 환자 목록 관리
 let allPatients = [];
@@ -96,6 +96,7 @@ async function createPatientElement(hospitalName, patientData, patientId, type, 
                 </div>
             </div>
         </span>
+        <button class="delete-patient-btn">×</button>
     `;
 
     // 의사 목록 로드 및 드롭다운 이벤트 설정
@@ -283,6 +284,49 @@ async function createPatientElement(hospitalName, patientData, patientId, type, 
         
         // 클릭된 환자 정보 UI에 selected 클래스 추가
         patientElement.classList.add('selected');
+    });
+
+    // 삭제 버튼 이벤트 리스너 추가
+    const deleteBtn = patientElement.querySelector('.delete-patient-btn');
+    deleteBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        if (confirm('Are you sure you want to delete this patient?')) {
+            try {
+                // 환자 문서 삭제
+                if (type === 'waiting') {
+                    const waitingRef = doc(db, 'hospitals', hospitalName, 'dates', currentDate, 'waiting', patientId);
+                    await deleteDoc(waitingRef);
+                } else if (type === 'reservation') {
+                    const reservationRef = doc(db, 'hospitals', hospitalName, 'dates', currentDate, 'reservation', patientId);
+                    await deleteDoc(reservationRef);
+                }
+
+                // Room에서 환자 정보 삭제 //이 로직은 추후 삭제될수있음 2025-02-14
+                const roomsRef = collection(db, 'hospitals', hospitalName, 'treatment.room');
+                const roomsSnapshot = await getDocs(roomsRef);
+                
+                roomsSnapshot.forEach(async roomDoc => {
+                    const roomData = roomDoc.data();
+                    if (roomData.patients) {
+                        // 삭제된 환자를 제외한 환자 목록 생성
+                        const updatedPatients = roomData.patients.filter(
+                            patient => patient.id !== patientId
+                        );
+                        
+                        // 환자 목록이 변경된 경우에만 업데이트
+                        if (updatedPatients.length !== roomData.patients.length) {
+                            await updateDoc(doc(roomsRef, roomDoc.id), {
+                                patients: updatedPatients
+                            });
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error deleting patient:', error);
+                alert('Failed to delete patient');
+            }
+        }
     });
 
     return patientElement;
