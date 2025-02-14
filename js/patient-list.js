@@ -13,7 +13,7 @@ window.addEventListener('click', () => {
 });
 
 // 환자 요소 생성 함수 (기존 로직 재사용)
-async function createPatientElement(hospitalName, patientData, patientId, type) {
+async function createPatientElement(hospitalName, patientData, patientId, type, currentDate) {
     const patientRef = doc(db, 'hospitals', hospitalName, 'patient', patientId);
     const patientDoc = await getDoc(patientRef);
     
@@ -105,6 +105,15 @@ async function createPatientElement(hospitalName, patientData, patientId, type) 
     const doctorSelected = doctorContainer.querySelector('.doctor-selected');
     const doctorOptions = doctorContainer.querySelector('.doctor-options');
 
+    // 드롭다운 초기 상태 설정 //2024-02-13 15:55
+    if (patientData.doctor) {
+        doctorSelected.textContent = patientData.doctor;
+        doctorSelected.style.color = '#000000';  // 의사가 선택된 경우 검은색
+    } else {
+        doctorSelected.textContent = 'Choose a doctor';
+        doctorSelected.style.color = 'rgb(110, 110, 124)';  // 선택되지 않은 경우 회색
+    }
+
     // 의사 목록 로드
     const staffRef = collection(db, 'hospitals', hospitalName, 'staff');
     const q = query(staffRef, where('role', '==', 'doctor'));
@@ -186,17 +195,18 @@ async function createPatientElement(hospitalName, patientData, patientId, type) 
         const option = e.target.closest('.doctor-option');
         if (option && !option.classList.contains('disabled')) {
             const doctorId = option.dataset.value;
+            
+            // waitingRef 정의 시 currentDate 사용
+            const waitingRef = collection(db, 'hospitals', hospitalName, 'dates', currentDate, 'waiting');
 
             // Choose a doctor 선택한 경우
             if (!doctorId) {
-                // 데이터베이스 업데이트 - doctor 필드를 null로
                 const waitingDocRef = doc(waitingRef, patientId);
                 await updateDoc(waitingDocRef, {
                     doctor: null
                 });
 
-                // UI 업데이트
-                doctorSelected.style.color = 'rgb(110, 110, 124)'; // 회색으로
+                doctorSelected.style.color = 'rgb(110, 110, 124)';
                 doctorSelected.textContent = 'Choose a doctor';
             } else {
                 const doctorRef = doc(db, 'hospitals', hospitalName, 'staff', doctorId);
@@ -244,7 +254,7 @@ async function createPatientElement(hospitalName, patientData, patientId, type) 
                     }]
                 });
 
-                // waiting 문서 업데이트
+                // waiting 문서 업데이트 - 이제 waitingRef를 사용할 수 있음
                 const waitingDocRef = doc(waitingRef, patientId);
                 await updateDoc(waitingDocRef, {
                     doctor: doctorData.name
@@ -326,12 +336,12 @@ export async function initializePatientList(hospitalName, currentDate) {
 
     // waiting 리스너
     const unsubscribeWaiting = onSnapshot(waitingQuery, async (snapshot) => {
-        // waiting 환자만 제거
         allPatients = allPatients.filter(p => p.type !== 'waiting');
         
         for (const doc of snapshot.docs) {
             const patientData = doc.data();
-            const element = await createPatientElement(hospitalName, patientData, doc.id, 'waiting');
+            // currentDate 전달
+            const element = await createPatientElement(hospitalName, patientData, doc.id, 'waiting', currentDate);
             if (element) {
                 allPatients.push({
                     type: 'waiting',
@@ -345,12 +355,12 @@ export async function initializePatientList(hospitalName, currentDate) {
 
     // reservation 리스너
     const unsubscribeReservation = onSnapshot(reservationQuery, async (snapshot) => {
-        // reservation 환자만 제거
         allPatients = allPatients.filter(p => p.type !== 'reservation');
         
         for (const doc of snapshot.docs) {
             const patientData = doc.data();
-            const element = await createPatientElement(hospitalName, patientData, doc.id, 'reservation');
+            // currentDate 전달
+            const element = await createPatientElement(hospitalName, patientData, doc.id, 'reservation', currentDate);
             if (element) {
                 allPatients.push({
                     type: 'reservation',
