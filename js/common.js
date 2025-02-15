@@ -1,4 +1,5 @@
 import { auth, db, doc, getDoc, collection, getDocs, updateDoc, serverTimestamp } from './firebase-config.js';
+import { checkCurrentRoomPatients } from './room.js';
 
 // 닫기 버튼 클릭 이벤트 처리
 export function setupCloseButtons() {
@@ -18,50 +19,54 @@ export function setupCloseButtons() {
             });
         }
 
-// 로고 클릭 이벤트 핸들러 추가
+// 로고 클릭 이벤트 핸들러
 export function setupLogoLogout() {
     const logoContainer = document.querySelector('.logo-container');
     if (logoContainer) {
         logoContainer.addEventListener('click', async () => {
-            if (confirm('Do you want to logout?')) {
-                try {
-                    const user = auth.currentUser;
-                    if (user) {
-                        const [hospitalName, role] = user.email.split('@')[0].split('.');
-                        
-                        // 의사인 경우 진료실 정리 (로그아웃 시)
-                        if (role === 'doctor') {
-                            const staffRef = doc(db, 'hospitals', hospitalName, 'staff', user.email);
-                            const staffDoc = await getDoc(staffRef);
-                            const doctorName = staffDoc.data().name;
+            try {
+                const user = auth.currentUser;
+                if (!user) return;
 
-                            const roomsRef = collection(db, 'hospitals', hospitalName, 'treatment.room');
-                            const roomsSnapshot = await getDocs(roomsRef);
+                const [hospitalName, role] = user.email.split('@')[0].split('.');
+                
+                // 의사인 경우 환자 체크
+                if (role === 'doctor') {
+                    const staffRef = doc(db, 'hospitals', hospitalName, 'staff', user.email);
+                    const staffDoc = await getDoc(staffRef);
+                    const doctorName = staffDoc.data().name;
 
-                            // 의사가 배정된 진료실 찾아서 초기화
-                            for (const roomDoc of roomsSnapshot.docs) {
-                                const roomData = roomDoc.data();
-                                if (roomData.doctor === doctorName) {
-                                    await updateDoc(doc(roomsRef, roomDoc.id), {
-                                        doctor: null,
-                                        work: null
-                                    });
-                                }
-                            }
+                    // 환자 체크
+                    const canLogout = await checkCurrentRoomPatients(hospitalName, doctorName);
+                    if (!canLogout) return;
 
-                            // 의사 work 상태를 logout으로 변경
-                            await updateDoc(staffRef, {
-                                work: 'logout',
-                                lastUpdated: serverTimestamp()
+                    // 환자가 없는 경우 로그아웃 확인
+                    if (!confirm('Do you want to logout?')) return;
+
+                    // 의사가 배정된 진료실 찾아서 초기화
+                    const roomsRef = collection(db, 'hospitals', hospitalName, 'treatment.room');
+                    const roomsSnapshot = await getDocs(roomsRef);
+                    for (const roomDoc of roomsSnapshot.docs) {
+                        const roomData = roomDoc.data();
+                        if (roomData.doctor === doctorName) {
+                            await updateDoc(doc(roomsRef, roomDoc.id), {
+                                doctor: null,
+                                work: null
                             });
                         }
-
-                        await auth.signOut();
-                        window.location.href = 'main.html';
                     }
-                } catch (error) {
-                    console.error('Error during logout:', error);
+
+                    // 의사 work 상태를 logout으로 변경
+                    await updateDoc(staffRef, {
+                        work: 'logout',
+                        lastUpdated: serverTimestamp()
+                    });
                 }
+
+                await auth.signOut();
+                window.location.href = 'main.html';
+            } catch (error) {
+                console.error('Error during logout:', error);
             }
         });
     }
@@ -87,55 +92,54 @@ export function initializeStatusSelector() {
                 
                 // End Work 선택 시 로그아웃
                 if (status === 'end') {
-                    if (confirm('Do you want to logout?')) {
-                        try {
-                            const user = auth.currentUser;
-                            if (!user) return;
-                            
-                            const [hospitalName, role] = user.email.split('@')[0].split('.');
-                            
-                            // 의사인 경우 진료실 정리
-                            if (role === 'doctor') {
-                                // 의사 정보 가져오기
-                                const staffRef = doc(db, 'hospitals', hospitalName, 'staff', user.email);
-                                const staffDoc = await getDoc(staffRef);
-                                const doctorName = staffDoc.data().name;
+                    try {
+                        const user = auth.currentUser;
+                        if (!user) return;
+                        
+                        const [hospitalName, role] = user.email.split('@')[0].split('.');
+                        
+                        // 의사인 경우 환자 체크
+                        if (role === 'doctor') {
+                            const staffRef = doc(db, 'hospitals', hospitalName, 'staff', user.email);
+                            const staffDoc = await getDoc(staffRef);
+                            const doctorName = staffDoc.data().name;
 
-                                // 진료실 컬렉션 참조
-                                const roomsRef = collection(db, 'hospitals', hospitalName, 'treatment.room');
-                                const roomsSnapshot = await getDocs(roomsRef);
-                                
-                                // 의사가 배정된 진료실 찾아서 초기화
-                                for (const roomDoc of roomsSnapshot.docs) {
-                                    const roomData = roomDoc.data();
-                                    if (roomData.doctor === doctorName) {
-                                        await updateDoc(doc(roomsRef, roomDoc.id), {
-                                            doctor: null,
-                                            work: null
-                                        });
-                                    }
+                            // 환자 체크
+                            const canLogout = await checkCurrentRoomPatients(hospitalName, doctorName);
+                            if (!canLogout) return;
+
+                            // 환자가 없는 경우 로그아웃 확인
+                            if (!confirm('Do you want to logout?')) return;
+
+                            // 의사가 배정된 진료실 찾아서 초기화
+                            const roomsRef = collection(db, 'hospitals', hospitalName, 'treatment.room');
+                            const roomsSnapshot = await getDocs(roomsRef);
+                            for (const roomDoc of roomsSnapshot.docs) {
+                                const roomData = roomDoc.data();
+                                if (roomData.doctor === doctorName) {
+                                    await updateDoc(doc(roomsRef, roomDoc.id), {
+                                        doctor: null,
+                                        work: null
+                                    });
                                 }
                             }
-                            
-                            const userRef = doc(db, 'hospitals', hospitalName, 'staff', user.email);
-                            
-                            // work 상태를 'logout'으로 업데이트
-                            await updateDoc(userRef, {
-                                work: 'logout',
-                                lastUpdated: serverTimestamp()
-                            });
-                            
-                            await auth.signOut();
-                            window.location.href = 'main.html';
-                            return;
-                        } catch (error) {
-                            console.error('Logout error:', error);
-                            alert('Logout failed: ' + error.message);
-                            return;
                         }
-                    } else {
-                        return; // 로그아웃 취소 시 상태 변경하지 않음
+                        
+                        const userRef = doc(db, 'hospitals', hospitalName, 'staff', user.email);
+                        
+                        // work 상태를 'logout'으로 업데이트
+                        await updateDoc(userRef, {
+                            work: 'logout',
+                            lastUpdated: serverTimestamp()
+                        });
+                        
+                        await auth.signOut();
+                        window.location.href = 'main.html';
+                    } catch (error) {
+                        console.error('Logout error:', error);
+                        alert('Logout failed: ' + error.message);
                     }
+                    return;
                 }
 
                 try {

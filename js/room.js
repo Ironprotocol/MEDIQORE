@@ -172,3 +172,28 @@ export async function handleRoomLogout() {
         console.error('Error handling logout:', error);
     }
 }
+
+// 현재 방의 환자 체크 함수
+export async function checkCurrentRoomPatients(hospitalName, doctorName) {
+    try {
+        const roomsRef = collection(db, 'hospitals', hospitalName, 'treatment.room');
+        const roomsSnapshot = await getDocs(roomsRef);
+        
+        // 현재 의사가 있는 방 찾기
+        for (const roomDoc of roomsSnapshot.docs) {
+            const roomData = roomDoc.data();
+            if (roomData.doctor === doctorName) {
+                // 현재 방에 환자가 있는지 확인
+                if (roomData.patients && roomData.patients.length > 0) {
+                    alert('There are still patients in this room.');
+                    return false;
+                }
+                return true;
+            }
+        }
+        return true; // 의사가 어떤 방에도 없는 경우
+    } catch (error) {
+        console.error('Error checking room patients:', error);
+        return false;
+    }
+}
