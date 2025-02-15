@@ -4,20 +4,29 @@ import { checkCurrentRoomPatients } from './room.js';
 // 닫기 버튼 클릭 이벤트 처리
 export function setupCloseButtons() {
     const closeButtons = document.querySelectorAll('.close-button');
-            closeButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    // 현재 버튼이 속한 content-container를 찾아서 숨김
-                    const contentContainer = this.closest('.content-container, .content-container-2');
-                    if (contentContainer) {
-                        contentContainer.style.display = 'none';
-                    }
-                    
-                    // 관련된 메뉴 아이템의 active 상태 제거
-                    const menuItems = document.querySelectorAll('.menu-item');
-                    menuItems.forEach(item => item.classList.remove('active'));
-                });
+    closeButtons.forEach(button => {
+        const container = button.closest('.content-container, .content-container-2');
+        if (container && 
+            !container.classList.contains('reservation-container') && 
+            !container.classList.contains('desk-container-right') &&
+            !container.classList.contains('prescription-container') &&
+            !container.matches('.desk-container')) {
+            
+            button.addEventListener('click', function() {
+                if (container) {
+                    container.style.display = 'none';
+                }
+                
+                // 관련된 메뉴 아이템의 active 상태 제거
+                const menuItems = document.querySelectorAll('.menu-item');
+                menuItems.forEach(item => item.classList.remove('active'));
             });
+        } else {
+            // 해당 컨테이너들의 Close 버튼 숨기기
+            button.style.display = 'none';
         }
+    });
+}
 
 // 로고 클릭 이벤트 핸들러
 export function setupLogoLogout() {
