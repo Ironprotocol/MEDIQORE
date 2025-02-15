@@ -98,7 +98,10 @@ export async function initializeRoomManagement(hospitalName) {
         // Exit 버튼 이벤트 리스너
         document.querySelectorAll('.exit-btn').forEach(btn => {
             btn.addEventListener('click', async function() {
-                if (!confirm('Do you want to leave this room?')) return;
+                // 영어로 확인 팝업 표시
+                if (!confirm('Are you sure you want to exit the room?')) {
+                    return; // No를 선택하면 함수 종료
+                }
 
                 const roomId = this.dataset.room;
                 const userEmail = auth.currentUser.email;
