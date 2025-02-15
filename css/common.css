@@ -125,38 +125,35 @@
             left: 450px;        /* sidebar1(200px) + sidebar2(250px) 너비만큼 */
             right: 0;
             height: calc(100vh - 60px);  /* 전체 높이에서 탑바 높이 뺌 */
-            background-color: rgb(211, 228, 255);  /* 회색 배경 */
+            background-color: rgb(211, 228, 255);
+            display: flex;      /* flex 레이아웃 적용 */
+            gap: 10px;          /* A와 B 사이 간격 */
+            padding: 10px;      /* 전체 패딩 */
         }
 
-        /* ---------------------공통 content-container 스타일 ------------------*/
-        .content-container {
+        /* A: 왼쪽 컨테이너 */
+        .content-container.desk-container {
             background-color: white;
-            margin: 10px;
             border-radius: 8px;
-            height: calc(100% - 20px); /* 상하 마진 각 10px 고려 */
+            height: calc(100% - 20px);
             position: relative;
             display: none;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            width: calc(100% - 20px); /* 좌우 마진 각 10px 고려 */
+            flex: 1;            /* 남은 공간의 60% 차지 */
+            max-width: 60%;     /* 최대 너비 제한 */
         }
 
-        /* desk 메뉴 전용 스타일 */
-        .content-container.desk-container {
-            width: calc(59%); /* 우측 마진 고려 */
-        }
-
-        /* desk 메뉴 우측 컨테이너 전용 스타일 */
+        /* B: 오른쪽 컨테이너 */
         .content-container-2.desk-container-right {
             background-color: white;
-            margin: 10px;
             border-radius: 8px;
             height: calc(100% - 20px);
-            position: absolute;
+            position: relative;  /* absolute에서 relative로 변경 */
             display: none;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            width: 39%; /* 좌측 마진 고려 */
-            right: 0px; /* 우측 마진 */
-            top: 0;
+            flex: 0.8;          /* 남은 공간의 40% 차지 */
+            min-width: 35%;     /* 최소 너비 제한 */
+            max-width: 40%;     /* 최대 너비 제한 */
         }
 
         /* prescription 메뉴 전용 스타일 */
