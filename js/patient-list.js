@@ -245,24 +245,59 @@ async function createPatientElement(hospitalName, patientData, patientId, type, 
                     return;
                 }
 
-                // room에 환자 정보 추가
-                const roomRef = doc(roomsRef, doctorRoom.id);
-                await updateDoc(roomRef, {
-                    patients: [...currentPatients, {
-                        id: patientId,
-                        name: patientId.split('.')[0],
-                        status: type
-                    }]
-                });
+                try {
+                    // reservation 환자인 경우 추가 처리
+                    if (type === 'reservation') {
+                        // 1. register.date 문서 찾기
+                        const registerDateRef = collection(db, 'hospitals', hospitalName, 'patient', patientId, 'register.date');
+                        const registerQuery = query(registerDateRef, where('timestamp', '>=', new Date(currentDate)));
+                        const registerSnapshot = await getDocs(registerQuery);
+                        
+                        if (!registerSnapshot.empty) {
+                            // 해당 날짜의 문서 업데이트
+                            await updateDoc(registerSnapshot.docs[0].ref, {
+                                progress: 'waiting'
+                            });
+                        }
 
-                // waiting 문서 업데이트 - 이제 waitingRef를 사용할 수 있음
-                const waitingDocRef = doc(waitingRef, patientId);
-                await updateDoc(waitingDocRef, {
-                    doctor: doctorData.name
-                });
+                        // 2. waiting 문서 생성
+                        await setDoc(doc(waitingRef, patientId), {
+                            doctor: doctorData.name,
+                            progress: 'waiting',
+                            primaryComplaint: patientData.primaryComplaint,
+                            timestamp: serverTimestamp()
+                        });
 
-                doctorSelected.style.color = '#000000';
-                doctorSelected.textContent = doctorData.name;
+                        // 3. reservation 문서 삭제
+                        const reservationRef = doc(db, 'hospitals', hospitalName, 'dates', currentDate, 'reservation', patientId);
+                        await deleteDoc(reservationRef);
+                    }
+
+                    // room에 환자 정보 추가
+                    const roomRef = doc(roomsRef, doctorRoom.id);
+                    await updateDoc(roomRef, {
+                        patients: [...currentPatients, {
+                            id: patientId,
+                            name: patientId.split('.')[0],
+                            status: type === 'reservation' ? 'waiting' : type
+                        }]
+                    });
+
+                    // waiting 문서 업데이트 (waiting 환자인 경우)
+                    if (type === 'waiting') {
+                        const waitingDocRef = doc(waitingRef, patientId);
+                        await updateDoc(waitingDocRef, {
+                            doctor: doctorData.name
+                        });
+                    }
+
+                    doctorSelected.style.color = '#000000';
+                    doctorSelected.textContent = doctorData.name;
+
+                } catch (error) {
+                    console.error('Error updating patient status:', error);
+                    alert('Failed to update patient status');
+                }
             }
             
             doctorOptions.style.display = 'none';
