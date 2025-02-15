@@ -98,11 +98,6 @@ export async function initializeRoomManagement(hospitalName) {
         // Exit 버튼 이벤트 리스너
         document.querySelectorAll('.exit-btn').forEach(btn => {
             btn.addEventListener('click', async function() {
-                // 영어로 확인 팝업 표시
-                if (!confirm('Are you sure you want to exit the room?')) {
-                    return; // No를 선택하면 함수 종료
-                }
-
                 const roomId = this.dataset.room;
                 const userEmail = auth.currentUser.email;
                 const [hospitalName, role] = userEmail.split('@')[0].split('.');
@@ -110,12 +105,28 @@ export async function initializeRoomManagement(hospitalName) {
                 if (role !== 'doctor') return;
 
                 try {
+                    // 현재 방의 환자 체크
+                    const roomRef = doc(db, 'hospitals', hospitalName, 'treatment.room', roomId);
+                    const roomDoc = await getDoc(roomRef);
+                    const roomData = roomDoc.data();
+
+                    // Exit 확인
+                    if (!confirm('Are you sure you want to exit the room?')) {
+                        return;
+                    }
+
+                    // 환자가 있는 경우
+                    if (roomData.patients && roomData.patients.length > 0) {
+                        alert('There are still patients in this room.');
+                        return;
+                    }
+
                     const userRef = doc(db, 'hospitals', hospitalName, 'staff', userEmail);
                     const userDoc = await getDoc(userRef);
                     const userName = userDoc.data().name;
 
                     // 진료실에서 의사 제거
-                    await updateDoc(doc(roomsRef, roomId), {
+                    await updateDoc(roomRef, {
                         doctor: null,
                         work: null
                     });
