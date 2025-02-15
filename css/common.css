@@ -126,57 +126,65 @@
             right: 0;
             height: calc(100vh - 60px);  /* 전체 높이에서 탑바 높이 뺌 */
             background-color: rgb(211, 228, 255);  /* 회색 배경 */
+            display: flex; /**/
+            gap: 10px; /**/
+            padding : 10px;/**/
+            box-sizing: border-box;
         }
 
         /* ---------------------공통 content-container 스타일 ------------------*/
         .content-container {
             background-color: white;
-            margin: 10px;
             border-radius: 8px;
-            height: calc(100% - 20px); /* 상하 마진 각 10px 고려 */
+            height: calc(100%); /* 상하 마진 각 10px 고려 */
             position: relative;
             display: none;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            width: calc(100% - 20px); /* 좌우 마진 각 10px 고려 */
+            width: calc(100%); /* 좌우 마진 각 10px 고려 */
         }
 
         /* desk 메뉴 전용 스타일 */
         .content-container.desk-container {
             width: calc(59%); /* 우측 마진 고려 */
+            flex : 1;/**/
+            max-width: 60%;/**/
         }
 
         /* desk 메뉴 우측 컨테이너 전용 스타일 */
         .content-container-2.desk-container-right {
             background-color: white;
-            margin: 10px;
+           /* margin: 10px;*/
             border-radius: 8px;
-            height: calc(100% - 20px);
-            position: absolute;
+            height: calc(100%);
+            position: relative;/**/
             display: none;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            width: calc(39%); /* 좌측 마진 고려 */
-            right: 0px; /* 우측 마진 */
-            top: 0;
+            /*width: calc(39%);  좌측 마진 고려 
+            right: 0px; /* 우측 마진 
+            top: 0;*/
+            flex : 0.8;/**/
+            min-width: 35%;/**/
+            max-width: 40%;/**/
         }
 
         /* prescription 메뉴 전용 스타일 */
         .content-container.prescription-container {
-            width: calc(100% - 20px); /* 좌우 마진 고려 */
+            width: calc(100%); /* 좌우 마진 고려 *//**/
         }
 
         /* reservation 메뉴 전용 스타일 */
         .content-container.reservation-container {
-            width: calc(100% - 20px); /* 좌우 마진 고려 */
+            width: calc(100%); /* 좌우 마진 고려 *//**/
         }
 
         /* pharmacy 메뉴 전용 스타일 */
         .content-container.pharmacy-container {
-            width: calc(100% - 20px); /* 좌우 마진 고려 */
+            width: calc(100%); /* 좌우 마진 고려 *//**/
         }
 
         /* data 메뉴 전용 스타일 */
         .content-container.data-container {
-            width: calc(100% - 20px); /* 좌우 마진 고려 */
+            width: calc(100%); /* 좌우 마진 고려 *//**/
         }
 
         /* --------------상단 메뉴바 스타일------------- */
@@ -190,7 +198,7 @@
             border-radius: 8px 8px 0 0;
         }
 
-        /* --------------하단단 메뉴바 스타일------------- */
+        /* --------------하단 메뉴바 스타일------------- */
         .content-footer {
             height: 50px;
             border-top: 1px solid hsl(0, 0%, 85%);
