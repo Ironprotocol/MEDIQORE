@@ -224,10 +224,16 @@ async function createPatientElement(hospitalName, patientData, patientId, type, 
                 const roomsRef = collection(db, 'hospitals', hospitalName, 'treatment.room');
                 const roomsSnapshot = await getDocs(roomsRef);
                 let doctorRoom = null;
+                let currentRoom = null;
 
+                // 환자가 현재 있는 room과 새로 배정될 room 찾기
                 roomsSnapshot.forEach(roomDoc => {
-                    if (roomDoc.data().doctor === doctorData.name) {
-                        doctorRoom = { id: roomDoc.id, ...roomDoc.data() };
+                    const roomData = roomDoc.data();
+                    if (roomData.doctor === doctorData.name) {
+                        doctorRoom = { id: roomDoc.id, ...roomData };
+                    }
+                    if (roomData.patients?.some(patient => patient.id === patientId)) {
+                        currentRoom = { id: roomDoc.id, ...roomData };
                     }
                 });
 
@@ -236,16 +242,41 @@ async function createPatientElement(hospitalName, patientData, patientId, type, 
                     return;
                 }
 
-                // 중복 환자 체크 //2024-02-13 15:45
-                const currentPatients = doctorRoom.patients || [];
-                const isDuplicate = currentPatients.some(patient => patient.id === patientId);
-                
-                if (isDuplicate) {
-                    alert('The same patient already exists in the room.');
+                // 같은 의사를 다시 선택한 경우
+                if (currentRoom && currentRoom.id === doctorRoom.id) {
+                    doctorOptions.style.display = 'none';
+                    return;
+                }
+
+                // 다른 의사로 재배정하는 경우 확인 메시지
+                if (currentRoom && !confirm(`Reassign to Dr. ${doctorData.name}?`)) {
+                    doctorOptions.style.display = 'none';
                     return;
                 }
 
                 try {
+                    // 현재 room에서 환자 제거 (이미 room에 있는 경우)
+                    if (currentRoom) {
+                        const updatedPatients = currentRoom.patients.filter(
+                            patient => patient.id !== patientId
+                        );
+                        await updateDoc(doc(roomsRef, currentRoom.id), {
+                            patients: updatedPatients
+                        });
+                    }
+
+                    // register.date 문서 업데이트
+                    const registerDateRef = collection(db, 'hospitals', hospitalName, 'patient', patientId, 'register.date');
+                    const registerQuery = query(registerDateRef, where('timestamp', '>=', new Date(currentDate)));
+                    const registerSnapshot = await getDocs(registerQuery);
+                    
+                    if (!registerSnapshot.empty) {
+                        // 해당 날짜의 문서 업데이트
+                        await updateDoc(registerSnapshot.docs[0].ref, {
+                            doctor: doctorData.name // 새로 선택된 의사 이름으로 업데이트
+                        });
+                    }
+
                     // reservation 환자인 경우 추가 처리
                     if (type === 'reservation') {
                         // 1. register.date 문서 찾기
@@ -273,9 +304,9 @@ async function createPatientElement(hospitalName, patientData, patientId, type, 
                         await deleteDoc(reservationRef);
                     }
 
-                    // room에 환자 정보 추가
-                    const roomRef = doc(roomsRef, doctorRoom.id);
-                    await updateDoc(roomRef, {
+                    // 새로운 room에 환자 추가
+                    const currentPatients = doctorRoom.patients || [];
+                    await updateDoc(doc(roomsRef, doctorRoom.id), {
                         patients: [...currentPatients, {
                             id: patientId,
                             name: patientId.split('.')[0],
