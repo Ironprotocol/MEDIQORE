@@ -72,19 +72,38 @@ export async function initializeRoomManagement(hospitalName) {
                     const userDoc = await getDoc(userRef);
                     const userName = userDoc.data().name;
 
-                    // 진료실에 의사 배정 (name과 work 상태 함께 저장)
+                    // 1. 먼저 의사가 다른 room에 있는지, 환자가 있는지 체크
+                    const hasPatients = await checkCurrentRoomPatients(hospitalName, userName);
+                    if (!hasPatients) {
+                        // "There are still patients in your room" 알림은 checkCurrentRoomPatients 함수 내에서 표시됨
+                        return;
+                    }
+
+                    // 2. 선택한 room에 다른 의사가 있는지 확인
                     const roomRef = doc(db, 'hospitals', hospitalName, 'treatment.room', roomId);
+                    const roomDoc = await getDoc(roomRef);
+                    const roomData = roomDoc.data();
+
+                    if (roomData.doctor) {
+                        alert("Another doctor is already working in your room");
+                        return;
+                    }
+
+                    // 3. room이 비어있는 경우, 시작 여부 확인
+                    if (!confirm("Would you like to start working?")) {
+                        return;
+                    }
+
+                    // 4. 모든 체크 통과 시 Join 진행
                     await updateDoc(roomRef, {
                         doctor: userName,
                         work: 'start'
                     });
 
-                    // 의사의 work 값 변경
                     await updateDoc(userRef, {
                         work: 'start'
                     });
 
-                    // 상단 상태 원 업데이트
                     const statusDot = document.querySelector('.status-dot');
                     if (statusDot) {
                         statusDot.style.backgroundColor = getStatusColor('start');
@@ -117,7 +136,7 @@ export async function initializeRoomManagement(hospitalName) {
 
                     // 환자가 있는 경우
                     if (roomData.patients && roomData.patients.length > 0) {
-                        alert('There are still patients in this room.');
+                        alert('There are still patients in your room.');
                         return;
                     }
 
@@ -185,7 +204,7 @@ export async function checkCurrentRoomPatients(hospitalName, doctorName) {
             if (roomData.doctor === doctorName) {
                 // 현재 방에 환자가 있는지 확인
                 if (roomData.patients && roomData.patients.length > 0) {
-                    alert('There are still patients in this room.');
+                    alert('There are still patients in your room.');
                     return false;
                 }
                 return true;
