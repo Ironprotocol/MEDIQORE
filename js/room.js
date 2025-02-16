@@ -26,37 +26,57 @@ export async function initializeRoomManagement(hospitalName) {
         ];
 
         // UI 업데이트
-        roomContainer.innerHTML = allItems.map(item => {
-            const hasPatients = item.type === 'room' && item.patients && item.patients.length > 0;
-            return `
-                <div class="room-item ${hasPatients ? 'has-patients' : ''}">
-                    <div class="room-header">
-                        <div class="room-info">
-                            <span class="room-title">${item.id}</span>
-                            ${item.type === 'room' && item.doctor ? 
-                                `<span class="doctor-name">${item.doctor}</span>` : 
-                                ''}
+        const updateRoomUI = async () => {
+            // 먼저 현재 의사 정보 가져오기
+            const currentUserEmail = auth.currentUser.email;
+            const [, role] = currentUserEmail.split('@')[0].split('.');
+            let currentDoctorName = '';
+            
+            if (role === 'doctor') {
+                const userRef = doc(db, 'hospitals', hospitalName, 'staff', currentUserEmail);
+                const userDoc = await getDoc(userRef);
+                currentDoctorName = userDoc.data().name;
+            }
+
+            // 그 다음 UI 업데이트
+            roomContainer.innerHTML = allItems.map(item => {
+                const hasPatients = item.type === 'room' && item.patients && item.patients.length > 0;
+                
+                return `
+                    <div class="room-item ${hasPatients ? 'has-patients' : ''}">
+                        <div class="room-header">
+                            <div class="room-info">
+                                <span class="room-title">${item.id}</span>
+                                ${item.type === 'room' && item.doctor ? 
+                                    `<span class="doctor-name">${item.doctor}</span>` : 
+                                    ''}
+                            </div>
+                            ${item.type === 'room' ? 
+                                (!item.doctor ? 
+                                    `<button class="join-btn" data-room="${item.id}">Join</button>` :
+                                    (item.doctor === currentDoctorName ? 
+                                        `<button class="exit-btn" data-room="${item.id}">Exit</button>` : 
+                                        ''
+                                    )
+                                ) : ''}
                         </div>
-                        ${item.type === 'room' ? 
-                            (item.doctor ? 
-                                `<button class="exit-btn" data-room="${item.id}">Exit</button>` : 
-                                `<button class="join-btn" data-room="${item.id}">Join</button>`
-                            ) : ''}
+                        ${hasPatients ? 
+                            `<div class="patient-list">
+                                ${item.patients.map(patient => `
+                                    <div class="room-patient-item">
+                                        <span class="patient-name">${patient.name}</span>
+                                        <img src="image/${patient.status}.png" alt="${patient.status}" 
+                                             class="patient-status-icon">
+                                    </div>
+                                `).join('')}
+                            </div>` : 
+                            ''}
                     </div>
-                    ${hasPatients ? 
-                        `<div class="patient-list">
-                            ${item.patients.map(patient => `
-                                <div class="room-patient-item">
-                                    <span class="patient-name">${patient.name}</span>
-                                    <img src="image/${patient.status}.png" alt="${patient.status}" 
-                                         class="patient-status-icon">
-                                </div>
-                            `).join('')}
-                        </div>` : 
-                        ''}
-                </div>
-            `;
-        }).join('');
+                `;
+            }).join('');
+        };
+
+        await updateRoomUI();
 
         // Join 버튼 이벤트 리스너
         document.querySelectorAll('.join-btn').forEach(btn => {
