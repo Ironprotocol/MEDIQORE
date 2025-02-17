@@ -94,6 +94,7 @@ export function initializeMenuEvents() {
             
             // 각 메뉴별 컨테이너 ID 매핑
             const menuToContainer = {
+                'home': 'home-content',  // Home 메뉴 추가
                 'prescription': 'prescription-content',
                 'reservation': 'reservation-content',
                 'pharmacy': 'pharmacy-content',
