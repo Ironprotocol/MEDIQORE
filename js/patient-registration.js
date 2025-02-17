@@ -161,9 +161,10 @@ export function initializeRegistrationForm() {
             const state = document.getElementById('state').value.trim();
             const primaryComplaint = document.getElementById('primaryComplaint').value;
             const phoneNumber = document.getElementById('phoneNumber').value;
+            const gender = document.getElementById('gender').value;
 
             if (!patientName || !idNumber || !birthDay || !birthMonth || !birthYear || 
-                !district || !city || !state || !primaryComplaint || !phoneNumber) {
+                !district || !city || !state || !primaryComplaint || !phoneNumber || !gender) {
                 alert('Please fill in all required fields');
                 return;
             }
@@ -209,7 +210,8 @@ export function initializeRegistrationForm() {
                         )),
                         address: `${district}, ${city}, ${state}`,
                         insurance: insuranceData,
-                        phoneNumber: phoneNumber
+                        phoneNumber: phoneNumber,
+                        gender: gender
                     }
                 });
             }
@@ -282,6 +284,7 @@ export function initializeRegistrationForm() {
             document.getElementById('primaryComplaint').value = '';
             document.getElementById('otherComplaint').value = '';
             document.getElementById('phoneNumber').value = '';
+            document.getElementById('gender').value = '';
             document.querySelectorAll('input[name="insuranceStatus"]').forEach(radio => radio.checked = false);
             document.getElementById('insuranceProvider').value = '';
             document.getElementById('insuranceNumber').value = '';
