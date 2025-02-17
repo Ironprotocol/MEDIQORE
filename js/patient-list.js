@@ -74,7 +74,12 @@ async function createPatientElement(hospitalName, patientData, patientId, type, 
     }
 
     patientElement.innerHTML = `
-        <span class="patient-id-span">${formatPatientId(patientId)}</span>
+        <span class="patient-id-span">
+            <img src="image/${patientDoc.data().info.gender || 'unknown'}.png" 
+                 alt="${patientDoc.data().info.gender || 'unknown'}" 
+                 class="gender-icon">
+            ${formatPatientId(patientId)}
+        </span>
         <span class="age-span">${age}years</span>
         <span class="complaint-span">${formatComplaint(patientData.primaryComplaint)}</span>
         <span class="time-span">${timeString}</span>

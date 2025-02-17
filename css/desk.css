@@ -60,7 +60,8 @@
 
 /* 환자 ID/이름 span - 고정 너비 */
 .patient-info-container .patient-id-span {
-    display: inline-block;
+    display: flex;
+    align-items: center;
     width: 160px;              /* 18자를 수용할 수 있는 너비로 수정 */
     text-align: left;          /* 왼쪽 정렬 */
     white-space: nowrap;       /* 줄바꿈 방지 */
@@ -173,4 +174,11 @@
     margin-right: 10px;
     color: rgb(110, 110, 124);
     font-size: 13px;
+}
+
+.gender-icon {
+    width: 16px;
+    height: 24px;
+    margin-right: 8px;
+    vertical-align: middle;
 }
