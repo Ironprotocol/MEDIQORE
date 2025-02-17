@@ -40,12 +40,7 @@
             margin-bottom: 40px;  /* RSVD 버튼을 위한 여백 */
         }
 
-        .tooltip-form label {
-            font-size: 12px;
-            color: #000;  /* 회색에서 검정색으로 변경 */
-            display: block;
-            margin-top: 8px;
-        }
+
 
         /* CSS 추가 - 위쪽 표시일 때의 화살표 스타일 */
         .tooltip-above:before {
@@ -68,13 +63,7 @@
             color: black;  /* 실제 옵션들은 검정색으로 */
         }
 
-        /* 입력 폼 간격 수정 */
-        .tooltip-form label {
-            font-size: 12px;
-            color: #000;
-            display: block;
-            margin-top: 0;  /* 라벨 상단 여백 제거 */
-        }
+
 
         .date-select-group {
             margin-bottom: 20px;  /* 입력 요소 아래 여백 통일 */
@@ -226,11 +215,10 @@
                 font-weight: bold;
             }
     
-            .tooltip-form input,
-            .tooltip-form select {
+            .tooltip-form input {
                 width: 100%;
                 padding: 8px 12px;
-                margin-bottom: 15px;
+
                 border: 1px solid #e0e0e0;
                 border-radius: 4px;
                 font-size: 12px;
@@ -278,6 +266,7 @@
 /* 모든 입력폼 공통 스타일 */
 .tooltip-form input,
 .tooltip-complaint,
+.tooltip-gender,
 .tooltip-complaint-other,
 .tooltip-doctor-selected,
 .birth-selected {
