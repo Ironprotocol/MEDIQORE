@@ -481,7 +481,7 @@ export async function updateSchedulerReservations(currentDate) {
             const cellIndex = rowIndex * 5 + index;
             if (cells[cellIndex]) {
                 const nameSpan = document.createElement('span');
-                nameSpan.className = 'patient-name';
+                nameSpan.className = 'patient-name-calendar';
                 nameSpan.textContent = `[${patientId}]`;
                 cells[cellIndex].appendChild(nameSpan);
             }

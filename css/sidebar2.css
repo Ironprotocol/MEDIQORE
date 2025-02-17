@@ -116,7 +116,7 @@
 
         .patient-name {
             font-size: 10px;
-            color: rgb(110, 110, 124);
+            color: rgb(0, 0, 0);
         }
 
         .patient-status-icon {
@@ -222,11 +222,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-
-        .patient-name {
-            font-size: 10px;
-            color: rgb(110, 110, 124);
         }
 
         .patient-status-icon {
