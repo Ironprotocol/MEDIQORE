@@ -296,7 +296,8 @@ async function createPatientElement(hospitalName, patientData, patientId, type, 
                             doctor: doctorData.name,
                             progress: 'waiting',
                             primaryComplaint: patientData.primaryComplaint,
-                            timestamp: serverTimestamp()
+                            timestamp: serverTimestamp(),
+                            gender: patientData.gender  // reservation의 gender 필드 가져오기
                         });
 
                         // 3. reservation 문서 삭제

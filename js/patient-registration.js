@@ -295,7 +295,8 @@ export function initializeRegistrationForm() {
                 primaryComplaint: primaryComplaint,
                 progress: 'waiting',
                 doctor: null,
-                timestamp: serverTimestamp()  // 이 부분이 제대로 저장되는지 확인
+                timestamp: serverTimestamp(),
+                gender: gender
             });
         } catch (error) {
             console.error('Error registering patient:', error);
