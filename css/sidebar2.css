@@ -270,3 +270,36 @@
             color: rgb(110, 110, 124);
         }
        
+        /* 환자 수 컨테이너 스타일 */
+        .patient-count-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            padding: 4px 12px;
+            background-color: rgb(247, 247, 255);
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        .patient-count-container:hover {
+            background-color: rgb(237, 237, 245);
+        }
+
+        .patient-count {
+            font-size: 12px;
+            font-weight: bold;
+            color: rgb(110, 110, 124);
+        }
+
+        .triangle-icon {
+            font-size: 8px;
+            color: rgb(110, 110, 124);
+            transition: transform 0.2s;
+            margin-left: 2px;
+        }
+
+        .triangle-icon.expanded {
+            transform: rotate(0deg);
+        }
+       

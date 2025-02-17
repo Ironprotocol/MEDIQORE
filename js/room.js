@@ -1,5 +1,8 @@
 import { auth, db, doc, getDoc, collection, getDocs, updateDoc, onSnapshot } from './firebase-config.js';
 
+// 펼침 상태를 저장할 Map 추가
+const expandedRooms = new Map();
+
 export async function initializeRoomManagement(hospitalName) {
     const roomContainer = document.querySelector('.patient-list-container');
     const roomsRef = collection(db, 'hospitals', hospitalName, 'treatment.room');
@@ -40,6 +43,7 @@ export async function initializeRoomManagement(hospitalName) {
             roomContainer.innerHTML = allItems.map(item => {
                 const hasPatients = item.type === 'room' && item.patients && item.patients.length > 0;
                 const patientCount = hasPatients ? item.patients.length : 0;
+                const isExpanded = expandedRooms.get(item.id) || false;
                 
                 return `
                     <div class="room-item ${hasPatients ? 'has-patients' : ''}" data-room-id="${item.id}">
@@ -53,11 +57,14 @@ export async function initializeRoomManagement(hospitalName) {
                             ${item.type === 'room' ? 
                                 (!item.doctor ? 
                                     `<button class="join-btn" data-room="${item.id}">Join</button>` :
-                                    `<span class="patient-count" data-room="${item.id}">${patientCount}</span>`
+                                    `<div class="patient-count-container" data-room="${item.id}">
+                                        <span class="patient-count">${patientCount}</span>
+                                        <span class="triangle-icon ${isExpanded ? 'expanded' : ''}">${isExpanded ? '▼' : '▲'}</span>
+                                    </div>`
                                 ) : ''}
                         </div>
                         ${hasPatients ? 
-                            `<div class="patient-list" style="display: none;">
+                            `<div class="patient-list" style="display: ${isExpanded ? 'block' : 'none'};">
                                 ${item.patients.map(patient => `
                                     <div class="room-patient-item">
                                         <span class="patient-name">${patient.name}</span>
@@ -71,14 +78,21 @@ export async function initializeRoomManagement(hospitalName) {
                 `;
             }).join('');
 
-            // 환자 수 클릭 이벤트 리스너 추가
-            document.querySelectorAll('.patient-count').forEach(countElement => {
-                countElement.addEventListener('click', function() {
+            // 환자 수 클릭 이벤트 리스너 수정
+            document.querySelectorAll('.patient-count-container').forEach(container => {
+                container.addEventListener('click', function() {
+                    const roomId = this.dataset.room;
                     const roomItem = this.closest('.room-item');
                     const patientList = roomItem.querySelector('.patient-list');
+                    const triangleIcon = this.querySelector('.triangle-icon');
+                    
                     if (patientList) {
-                        patientList.style.display = 
-                            patientList.style.display === 'none' ? 'block' : 'none';
+                        const isExpanded = expandedRooms.get(roomId) || false;
+                        expandedRooms.set(roomId, !isExpanded);
+                        
+                        patientList.style.display = !isExpanded ? 'block' : 'none';
+                        triangleIcon.textContent = !isExpanded ? '▼' : '▲';
+                        triangleIcon.classList.toggle('expanded');
                     }
                 });
             });
@@ -139,6 +153,7 @@ export async function initializeRoomManagement(hospitalName) {
 
 // 로그아웃 감지 및 처리
 export async function handleRoomLogout() {
+    expandedRooms.clear(); // 펼침 상태 초기화
     try {
         const [hospitalName, role] = auth.currentUser?.email.split('@')[0].split('.') || [];
         if (role === 'doctor') {
