@@ -66,8 +66,9 @@ export async function initializeRoomManagement(hospitalName) {
                         ${hasPatients ? 
                             `<div class="patient-list" style="display: ${isExpanded ? 'block' : 'none'};">
                                 ${item.patients.map(patient => `
-                                    <div class="room-patient-item">
+                                    <div class="room-patient-item" data-patient-id="${patient.id}">
                                         <span class="patient-name">${patient.name}</span>
+                                        <span class="patient-age" style="display: none;">${patient.age || '0years'}</span>
                                         <img src="image/${patient.status}.png" alt="${patient.status}" 
                                              class="patient-status-icon">
                                     </div>
@@ -145,6 +146,19 @@ export async function initializeRoomManagement(hospitalName) {
                     }
                 });
             });
+
+            // 환자 클릭 이벤트 리스너 추가
+            document.querySelectorAll('.room-patient-item').forEach(patientItem => {
+                patientItem.addEventListener('click', function() {
+                    // 이전에 선택된 환자의 active 상태 제거
+                    document.querySelectorAll('.room-patient-item').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    // 현재 선택된 환자에 active 상태 추가
+                    this.classList.add('active');
+                    handlePatientClick(this);
+                });
+            });
         };
 
         await updateRoomUI();
@@ -198,5 +212,25 @@ export async function checkCurrentRoomPatients(hospitalName, doctorName) {
     } catch (error) {
         console.error('Error checking room patients:', error);
         return false;
+    }
+}
+
+function handlePatientClick(patientElement) {
+    const patientName = patientElement.querySelector('.patient-name').textContent;
+    const patientAge = patientElement.closest('.room-patient-item').querySelector('.patient-age').textContent;
+
+    // Prescription 메뉴로 전환
+    const prescriptionMenu = Array.from(document.querySelectorAll('.menu-item')).find(
+        item => item.textContent.trim() === 'Prescription'
+    );
+
+    if (prescriptionMenu) {
+        prescriptionMenu.click();
+
+        // 환자 정보 이벤트 발생
+        const event = new CustomEvent('prescriptionPatientSelected', {
+            detail: { name: patientName, age: patientAge }
+        });
+        document.dispatchEvent(event);
     }
 }

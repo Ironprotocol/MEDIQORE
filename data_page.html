@@ -37,6 +37,7 @@
         import {initializeSubmenuEvents, initializeSubmenuItemEvents } from './js/sidebar2.js';
         import {CustomCalendar,initializeScheduler} from './js/calendar.js';
         import {handleComplaintChange, initializeNewPatientButton, loadDoctors, initializeAddressSearch, initializeInsuranceForm, initializeRegistrationForm} from './js/patient-registration.js';
+        import {initializePrescription} from './js/prescription.js';
 
         // 전역 함수
         window.app = app;
@@ -114,6 +115,7 @@
               const currentDate = document.querySelector('.current-date').textContent; // 현재 날짜 가져오기
               await initializePatientList(hospitalName, currentDate); //patient-list.js - 환자 리스트 전체 관리
               await initializeRoomManagement(hospitalName);  //room 관리 
+              initializePrescription();  // Prescription 초기화
                 
               auth.onAuthStateChanged(async (user) => {
                     if (!user) {
@@ -439,6 +441,11 @@
             <div class="content-header">
                 <div class="content-title">Prescription</div>
                 <button class="close-button">Close</button>
+            </div>
+            <div class="content-body">
+                <div class="no-patient-message" style="display: flex; justify-content: center; align-items: center; height: 100%;">
+                    Please select a patient
+                </div>
             </div>
         </div>
 
