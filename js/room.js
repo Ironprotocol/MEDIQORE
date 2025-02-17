@@ -27,7 +27,6 @@ export async function initializeRoomManagement(hospitalName) {
 
         // UI 업데이트
         const updateRoomUI = async () => {
-            // 먼저 현재 의사 정보 가져오기
             const currentUserEmail = auth.currentUser.email;
             const [, role] = currentUserEmail.split('@')[0].split('.');
             let currentDoctorName = '';
@@ -38,12 +37,12 @@ export async function initializeRoomManagement(hospitalName) {
                 currentDoctorName = userDoc.data().name;
             }
 
-            // 그 다음 UI 업데이트
             roomContainer.innerHTML = allItems.map(item => {
                 const hasPatients = item.type === 'room' && item.patients && item.patients.length > 0;
+                const patientCount = hasPatients ? item.patients.length : 0;
                 
                 return `
-                    <div class="room-item ${hasPatients ? 'has-patients' : ''}">
+                    <div class="room-item ${hasPatients ? 'has-patients' : ''}" data-room-id="${item.id}">
                         <div class="room-header">
                             <div class="room-info">
                                 <span class="room-title">${item.id}</span>
@@ -54,14 +53,11 @@ export async function initializeRoomManagement(hospitalName) {
                             ${item.type === 'room' ? 
                                 (!item.doctor ? 
                                     `<button class="join-btn" data-room="${item.id}">Join</button>` :
-                                    (item.doctor === currentDoctorName ? 
-                                        `<button class="exit-btn" data-room="${item.id}">Exit</button>` : 
-                                        ''
-                                    )
+                                    `<span class="patient-count" data-room="${item.id}">${patientCount}</span>`
                                 ) : ''}
                         </div>
                         ${hasPatients ? 
-                            `<div class="patient-list">
+                            `<div class="patient-list" style="display: none;">
                                 ${item.patients.map(patient => `
                                     <div class="room-patient-item">
                                         <span class="patient-name">${patient.name}</span>
@@ -74,117 +70,70 @@ export async function initializeRoomManagement(hospitalName) {
                     </div>
                 `;
             }).join('');
+
+            // 환자 수 클릭 이벤트 리스너 추가
+            document.querySelectorAll('.patient-count').forEach(countElement => {
+                countElement.addEventListener('click', function() {
+                    const roomItem = this.closest('.room-item');
+                    const patientList = roomItem.querySelector('.patient-list');
+                    if (patientList) {
+                        patientList.style.display = 
+                            patientList.style.display === 'none' ? 'block' : 'none';
+                    }
+                });
+            });
+
+            // Join 버튼 이벤트 리스너
+            document.querySelectorAll('.join-btn').forEach(btn => {
+                btn.addEventListener('click', async function() {
+                    const roomId = this.dataset.room;
+                    const userEmail = auth.currentUser.email;
+                    const [hospitalName, role] = userEmail.split('@')[0].split('.');
+
+                    if (role !== 'doctor') return;
+
+                    try {
+                        const userRef = doc(db, 'hospitals', hospitalName, 'staff', userEmail);
+                        const userDoc = await getDoc(userRef);
+                        const userName = userDoc.data().name;
+
+                        // 1. 선택한 room에 다른 의사가 있는지 확인
+                        const roomRef = doc(db, 'hospitals', hospitalName, 'treatment.room', roomId);
+                        const roomDoc = await getDoc(roomRef);
+                        const roomData = roomDoc.data();
+
+                        if (roomData.doctor) {
+                            alert("Another doctor is already working in your room");
+                            return;
+                        }
+
+                        // 2. room이 비어있는 경우, 시작 여부 확인
+                        if (!confirm("Would you like to start working?")) {
+                            return;
+                        }
+
+                        // 3. Join 진행
+                        await updateDoc(roomRef, {
+                            doctor: userName,
+                            work: 'start'
+                        });
+
+                        await updateDoc(userRef, {
+                            work: 'start'
+                        });
+
+                        const statusDot = document.querySelector('.status-dot');
+                        if (statusDot) {
+                            statusDot.style.backgroundColor = getStatusColor('start');
+                        }
+                    } catch (error) {
+                        console.error('Error joining room:', error);
+                    }
+                });
+            });
         };
 
         await updateRoomUI();
-
-        // Join 버튼 이벤트 리스너
-        document.querySelectorAll('.join-btn').forEach(btn => {
-            btn.addEventListener('click', async function() {
-                const roomId = this.dataset.room;
-                const userEmail = auth.currentUser.email;
-                const [hospitalName, role] = userEmail.split('@')[0].split('.');
-
-                if (role !== 'doctor') return;
-
-                try {
-                    const userRef = doc(db, 'hospitals', hospitalName, 'staff', userEmail);
-                    const userDoc = await getDoc(userRef);
-                    const userName = userDoc.data().name;
-
-                    // 1. 먼저 의사가 다른 room에 있는지, 환자가 있는지 체크
-                    const hasPatients = await checkCurrentRoomPatients(hospitalName, userName);
-                    if (!hasPatients) {
-                        // "There are still patients in your room" 알림은 checkCurrentRoomPatients 함수 내에서 표시됨
-                        return;
-                    }
-
-                    // 2. 선택한 room에 다른 의사가 있는지 확인
-                    const roomRef = doc(db, 'hospitals', hospitalName, 'treatment.room', roomId);
-                    const roomDoc = await getDoc(roomRef);
-                    const roomData = roomDoc.data();
-
-                    if (roomData.doctor) {
-                        alert("Another doctor is already working in your room");
-                        return;
-                    }
-
-                    // 3. room이 비어있는 경우, 시작 여부 확인
-                    if (!confirm("Would you like to start working?")) {
-                        return;
-                    }
-
-                    // 4. 모든 체크 통과 시 Join 진행
-                    await updateDoc(roomRef, {
-                        doctor: userName,
-                        work: 'start'
-                    });
-
-                    await updateDoc(userRef, {
-                        work: 'start'
-                    });
-
-                    const statusDot = document.querySelector('.status-dot');
-                    if (statusDot) {
-                        statusDot.style.backgroundColor = getStatusColor('start');
-                    }
-                } catch (error) {
-                    console.error('Error joining room:', error);
-                }
-            });
-        });
-
-        // Exit 버튼 이벤트 리스너
-        document.querySelectorAll('.exit-btn').forEach(btn => {
-            btn.addEventListener('click', async function() {
-                const roomId = this.dataset.room;
-                const userEmail = auth.currentUser.email;
-                const [hospitalName, role] = userEmail.split('@')[0].split('.');
-
-                if (role !== 'doctor') return;
-
-                try {
-                    // 현재 방의 환자 체크
-                    const roomRef = doc(db, 'hospitals', hospitalName, 'treatment.room', roomId);
-                    const roomDoc = await getDoc(roomRef);
-                    const roomData = roomDoc.data();
-
-                    // Exit 확인
-                    if (!confirm('Are you sure you want to exit the room?')) {
-                        return;
-                    }
-
-                    // 환자가 있는 경우
-                    if (roomData.patients && roomData.patients.length > 0) {
-                        alert('There are still patients in your room.');
-                        return;
-                    }
-
-                    const userRef = doc(db, 'hospitals', hospitalName, 'staff', userEmail);
-                    const userDoc = await getDoc(userRef);
-                    const userName = userDoc.data().name;
-
-                    // 진료실에서 의사 제거
-                    await updateDoc(roomRef, {
-                        doctor: null,
-                        work: null
-                    });
-
-                    // 의사의 work 값 변경
-                    await updateDoc(userRef, {
-                        work: 'login'
-                    });
-
-                    // 상단 상태 원 업데이트
-                    const statusDot = document.querySelector('.status-dot');
-                    if (statusDot) {
-                        statusDot.style.backgroundColor = getStatusColor('login');
-                    }
-                } catch (error) {
-                    console.error('Error exiting room:', error);
-                }
-            });
-        });
     });
 }
 
