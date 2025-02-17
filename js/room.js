@@ -2,6 +2,8 @@ import { auth, db, doc, getDoc, collection, getDocs, updateDoc, onSnapshot } fro
 
 // 펼침 상태를 저장할 Map 추가
 const expandedRooms = new Map();
+// 선택된 환자 ID 저장
+let selectedPatientId = null;
 
 export async function initializeRoomManagement(hospitalName) {
     const roomContainer = document.querySelector('.patient-list-container');
@@ -66,7 +68,8 @@ export async function initializeRoomManagement(hospitalName) {
                         ${hasPatients ? 
                             `<div class="patient-list" style="display: ${isExpanded ? 'block' : 'none'};">
                                 ${item.patients.map(patient => `
-                                    <div class="room-patient-item" data-patient-id="${patient.id}">
+                                    <div class="room-patient-item ${patient.id === selectedPatientId ? 'active' : ''}" 
+                                         data-patient-id="${patient.id}">
                                         <span class="patient-name">${patient.name}</span>
                                         <span class="patient-age" style="display: none;">${patient.age || '0years'}</span>
                                         <img src="image/${patient.status}.png" alt="${patient.status}" 
@@ -147,7 +150,7 @@ export async function initializeRoomManagement(hospitalName) {
                 });
             });
 
-            // 환자 클릭 이벤트 리스너 추가
+            // 환자 클릭 이벤트 리스너 수정
             document.querySelectorAll('.room-patient-item').forEach(patientItem => {
                 patientItem.addEventListener('click', function() {
                     // 이전에 선택된 환자의 active 상태 제거
@@ -156,6 +159,7 @@ export async function initializeRoomManagement(hospitalName) {
                     });
                     // 현재 선택된 환자에 active 상태 추가
                     this.classList.add('active');
+                    selectedPatientId = this.dataset.patientId;  // 선택된 환자 ID 저장
                     handlePatientClick(this);
                 });
             });
