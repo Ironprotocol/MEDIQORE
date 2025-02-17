@@ -208,6 +208,15 @@ function handleCellClick(hour, minute, column) {
             <label>Name</label>
             <input type="text" class="tooltip-name">
             
+            <label>Gender</label>
+            <div class="tooltip-gender-select">
+                <select class="tooltip-gender">
+                    <option value="">Select Gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
+            </div>
+            
             <label>Birth Date</label>
             <div class="date-select-group">
                 <div class="tooltip-birth-select">
@@ -311,6 +320,7 @@ function handleCellClick(hour, minute, column) {
         e.preventDefault();
         try {
             const name = tooltip.querySelector('.tooltip-name').value;
+            const gender = tooltip.querySelector('.tooltip-gender').value;
             const birthDay = tooltip.querySelector('.tooltip-birth-select:nth-child(1) .birth-selected').textContent;
             const birthMonth = tooltip.querySelector('.tooltip-birth-select:nth-child(2) .birth-selected').textContent;
             const birthYear = tooltip.querySelector('.tooltip-birth-select:nth-child(3) .birth-selected').textContent;
@@ -338,6 +348,7 @@ function handleCellClick(hour, minute, column) {
             await setDoc(patientInfoRef, {
                 info: {
                     name: name,
+                    gender: gender,
                     birthDate: Timestamp.fromDate(birthDate),
                     phoneNumber: phoneNumber,
                     address: null,
