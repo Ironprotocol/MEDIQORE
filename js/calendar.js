@@ -372,10 +372,11 @@ function handleCellClick(hour, minute, column) {
                 primaryComplaint: finalComplaint,
                 doctor: selectedDoctor,
                 progress: 'reservation',
-                rsvdTime: tooltipTime
+                rsvdTime: tooltipTime,
+                gender: gender
             });
 
-            // 3. 병원 날짜별 예약 목록 저장 부분 수정
+            // 3. 병원 날짜별 예약 목록 저장
             const [day, month, year] = tooltipDate.split('.');
             const monthIndex = months.indexOf(month);
             const [hour, minute] = tooltipTime.split(':');
@@ -385,10 +386,11 @@ function handleCellClick(hour, minute, column) {
 
             const reservationRef = doc(db, 'hospitals', hospitalName, 'dates', tooltipDate, 'reservation', patientId);
             await setDoc(reservationRef, {
-                timestamp: serverTimestamp(),  // 예약 등록 시점
+                timestamp: serverTimestamp(),
                 primaryComplaint: finalComplaint,
                 doctor: selectedDoctor,
-                rsvdTime: Timestamp.fromDate(rsvdDateTime)  // 실제 예약 시간
+                rsvdTime: Timestamp.fromDate(rsvdDateTime),
+                gender: gender
             });
 
             alert('Reservation completed successfully');
