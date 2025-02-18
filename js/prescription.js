@@ -6,7 +6,7 @@ export function initializePrescription() {
     // Room의 환자 클릭 이벤트에 대한 처리
     document.addEventListener('prescriptionPatientSelected', (e) => {
         const { name, age } = e.detail;
-        prescriptionTitle.textContent = `Prescription : ${name}   ${age}`;
+        prescriptionTitle.textContent = `${name} Prescription`;
         noPatientMessage.style.display = 'none';
     });
 }

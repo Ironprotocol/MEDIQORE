@@ -67,6 +67,10 @@
     white-space: nowrap;       /* 줄바꿈 방지 */
     overflow: hidden;          /* 넘치는 텍스트 숨김 */
     text-overflow: ellipsis;   /* 말줄임표 처리 */
+    font-size: 15px;
+    color : black;
+    font-style: bold;
+    
 }
 
 /* 나이 span - 고정 너비 */
@@ -177,8 +181,8 @@
 }
 
 .gender-icon {
-    width: 20px;
-    height: 28px;
+    width: 17px;
+    height: 24.65px;
     margin-right: 20px;
     vertical-align: middle;
 }
