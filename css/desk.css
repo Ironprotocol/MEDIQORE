@@ -4,27 +4,6 @@
     color: #666;
 }
 
-.content-header {
-    height: 50px;
-    border-bottom: 1px solid hsl(0, 0%, 85%);
-    border-radius: 8px 8px 0 0;
-}
-
-.content-body {
-    height: calc(100% - 100px);  /* 전체 높이에서 헤더와 푸터 높이를 뺌 */
-    overflow-y: auto;  /* 내용이 많을 경우 스크롤 */
-}
-
-.content-footer {
-    height: 50px;
-    border-top: 1px solid hsl(0, 0%, 85%);
-    border-radius: 0 0 8px 8px;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background-color: white;
-}
 
 /* 환자 정보 카드 스타일 */
 .patient-info-container {

@@ -80,22 +80,34 @@ export async function checkUserPermissions(user) {
 export function initializeMenuEvents() {
     const menuItems = document.querySelectorAll('.menu-item');
     const contentContainers = document.querySelectorAll('.content-container, .content-container-2');
+    const mainContent = document.querySelector('.main-content');
+    const prescriptionContent = document.querySelector('.main-content-prescription');
 
     menuItems.forEach(item => {
         item.addEventListener('click', async function() {
             menuItems.forEach(i => i.classList.remove('active'));
             this.classList.add('active');
 
+            const menuText = this.textContent.trim().toLowerCase();
+            
+            // Prescription 메뉴 처리
+            if (menuText === 'prescription') {
+                mainContent.style.display = 'none';
+                prescriptionContent.style.display = 'flex';
+                document.getElementById('prescription-content').style.display = 'block';
+                return;
+            }
+
+            // 다른 메뉴들 처리
+            mainContent.style.display = 'flex';
+            prescriptionContent.style.display = 'none';
             contentContainers.forEach(container => {
                 container.style.display = 'none';
             });
 
-            const menuText = this.textContent.trim().toLowerCase();
-            
-            // 각 메뉴별 컨테이너 ID 매핑
+            // 기존 메뉴 처리 로직...
             const menuToContainer = {
-                'home': 'home-content', 
-                'prescription': 'prescription-content',
+                'home': 'home-content',
                 'reservation': 'reservation-content',
                 'pharmacy': 'pharmacy-content',
                 'desk': ['desk-content', 'desk-content-right']

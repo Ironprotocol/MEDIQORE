@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="css/calendar.css">
     <link rel="stylesheet" href="css/tooltip_calendar.css">
     <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/prescription.css">
 </head>
     <style>
         body {
@@ -266,6 +267,21 @@
             <!-- 하단 컨테이너 내용 -->
         </div>
     </div>
+    <div class="main-content-prescription">
+        <div id="prescription-content" class="content-container-prescription">
+            <div class="content-header-prescription">
+                <div class="content-title-prescription">Prescription</div>
+                <button class="close-button">Close</button>
+            </div>
+            <div class="content-body-prescription">
+                <div class="no-patient-message" style="display: flex; justify-content: center; align-items: center; height: 100%;">
+                    Please select a patient
+                </div>
+            </div>
+            <div class="content-footer-prescription">
+            </div>
+        </div>
+    </div>
     <div class="main-content">
         <div id="data-content" class="content-container data-container">
             <div class="content-header">
@@ -445,19 +461,7 @@
             </div>
         </div>
 
-        <div id="prescription-content" class="content-container prescription-container">
-            <div class="content-header">
-                <div class="content-title">Prescription</div>
-                <button class="close-button">Close</button>
-            </div>
-            <div class="content-body">
-                <div class="no-patient-message" style="display: flex; justify-content: center; align-items: center; height: 100%;">
-                    Please select a patient
-                </div>
-            </div>
-            <div class="content-footer">
-            </div>
-        </div>
+
 
         <div id="reservation-content" class="content-container reservation-container">
             <div class="content-header">
@@ -470,7 +474,7 @@
                         <div class="calendar-nav">
                             <button id="prevMonth">&lt; Prev</button>
                         </div>
-                        <div class="month-year">2024년 3월</div>
+                        <div class="month-year"></div>
                         <div class="calendar-nav">
                             <button id="nextMonth">Next &gt;</button>
                         </div>
@@ -511,6 +515,5 @@
             </div>
         </div>
     </div>
-
 </body>
 </html>
