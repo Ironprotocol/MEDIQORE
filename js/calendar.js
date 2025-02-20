@@ -341,7 +341,7 @@ function handleCellClick(hour, minute, column) {
             const user = auth.currentUser;
             const [hospitalName] = user.email.split('@')[0].split('.');
             console.log('[RSVD] Hospital Name:', hospitalName);
-            const patientId = `${name.toLowerCase().replace(/\s+/g, '.')}`;
+            const patientId = `${name.replace(/\s+/g, '.')}`;
 
             // 1. 환자 기본 정보 저장
             const birthDate = new Date(`${birthMonth} ${birthDay} ${birthYear}`);
