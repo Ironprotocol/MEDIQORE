@@ -107,6 +107,14 @@ export async function initializeRoomManagement(hospitalName) {
                 currentDoctorName = userDoc.data().name;
             }
 
+            // 현재 의사가 어떤 room에 있는지 확인
+            let doctorCurrentRoom = null;
+            rooms.forEach(room => {
+                if (room.doctor === currentDoctorName) {
+                    doctorCurrentRoom = room.id;
+                }
+            });
+
             roomContainer.innerHTML = allItems.map(item => {
                 const hasPatients = item.type === 'room' && item.patients && item.patients.length > 0;
                 const patientCount = hasPatients ? item.patients.length : 0;
@@ -123,7 +131,10 @@ export async function initializeRoomManagement(hospitalName) {
                             </div>
                             ${item.type === 'room' ? 
                                 (!item.doctor ? 
-                                    `<button class="join-btn" data-room="${item.id}">Join</button>` :
+                                    // 의사가 다른 room에 없을 때만 join 버튼 표시
+                                    `<button class="join-btn" data-room="${item.id}" 
+                                        ${doctorCurrentRoom ? 'style="display: none;"' : ''}>
+                                        Join</button>` :
                                     `<div class="patient-count-container" data-room="${item.id}">
                                         <span class="patient-count">${patientCount}</span>
                                         <span class="triangle-icon ${isExpanded ? 'expanded' : ''}">${isExpanded ? '▼' : '▲'}</span>
