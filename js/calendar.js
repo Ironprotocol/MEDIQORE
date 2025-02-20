@@ -209,8 +209,8 @@ function handleCellClick(hour, minute, column) {
             <input type="text" class="tooltip-name">
             
             <label>Gender</label>
-            <div class="tooltip-complaint-select">
-                <select class="tooltip-complaint">
+            <div class="tooltip-gender-select">
+                <select class="tooltip-gender">
                     <option value="">Select Gender</option>
                     <option value="male">Male</option>
                     <option value="female">Female</option>
@@ -320,7 +320,7 @@ function handleCellClick(hour, minute, column) {
         e.preventDefault();
         try {
             const name = tooltip.querySelector('.tooltip-name').value;
-            const gender = tooltip.querySelector('.tooltip-complaint').value;
+            const gender = tooltip.querySelector('.tooltip-gender').value;
             const birthDay = tooltip.querySelector('.tooltip-birth-select:nth-child(1) .birth-selected').textContent;
             const birthMonth = tooltip.querySelector('.tooltip-birth-select:nth-child(2) .birth-selected').textContent;
             const birthYear = tooltip.querySelector('.tooltip-birth-select:nth-child(3) .birth-selected').textContent;
