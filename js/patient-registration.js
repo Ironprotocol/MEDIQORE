@@ -150,7 +150,7 @@ export function initializeRegistrationForm() {
             const user = auth.currentUser;
             if (!user) return;
 
-            // 필수 입력값 확인 (의사 선택 제외)
+            // 필수 입력값 확인
             const patientName = document.getElementById('patientName').value.trim();
             const idNumber = document.getElementById('idNumber').value.trim();
             const birthDay = document.getElementById('birthDay').value;
@@ -162,11 +162,26 @@ export function initializeRegistrationForm() {
             const primaryComplaint = document.getElementById('primaryComplaint').value;
             const phoneNumber = document.getElementById('phoneNumber').value;
             const gender = document.getElementById('gender').value;
+            // Insurance 선택 여부 확인 추가
+            const insuranceStatus = document.querySelector('input[name="insuranceStatus"]:checked');
 
+            // 기본 필수 입력값 체크
             if (!patientName || !idNumber || !birthDay || !birthMonth || !birthYear || 
-                !district || !city || !state || !primaryComplaint || !phoneNumber || !gender) {
+                !district || !city || !state || !primaryComplaint || !phoneNumber || !gender || 
+                !insuranceStatus) {
                 alert('Please fill in all required fields');
                 return;
+            }
+
+            // Have medical insurance 선택 시 추가 필수값 체크
+            if (insuranceStatus.value === 'has') {
+                const insuranceProvider = document.getElementById('insuranceProvider').value.trim();
+                const insuranceNumber = document.getElementById('insuranceNumber').value.trim();
+                
+                if (!insuranceProvider || !insuranceNumber) {
+                    alert('Please fill in all required fields');
+                    return;
+                }
             }
 
             // 병원명 추출
@@ -182,14 +197,13 @@ export function initializeRegistrationForm() {
             // 새로운 환자인 경우에만 info 필드 생성
             if (!patientDoc.exists()) {
                 // insurance 정보 수집
-                const insuranceStatus = document.querySelector('input[name="insuranceStatus"]:checked')?.value;
                 let insuranceData = {
                     status: '',
                     provider: '',
                     cardNumber: ''
                 };
 
-                if (insuranceStatus === 'has') {
+                if (insuranceStatus.value === 'has') {
                     insuranceData = {
                         status: 'have',
                         provider: document.getElementById('insuranceProvider').value,
@@ -235,13 +249,14 @@ export function initializeRegistrationForm() {
                 year: 'numeric'
             }).replace(/\//g, '.')}_${now.getHours().toString().padStart(2,'0')}${now.getMinutes().toString().padStart(2,'0')}${now.getSeconds().toString().padStart(2,'0')}`;
 
-            // register.date 컬렉션에 방문 기록 문서 생성
+            // register.date 컬렉션에 방문 기록 문서 생성 시 gender 필드 추가
             const visitRef = doc(patientRef, 'register.date', dateId);
             await setDoc(visitRef, {
                 timestamp: serverTimestamp(),
                 primaryComplaint: complaintData,
-                doctor: null,  // 의사 정보 null로 설정
-                progress: 'waiting'
+                doctor: null,
+                progress: 'waiting',
+                gender: gender  // gender 필드 추가
             });
 
             // 날짜 형식 수정 및 waiting 경로 추가
