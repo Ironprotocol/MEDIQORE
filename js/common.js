@@ -199,8 +199,7 @@ export function initializeZoomPrevention() {
         }
     }, { passive: false });
 }
-
-   
+  
 export async function displayUserName(user) {
     try {
         const [hospitalName] = user.email.split('@')[0].split('.');
