@@ -340,6 +340,7 @@ function handleCellClick(hour, minute, column) {
 
             const user = auth.currentUser;
             const [hospitalName] = user.email.split('@')[0].split('.');
+            console.log('[RSVD] Hospital Name:', hospitalName);
             const patientId = `${name.toLowerCase().replace(/\s+/g, '.')}`;
 
             // 1. 환자 기본 정보 저장
@@ -362,6 +363,7 @@ function handleCellClick(hour, minute, column) {
 
             // 선택된 날짜와 시간 가져오기
             const tooltipDate = tooltip.querySelector('.tooltip-date').textContent.trim().replace(/\s+/g, '.');
+            console.log('[RSVD] Selected Date:', tooltipDate);
             const tooltipTime = tooltip.querySelector('.tooltip-time').textContent;
             
             // 2. 환자 예약 기록 저장
@@ -393,14 +395,18 @@ function handleCellClick(hour, minute, column) {
                 gender: gender
             });
 
+            // Firebase 저장 후
+            console.log('[RSVD] Reservation saved successfully');
+
             alert('Reservation completed successfully');
             tooltip.remove();
 
-            // 예약 완료 후 달력과 스케줄러 즉시 업데이트 2025-02-12 12:45
+            console.log('[RSVD] Updating calendar and scheduler...');
             await Promise.all([
                 updateCalendarReservations(hospitalName),
                 updateSchedulerReservations(tooltipDate)
             ]);
+            console.log('[RSVD] Update completed');
 
         } catch (error) {
             console.error('Error making reservation:', error);
@@ -434,25 +440,24 @@ async function updateCalendarReservations(hospitalName) {
     const dates = document.querySelectorAll('.date:not(.empty)');
     
     dates.forEach(async (dateDiv) => {
-        const day = dateDiv.textContent;
+        // 기존 예약 수 표시가 있다면 제외하고 날짜만 가져오기
+        const existingCount = dateDiv.querySelector('.reservation-count');
+        if (existingCount) existingCount.remove();
+        
+        const day = dateDiv.textContent;  // 이제 순수하게 날짜만 남음
         const currentDate = new Date(document.querySelector('.month-year').textContent);
         const formattedDate = `${day.padStart(2, '0')}.${months[currentDate.getMonth()]}.${currentDate.getFullYear()}`;
         
-        // 해당 날짜의 reservation 컬렉션 조회
         const reservationRef = collection(db, 'hospitals', hospitalName, 'dates', formattedDate, 'reservation');
         const snapshot = await getDocs(reservationRef);
+      
         
-        // 예약 수가 있는 경우에만 표시
         if (snapshot.size > 0) {
-            // 기존 예약 수 표시 요소가 있으면 제거
-            const existingCount = dateDiv.querySelector('.reservation-count');
-            if (existingCount) existingCount.remove();
-            
-            // 새로운 예약 수 표시
             const countDiv = document.createElement('div');
             countDiv.className = 'reservation-count';
             countDiv.textContent = snapshot.size;
             dateDiv.appendChild(countDiv);
+        
         }
     });
 }
