@@ -2,10 +2,10 @@ import { auth, db, doc, getDoc } from './firebase-config.js';
 import { CustomCalendar, updateSchedulerReservations } from './calendar.js';
 import { clearPatientSelection } from './patient-list.js';
 
-// months 배열 추가
+// months 배열 추가 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-// 사용자 권한 체크 함수를 별도로 분리
+// 사용자 권한 체크 함수를 별도로 분리 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 export async function checkUserPermissions(user) {
     try {
         const email = user.email;

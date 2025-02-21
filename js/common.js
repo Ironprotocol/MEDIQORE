@@ -1,7 +1,62 @@
-import { auth, db, doc, getDoc, collection, getDocs, updateDoc, serverTimestamp } from './firebase-config.js';
+import { auth, db, doc, getDoc, collection, getDocs, updateDoc, serverTimestamp, onSnapshot } from './firebase-config.js';
 import { checkCurrentRoomPatients } from './room.js';
 
-// 닫기 버튼 클릭 이벤트 처리
+// 전역 변수로 리스너 해제 함수 저장
+let userStatusUnsubscribe = null;
+
+
+// 리스너 설정 함수를 하나로 통합하고 export ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+export function setupUserStatusListener(user) {
+    const [hospitalName] = user.email.split('@')[0].split('.');
+    const userRef = doc(db, 'hospitals', hospitalName, 'staff', user.email);
+    
+    return onSnapshot(userRef, (snapshot) => {
+        if (snapshot.exists()) {
+            const userData = snapshot.data();
+            // 모든 .user-name 요소 업데이트
+            document.querySelectorAll('.user-name').forEach(element => {
+                element.textContent = userData.name;
+            });
+            // 모든 상태 아이콘 업데이트
+            document.querySelectorAll('.current-status img').forEach(icon => {
+                icon.src = `image/${userData.work}.png`;
+                icon.alt = userData.work;
+            });
+        }
+    });
+}
+
+// displayUserName 함수 유지 (다른 곳에서 사용 중)
+export async function displayUserName(user) {
+    try {
+        if (userStatusUnsubscribe) {
+            userStatusUnsubscribe();
+        }
+        userStatusUnsubscribe = setupUserStatusListener(user);
+    } catch (error) {
+        console.error('Error displaying user name:', error);
+    }
+}
+
+// 현재 사용자 이름 초기화
+export function initializeUserName() {
+    // 현재 로그인된 사용자 확인 및 이름 표시
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+        displayUserName(currentUser);
+    }
+
+    // auth 상태 변경 감지
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            displayUserName(user);
+        }
+    });
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+//닫기 버튼 클릭 이벤트 처리/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 export function setupCloseButtons() {
     const closeButtons = document.querySelectorAll('.close-button');
     closeButtons.forEach(button => {
@@ -27,8 +82,9 @@ export function setupCloseButtons() {
         }
     });
 }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// 로고 클릭 이벤트 핸들러
+// 로고 클릭 이벤트 핸들러////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 export function setupLogoLogout() {
     const logoContainer = document.querySelector('.logo-container');
     if (logoContainer) {
@@ -39,7 +95,7 @@ export function setupLogoLogout() {
 
                 const [hospitalName, role] = user.email.split('@')[0].split('.');
                 
-                // 의사인 경우 환자 체크
+                // 로그아웃 시 의사인 경우 room 내부 환자 체크
                 if (role === 'doctor') {
                     const staffRef = doc(db, 'hospitals', hospitalName, 'staff', user.email);
                     const staffDoc = await getDoc(staffRef);
@@ -64,14 +120,12 @@ export function setupLogoLogout() {
                             });
                         }
                     }
-
                     // 의사 work 상태를 logout으로 변경
                     await updateDoc(staffRef, {
                         work: 'logout',
                         lastUpdated: serverTimestamp()
                     });
                 }
-
                 await auth.signOut();
                 window.location.href = 'main.html';
             } catch (error) {
@@ -80,8 +134,9 @@ export function setupLogoLogout() {
         });
     }
 }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// 상태 선택기 초기화
+// 상태 선택기 초기화 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 export function initializeStatusSelector() {
     const currentStatus = document.querySelector('.current-status');
     const dropdown = document.querySelector('.status-dropdown');
@@ -182,8 +237,9 @@ export function initializeStatusSelector() {
         });
     }
 }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// 확대/축소 방지 기능 초기화
+// 확대/축소 방지 기능 초기화 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 export function initializeZoomPrevention() {
     // 키보드로 확대/축소 방지
     document.addEventListener('keydown', function(e) {
@@ -199,39 +255,3 @@ export function initializeZoomPrevention() {
         }
     }, { passive: false });
 }
-  
-export async function displayUserName(user) {
-    try {
-        const [hospitalName] = user.email.split('@')[0].split('.');
-        const userRef = doc(db, 'hospitals', hospitalName, 'staff', user.email);
-        const userDoc = await getDoc(userRef);
-
-        if (userDoc.exists()) {
-            const userData = userDoc.data();
-            document.querySelector('.user-name').textContent = userData.name;
-            // 현재 work 상태에 따라 상태 아이콘 업데이트
-            const statusIcon = document.querySelector('.current-status img');
-            statusIcon.src = `image/${userData.work}.png`;
-            statusIcon.alt = userData.work;
-        }
-    } catch (error) {
-        console.error('Error displaying user name:', error);
-    }
-}
-
-// 현재 사용자 이름 초기화
-export function initializeUserName() {
-    // 현재 로그인된 사용자 확인 및 이름 표시
-    const currentUser = auth.currentUser;
-    if (currentUser) {
-        displayUserName(currentUser);
-    }
-
-    // auth 상태 변경 감지
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            displayUserName(user);
-        }
-    });
-}
-//------------------------------------------ 우측 상단에 표시되는 이름 조정 함수----------------------------------------- 

@@ -1,4 +1,4 @@
-// 월 이름 배열을 전역으로 이동
+// 월 이름 배열을 전역으로 이동 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 export class CustomCalendar {
@@ -14,7 +14,6 @@ export class CustomCalendar {
         this.init();
         this.currentTooltip = null;  // 현재 열린 툴팁 추적
         }
-
     init() {
         this.renderCalendar();
         this.addEventListeners();
@@ -26,23 +25,24 @@ export class CustomCalendar {
             updateCalendarReservations(hospitalName);
         }
     }
+    
 
     renderCalendar() {
         this.monthYear.textContent = `${this.months[this.date.getMonth()]} ${this.date.getFullYear()}`;
         const dates = this.calendarGrid.querySelectorAll('.date');
         dates.forEach(date => date.remove());
 
-    const firstDay = new Date(this.date.getFullYear(), this.date.getMonth(), 1);
-    const lastDay = new Date(this.date.getFullYear(), this.date.getMonth() + 1, 0);
+        const firstDay = new Date(this.date.getFullYear(), this.date.getMonth(), 1);
+        const lastDay = new Date(this.date.getFullYear(), this.date.getMonth() + 1, 0);
 
-    // 이전 달의 날짜들 추가
-    for (let i = 0; i < firstDay.getDay(); i++) {
+        // 이전 달의 날짜들 추가
+        for (let i = 0; i < firstDay.getDay(); i++) {
         const dateDiv = document.createElement('div');
         dateDiv.className = 'date empty';  // empty 클래스 추가
         this.calendarGrid.appendChild(dateDiv);
         }
-    // 현재 달의 날짜 추가
-    for (let i = 1; i <= lastDay.getDate(); i++) {
+        // 현재 달의 날짜 추가
+        for (let i = 1; i <= lastDay.getDate(); i++) {
         const dateDiv = document.createElement('div');
         dateDiv.className = 'date';
         dateDiv.textContent = i;
@@ -59,7 +59,6 @@ export class CustomCalendar {
              this.date.getFullYear() === this.selectedDate.getFullYear())) {
             dateDiv.classList.add('selected');
         }
-        
         // 날짜 클릭 이벤트
         dateDiv.addEventListener('click', (e) => {
             // 이전 선택 제거
@@ -67,27 +66,24 @@ export class CustomCalendar {
             if (prevSelected) {
                 prevSelected.classList.remove('selected');
             }
-            
             // 새로운 선택 추가
             dateDiv.classList.add('selected');
             this.selectedDate = new Date(this.date.getFullYear(), this.date.getMonth(), i);
-            
             // 기존의 날짜 클릭 핸들러 호출
             this.handleDateClick(e, i);
         });
-        
         this.calendarGrid.appendChild(dateDiv);
-    }
-
-    // 남은 칸에에 빈 셀 채우기
-    const totalCells = 42; // 6주 x 7일
-    const remainingCells = totalCells - (firstDay.getDay() + lastDay.getDate());
-    for (let i = 0; i < remainingCells; i++) {
+        }  
+        // 남은 칸에에 빈 셀 채우기
+        const totalCells = 42; // 6주 x 7일
+        const remainingCells = totalCells - (firstDay.getDay() + lastDay.getDate());
+        for (let i = 0; i < remainingCells; i++) {
         const dateDiv = document.createElement('div');
         dateDiv.className = 'date empty';  // empty 클래스 추가
         this.calendarGrid.appendChild(dateDiv);
-    }
-    }
+        }
+        }
+
 
     addEventListeners() {
         document.getElementById('prevMonth').addEventListener('click', async () => {
@@ -115,6 +111,7 @@ export class CustomCalendar {
         });
     }
 
+
     handleDateClick(e, date) {
         const formattedDate = this.formatDate(date);
         document.querySelector('.scheduler-header .current-date').textContent = formattedDate;
@@ -123,20 +120,21 @@ export class CustomCalendar {
         updateSchedulerReservations(formattedDate);
     }
 
+
     formatDate(day) {
     const date = new Date(this.date.getFullYear(), this.date.getMonth(), day);
     return `${String(day).padStart(2, '0')}.${months[date.getMonth()]}.${date.getFullYear()}`;
     }
     };
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// 스케줄러 초기화 함수
+// 스케줄러 초기화 함수 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 export function initializeScheduler() {
     const timeGrid = document.querySelector('.time-grid');
     const currentDate = new Date();
     
     // 날짜 표시 형식 변경 - 점(.)을 추가 //2025-02-11 17:05
     const formattedDate = `${currentDate.getDate().toString().padStart(2, '0')}.${months[currentDate.getMonth()]}.${currentDate.getFullYear()}`;
-    
     document.querySelector('.scheduler-header .current-date').textContent = formattedDate;
     
     // 시간대 생성 (8:00 ~ 15:00)
@@ -171,8 +169,7 @@ export function initializeScheduler() {
             }
         }
     }
-
-    // auth 상태가 준비된 후 예약 정보 업데이트 //2025-02-11 17:05
+    // auth 상태가 준비된 후 예약 정보 업데이트
     if (auth.currentUser) {
         updateSchedulerReservations(formattedDate);
     } else {
@@ -183,6 +180,8 @@ export function initializeScheduler() {
         });
     }
 }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 function handleCellClick(hour, minute, column) {
     // 기존 툴팁이 있다면 제거
@@ -435,6 +434,8 @@ function handleCellClick(hour, minute, column) {
         tooltip.remove();
     });
 }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 async function updateCalendarReservations(hospitalName) {
     const dates = document.querySelectorAll('.date:not(.empty)');
@@ -461,7 +462,9 @@ async function updateCalendarReservations(hospitalName) {
         }
     });
 }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 export async function updateSchedulerReservations(currentDate) {
     // 기존 예약 표시 제거
     document.querySelectorAll('.schedule-cell').forEach(cell => {
@@ -506,3 +509,4 @@ export async function updateSchedulerReservations(currentDate) {
         });
     });
 }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

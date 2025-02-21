@@ -31,7 +31,7 @@
     </style>
     <script type="module">
         import {app, auth, db, doc, getDoc, setDoc, collection, query, where, getDocs, updateDoc,  serverTimestamp, Timestamp,onSnapshot,orderBy } from './js/firebase-config.js';
-        import {setupCloseButtons, setupLogoLogout, initializeStatusSelector, initializeZoomPrevention,displayUserName,initializeUserName} from './js/common.js';
+        import {setupCloseButtons, setupLogoLogout, initializeStatusSelector, initializeZoomPrevention, displayUserName, initializeUserName} from './js/common.js';
         import {checkUserPermissions, initializeMenuEvents} from './js/desk-menu.js';
         import {initializePatientList} from './js/patient-list.js';
         import {initializeRoomManagement, handleRoomLogout} from './js/room.js';
@@ -79,14 +79,6 @@
                               <img src="${statusIcons.login}" alt="Status" class="status-icon">
                           </div>
                           <div class="status-dropdown">
-                              <div class="status-option" data-status="login">
-                                  <img src="${statusIcons.login}" alt="Login" class="status-icon">
-                                  <span>Login</span>
-                              </div>
-                              <div class="status-option" data-status="start">
-                                  <img src="${statusIcons.start}" alt="Start Work" class="status-icon">
-                                  <span>Start</span>
-                              </div>
                               <div class="status-option" data-status="end">
                                   <img src="${statusIcons.end}" alt="End Work" class="status-icon">
                                   <span>End</span>
@@ -221,14 +213,6 @@
                     <img src="image/login.png" alt="Status" class="status-icon">
                 </div>
                 <div class="status-dropdown">
-                    <div class="status-option" data-status="login">
-                        <img src="image/login.png" alt="Login" class="status-icon">
-                        <span>Login</span>
-                    </div>
-                    <div class="status-option" data-status="start">
-                        <img src="image/start.png" alt="Start Work" class="status-icon">
-                        <span>Start</span>
-                    </div>
                     <div class="status-option" data-status="end">
                         <img src="image/logout.png" alt="End Work" class="status-icon">
                         <span>End</span>

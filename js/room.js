@@ -216,9 +216,6 @@ export async function initializeRoomManagement(hospitalName) {
                             work: 'start'
                         });
 
-
-                        
-
                         const statusDot = document.querySelector('.status-dot');
                         if (statusDot) {
                             statusDot.style.backgroundColor = getStatusColor('start');
