@@ -126,10 +126,22 @@ async function createPatientElement(hospitalName, patientData, patientId, type, 
     const querySnapshot = await getDocs(q);
     
     // 드롭다운 옵션 생성
+    // 'Choose a doctor' 옵션 먼저 추가
+    const defaultOption = document.createElement('div');
+    defaultOption.className = `doctor-option${patientData.doctor ? ' disabled' : ''}`; // 의사가 이미 선택된 경우만 비활성화
+    defaultOption.dataset.value = '';
+    defaultOption.innerHTML = `
+        <div class="doctor-option-content">
+            <span class="${patientData.doctor ? 'disabled' : ''}">Choose a doctor</span>
+        </div>
+    `;
+    doctorOptions.appendChild(defaultOption);
+
+    // 의사 목록 추가 (기존 로직 유지)
     querySnapshot.forEach(doc => {
         const doctorData = doc.data();
         const option = document.createElement('div');
-        option.className = `doctor-option${doctorData.work === 'logout' ? ' disabled' : ''}`;
+        option.className = `doctor-option${doctorData.work === 'logout' ? ' disabled' : ''}`; // 로그아웃 상태의 의사만 비활성화
         option.dataset.value = doc.id;
         option.innerHTML = `
             <div class="doctor-option-content">
@@ -167,11 +179,11 @@ async function createPatientElement(hospitalName, patientData, patientId, type, 
         
         // 'Choose a doctor' 옵션 먼저 추가
         const defaultOption = document.createElement('div');
-        defaultOption.className = 'doctor-option';
+        defaultOption.className = `doctor-option${patientData.doctor ? ' disabled' : ''}`; // 의사가 이미 선택된 경우만 비활성화
         defaultOption.dataset.value = '';
         defaultOption.innerHTML = `
             <div class="doctor-option-content">
-                <span>Choose a doctor</span>
+                <span class="${patientData.doctor ? 'disabled' : ''}">Choose a doctor</span>
             </div>
         `;
         doctorOptions.appendChild(defaultOption);
@@ -180,7 +192,7 @@ async function createPatientElement(hospitalName, patientData, patientId, type, 
         querySnapshot.forEach(doc => {
             const doctorData = doc.data();
             const option = document.createElement('div');
-            option.className = `doctor-option${doctorData.work === 'logout' ? ' disabled' : ''}`;
+            option.className = `doctor-option${doctorData.work === 'logout' ? ' disabled' : ''}`; // 로그아웃 상태의 의사만 비활성화
             option.dataset.value = doc.id;
             option.innerHTML = `
                 <div class="doctor-option-content">
