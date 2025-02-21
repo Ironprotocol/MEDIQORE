@@ -45,23 +45,34 @@
     .content-footer-prescription {
         height: 50px;
         border-top: 1px solid hsl(0, 0%, 85%);
+        border-right : 1px solid hsl(0, 0%, 85%);
         display: flex;
         align-items: center;
-        justify-content: flex-end;  /* Register 버튼 우측 정렬 */
-        padding: 0 20px;
-        border-radius: 0 0 8px 8px;
         position: absolute;
         bottom: 0;
         left: 0;
         right: 0;
         background-color: white;
+        width: 75%;
     }
 
     .content-body-prescription {
         height: calc(100% - 100px);  /* 전체 높이에서 헤더와 푸터 높이를 뺌 */
-        overflow-y: auto;  /* 내용이 많을 경우 스크롤 */
+        overflow-y: auto;
+        width: 75%;  /* 1,2,3번 컨테이너 영역 */
+        border-right: 1px solid #ccc;
     }
 
+    /*////////////////////////// 오른쪽 컨테이너다. ///////////////////////*/
+    .content-body-prescription2 {
+        position: absolute;
+        top: 50px;  /* 헤더 높이만큼 */
+        right: 0;
+        width: 25%;  /* 4번 컨테이너 영역 */
+        height: calc(100% - 50px);  /* 헤더 높이만 뺌 */
+        background-color: white;
+        border-top: 1px solid #ccc;
+    }
 
     .content-title-prescription {
         font-size: 15px;
@@ -77,14 +88,14 @@
 }
 
 .prescription-left-container {
-    width: 25%;
+    width: 30%;
     height: 100%;
     border-right: 1px solid #ccc;
     background-color : white;
 }
 
 .prescription-center-container {
-    width: 50%;
+    width: 70%;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -94,7 +105,7 @@
 
 .prescription-center-top {
     height: 40%;
-    margin : 10px 10px 0px 10px;
+    margin : 5px 5px 0px 5px;
     border-bottom: 1px solid #ccc;
     background-color : white;
     border-radius: 8px;
@@ -102,13 +113,33 @@
 
 .prescription-center-bottom {
     height: 60%;
-    margin : 10px;
+    margin : 5px;
     border : 1px solid #ccc;
     background-color : white;
     border-radius: 8px;
 }
-
 .prescription-right-container {
-    width: 25%;
+    width: 100%;  /* content-body-prescription2의 전체 너비 사용 */
     height: 100%;
+}
+
+/* 환자 선택 메시지 컨테이너 */
+.patient-select-wrapper {
+    position: absolute;
+    top: 50px;  /* 헤더 높이만큼 */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: white;
+    border-radius: 0 0 8px 8px;
+    display: flex;
+    justify-content: center;
+    border-top: 1px solid #ccc;
+    align-items: center;
+}
+
+.patient-select-message {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
 }

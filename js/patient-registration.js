@@ -325,16 +325,30 @@ export function initializeNewPatientButton() {
     document.querySelector('.new-patient-btn').addEventListener('click', function() {
         const menuItems = document.querySelectorAll('.menu-item');
         const contentContainers = document.querySelectorAll('.content-container, .content-container-2');
+        const mainContent = document.querySelector('.main-content');
+        const prescriptionContent = document.querySelector('.main-content-prescription');
         
         // 모든 메뉴 아이템의 active 클래스 제거
         menuItems.forEach(item => {
             item.classList.remove('active');
         });
 
+        // 기존 컨테이너들 숨기기
         contentContainers.forEach(container => {
             container.style.display = 'none';
         });
 
+        // Prescription 관련 컨테이너 숨기기
+        if (prescriptionContent) {
+            prescriptionContent.style.display = 'none';
+        }
+        
+        // main-content 표시
+        if (mainContent) {
+            mainContent.style.display = 'flex';
+        }
+
+        // 환자 등록 컨테이너 표시
         const content = document.getElementById('patient-registration-content');
         if (content) {
             content.style.display = 'block';

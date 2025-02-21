@@ -257,19 +257,20 @@
                 <div class="content-title-prescription">Prescription</div>
                 <button class="close-button">Close</button>
             </div>
-            <div class="content-body-prescription">
-                <!-- 환자 선택 전 메시지 -->
-                <div class="no-patient-message" style="display: flex; justify-content: center; align-items: center; height: 100%;">
+
+            <!-- 100% 너비의 메시지 컨테이너 -->
+            <div class="patient-select-wrapper">
+                <div class="patient-select-message">
                     Please select a patient
                 </div>
+            </div>
 
-                <!-- 환자 선택 후 나타날 컨테이너들 -->
-                <div class="prescription-layout" style="display: none;">
-                    <!-- 왼쪽 컨테이너 (1번) -->
+            <!-- 기존 레이아웃 (초기에 숨김) -->
+            <div class="content-body-prescription" style="display: none;">
+                <div class="prescription-layout">
                     <div class="prescription-left-container">
                     </div>
                     
-                    <!-- 중앙 컨테이너 (2,3번) -->
                     <div class="prescription-center-container">
                         <div class="prescription-center-top">
                             <!-- 2번 영역 -->
@@ -278,13 +279,13 @@
                             <!-- 3번 영역 -->
                         </div>
                     </div>
-                    
-                    <!-- 오른쪽 컨테이너 (4번) -->
-                    <div class="prescription-right-container">
-                    </div>
+                         <!-- 오른쪽 컨테이너 (4번) -->
+                         <div class="content-body-prescription2">
+                        </div>
                 </div>
             </div>
-            <div class="content-footer-prescription">
+            <div class="content-footer-prescription" style="display: none;">
+
             </div>
         </div>
     </div>
