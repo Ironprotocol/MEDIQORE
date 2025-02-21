@@ -56,6 +56,17 @@
         width: calc(75% - 1px);  /* 75%에서 1px 줄임 */
     }
 
+    /* Footer 내부 세로줄 */
+    .content-footer-prescription::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 30%;  /* Left 컨테이너 너비와 동일 */
+        width: 1px;
+        height: 100%;
+        background-color: #ccc;
+    }
+
     .content-body-prescription {
         height: calc(100% - 100px);  /* 전체 높이에서 헤더와 푸터 높이를 뺌 */
         overflow-y: auto;
