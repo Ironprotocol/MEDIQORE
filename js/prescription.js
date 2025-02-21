@@ -18,5 +18,29 @@ export function initializePrescription() {
         prescriptionBody.style.display = 'block';
         prescriptionBody2.style.display = 'block';
         prescriptionFooter.style.display = 'flex';
+
+        // 현재 room 이름 업데이트
+        updateCurrentRoomName();
+    });
+}
+
+// 현재 room 이름 업데이트 함수
+async function updateCurrentRoomName() {
+    const currentRoomName = document.querySelector('.current-room-name');
+    const [hospitalName] = auth.currentUser.email.split('@')[0].split('.');
+    
+    const roomsRef = collection(db, 'hospitals', hospitalName, 'treatment.room');
+    const roomsSnapshot = await getDocs(roomsRef);
+    
+    // 현재 의사의 이름 가져오기
+    const userRef = doc(db, 'hospitals', hospitalName, 'staff', auth.currentUser.email);
+    const userDoc = await getDoc(userRef);
+    const doctorName = userDoc.data().name;
+
+    // 의사가 있는 room 찾기
+    roomsSnapshot.forEach(roomDoc => {
+        if (roomDoc.data().doctor === doctorName) {
+            currentRoomName.textContent = roomDoc.id;
+        }
     });
 }

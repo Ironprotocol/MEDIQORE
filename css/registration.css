@@ -11,6 +11,15 @@
             transition: background-color 0.3s ease;
             height: 33px;
             width: 110px;
+            display: flex;  /* 아이콘과 텍스트를 가로로 배치 */
+            align-items: center;  /* 세로 중앙 정렬 */
+            justify-content: center;  /* 가로 중앙 정렬 */
+            gap: 10px;  /* 아이콘과 텍스트 사이 간격 */
+        }
+
+        .register-btn img {
+            width: 20px;  /* 아이콘 크기 */
+            height: 20px;
         }
 
         .register-btn:hover {
