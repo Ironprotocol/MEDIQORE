@@ -2,7 +2,7 @@
 export function initializePrescription() {
     const prescriptionTitle = document.querySelector('#prescription-content .content-title-prescription');
     const noPatientMessage = document.querySelector('#prescription-content .no-patient-message');
-    const contentBody = document.querySelector('#prescription-content .content-body-prescription');
+    const prescriptionLayout = document.querySelector('#prescription-content .prescription-layout');
 
     // Room의 환자 클릭 이벤트에 대한 처리
     document.addEventListener('prescriptionPatientSelected', (e) => {
@@ -10,8 +10,9 @@ export function initializePrescription() {
         if (prescriptionTitle) {
             prescriptionTitle.textContent = `${name} Prescription`;
         }
-        if (noPatientMessage) {
+        if (noPatientMessage && prescriptionLayout) {
             noPatientMessage.style.display = 'none';
+            prescriptionLayout.style.display = 'flex';
         }
     });
 }

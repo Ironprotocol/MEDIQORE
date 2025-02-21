@@ -68,3 +68,47 @@
         color: #333;
         font-weight: bold;
     }
+
+.prescription-layout {
+    width: 100%;
+    height: 100%;
+    display: flex;  /* 컨테이너들을 가로로 배치 */
+     ;
+}
+
+.prescription-left-container {
+    width: 25%;
+    height: 100%;
+    border-right: 1px solid #ccc;
+    background-color : white;
+}
+
+.prescription-center-container {
+    width: 50%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #ccc;
+    background-color: rgb(211, 228, 255);
+}
+
+.prescription-center-top {
+    height: 40%;
+    margin : 10px 10px 0px 10px;
+    border-bottom: 1px solid #ccc;
+    background-color : white;
+    border-radius: 8px;
+}
+
+.prescription-center-bottom {
+    height: 60%;
+    margin : 10px;
+    border : 1px solid #ccc;
+    background-color : white;
+    border-radius: 8px;
+}
+
+.prescription-right-container {
+    width: 25%;
+    height: 100%;
+}
