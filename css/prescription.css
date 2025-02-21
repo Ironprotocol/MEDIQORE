@@ -45,7 +45,7 @@
     .content-footer-prescription {
         height: 50px;
         border-top: 1px solid hsl(0, 0%, 85%);
-        border-right: 1px solid hsl(0, 0%, 85%);
+        border-right: 2px solid #aaaaaa;
         display: flex;
         align-items: center;
         position: absolute;
@@ -53,7 +53,7 @@
         left: 0;
         right: 0;
         background-color: white;
-        width: calc(75% - 1px);  /* 75%에서 1px 줄임 */
+        width: calc(75% - 2px);  /* 75%에서 1px 줄임 */
     }
 
     /* Footer 내부 세로줄 */
@@ -61,10 +61,10 @@
         content: '';
         position: absolute;
         top: 0;
-        left: 30%;  /* Left 컨테이너 너비와 동일 */
-        width: 1px;
+        left: calc(30% - 1px);  /* Left 컨테이너 너비와 동일 */
+        width: 2px;
         height: 100%;
-        background-color: #ccc;
+        background-color: #aaaaaa;
     }
 
     .content-body-prescription {
@@ -101,7 +101,7 @@
 .prescription-left-container {
     width: 30%;
     height: 100%;
-    border-right: 1px solid #ccc;
+    border-right: 2px solid #aaaaaa;
     background-color : white;
 }
 
@@ -110,20 +110,20 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    border-right: 1px solid #ccc;
+    border-right: 2px solid #aaaaaa;
     background-color: rgb(211, 228, 255);
 }
 
 .prescription-center-top {
     height: 40%;
-    margin : 5px 5px 0px 5px;
+    margin : 10px 10px 0px 10px;
     border-bottom: 1px solid #ccc;
     background-color : white;
 }
 
 .prescription-center-bottom {
     height: 60%;
-    margin : 5px;
+    margin : 10px;
     border : 1px solid #ccc;
     background-color : white;
 }
@@ -151,4 +151,32 @@
     font-size: 18px;
     font-weight: bold;
     color: #333;
+}
+
+/* New Chart 버튼 스타일 */
+.new-chart-btn {
+    margin-left: 10px;
+    padding: 8px 16px;
+    background-color: rgb(0, 102, 255);
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    height: 33px;
+    width: 140px;
+    display: flex;  /* 아이콘과 텍스트를 가로로 배치 */
+    align-items: center;  /* 세로 중앙 정렬 */
+    justify-content: center;  /* 가로 중앙 정렬 */
+    gap: 10px;  /* 아이콘과 텍스트 사이 간격 */
+}
+
+.new-chart-btn img {
+    width: 20px;  /* 아이콘 크기 */
+    height: 20px;
+}
+
+.new-chart-btn:hover {
+    background-color: rgb(0, 82, 204);
 }

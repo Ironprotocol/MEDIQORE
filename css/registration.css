@@ -9,6 +9,8 @@
             font-size: 14px;
             cursor: pointer;
             transition: background-color 0.3s ease;
+            height: 33px;
+            width: 110px;
         }
 
         .register-btn:hover {
