@@ -53,7 +53,7 @@
         left: 0;
         right: 0;
         background-color: white;
-        width: calc(75% - 2px);  /* 75%에서 1px 줄임 */
+        width: calc(80% - 2px);  /* 75%에서 1px 줄임 */
     }
 
     /* Footer 내부 세로줄 */
@@ -61,7 +61,7 @@
         content: '';
         position: absolute;
         top: 0;
-        left: calc(30% - 1px);  /* Left 컨테이너 너비와 동일 */
+        left: calc(25% - 1px);  /* Left 컨테이너 너비와 동일 */
         width: 2px;
         height: 100%;
         background-color: #ccc;
@@ -70,7 +70,7 @@
     .content-body-prescription {
         height: calc(100% - 100px);  /* 전체 높이에서 헤더와 푸터 높이를 뺌 */
         overflow-y: auto;
-        width: 75%;  /* 1,2,3번 컨테이너 영역 */
+        width: 80%;  /* 1,2,3번 컨테이너 영역 */
         border-right: 1px solid #ccc;
     }
 
@@ -79,7 +79,7 @@
         position: absolute;
         top: 50px;  /* 헤더 높이만큼 */
         right: 0;
-        width: 25%;  /* 4번 컨테이너 영역 */
+        width: 20%;  /* 4번 컨테이너 영역 */
         height: calc(100% - 50px);  /* 헤더 높이만 뺌 */
         background-color: white;
         border-top: 1px solid #ccc;
@@ -99,14 +99,14 @@
 }
 
 .prescription-left-container {
-    width: 30%;
+    width: 25%;
     height: 100%;
     border-right: 2px solid #ccc;
     background-color : white;
 }
 
 .prescription-center-container {
-    width: 70%;
+    width: 75%;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -207,7 +207,7 @@
 /* 현재 room 이름 스타일 */
 .current-room-name {
     position: absolute;
-    left: calc(30% + 30px); /* 세로선(30%) 기준으로 30px 떨어짐 */
+    left: calc(28%); /* 세로선(30%) 기준으로 30px 떨어짐 */
     font-size: 14px;
     color: rgb(110, 110, 124);
     font-weight: bold;
@@ -236,6 +236,13 @@
 
 .chart-controls button:hover {
     background-color: rgb(0, 82, 204);
+}
+
+.prescription-left-title {
+    font-size: 12px;
+    font-weight: bold;
+    color: rgb(110, 110, 124);
+    margin: 15px 0 0 15px;  /* 상단과 좌측에 여백 */
 }
 
 
