@@ -21,6 +21,9 @@ export function initializePrescription() {
 
         // 현재 room 이름 업데이트
         updateCurrentRoomName();
+
+        // Canvas 초기화 추가
+        initializeCanvas();
     });
 }
 
@@ -43,4 +46,74 @@ async function updateCurrentRoomName() {
             currentRoomName.textContent = roomDoc.id;
         }
     });
+}
+
+// Canvas 관련 기능 초기화
+function initializeCanvas() {
+    const canvas = document.querySelector('.tooth-chart-canvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+    const drawHistory = [];  // 그리기 기록 저장
+    
+    // Canvas 크기 설정
+    const img = document.querySelector('.tooth-chart-img');
+    canvas.width = img.width;
+    canvas.height = img.height;
+
+    // 그리기 설정
+    ctx.strokeStyle = '#FF0000';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+
+    // 컨트롤 버튼 추가
+    const controlsDiv = document.createElement('div');
+    controlsDiv.className = 'chart-controls';
+    controlsDiv.innerHTML = `
+        <button class="undo-btn">Undo</button>
+        <button class="clear-btn">Clear</button>
+    `;
+    document.querySelector('.prescription-center-top').appendChild(controlsDiv);
+
+    // 버튼 이벤트 리스너
+    document.querySelector('.undo-btn').addEventListener('click', undo);
+    document.querySelector('.clear-btn').addEventListener('click', clearCanvas);
+
+    // 마우스 이벤트
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseleave', stopDrawing);
+    canvas.addEventListener('mousemove', draw);
+
+    function startDrawing(e) {
+        isDrawing = true;
+        [lastX, lastY] = [e.offsetX, e.offsetY];
+        // 새로운 선 시작시 현재 캔버스 상태 저장
+        drawHistory.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+    }
+
+    function stopDrawing() {
+        isDrawing = false;
+    }
+
+    function draw(e) {
+        if (!isDrawing) return;
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(e.offsetX, e.offsetY);
+        ctx.stroke();
+        [lastX, lastY] = [e.offsetX, e.offsetY];
+    }
+
+    function undo() {
+        if (drawHistory.length > 0) {
+            ctx.putImageData(drawHistory.pop(), 0, 0);
+        }
+    }
+
+    function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawHistory.length = 0;  // 히스토리 초기화
+    }
 }
