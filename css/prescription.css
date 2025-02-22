@@ -116,7 +116,7 @@
 
 .prescription-center-top {
     height: 60%;
-    margin: 5px 5px 0px 5px;
+    margin: 5px 5px 5px 5px;
     border-bottom: 1px solid #ccc;
     background-color: white;
     position: relative;
@@ -133,10 +133,20 @@
     display: block;
     border : 1px solid #ccc;
 }
+/* 기존 tooth-chart-img CSS는 그대로 두고 Canvas용 CSS만 추가 */
+.tooth-chart-canvas {
+    position: absolute;
+    height: calc(100% - 10px);  /* tooth-chart-img와 동일 */
+    margin: 5px 5px 0px 5px;
+    width: auto;
+    aspect-ratio: 1/1;
+    cursor: crosshair;
+    z-index: 1;
+}
 
 .prescription-center-bottom {
     height: 40%;
-    margin : 5px;
+    margin: 0px 5px 5px 5px;
     border : 1px solid #ccc;
     background-color : white;
 }
@@ -202,3 +212,5 @@
     color: rgb(110, 110, 124);
     font-weight: bold;
 }
+
+
