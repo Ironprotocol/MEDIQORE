@@ -14,31 +14,31 @@
      
         /*-------------------------로고를 담아두는 컨테이너-------------------- */
       .logo-container {
-        padding: 10px 20px;
+
         display: flex;
         align-items: center;
         gap: 5px; 
-        margin-top: 5px;
+        margin: 10px;
         line-height: 1;
         cursor: pointer
         }
 
-
-        /*------------로고 이미지 스타일일-------------*/
+        /*------------로고 이미지 스타일-------------*/
         .logo-image {
-            width: 30px;    
-            height: 30px;  
+            width: 183.6px;    
+            height: 40px;  
             object-fit: contain;
             display: block;  /* 이미지 하단의 여백 제거 */
         }
 
-        /*------------로고 텍스트트 스타일일-------------*/
+        /*------------로고 텍스트 스타일-------------*/
         .logo-text {
             font-weight: 700;
             font-size: 16px;
             color: rgb(0, 102, 255);
             display: block;  /* 텍스트 정확한 정렬을 위해 */
         }
+
 
         /*-------------------------메뉴를를 담아두는 컨테이너-------------------- */
         .menu-container {

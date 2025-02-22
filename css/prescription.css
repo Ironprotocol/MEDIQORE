@@ -115,14 +115,27 @@
 }
 
 .prescription-center-top {
-    height: 40%;
-    margin : 5px 5px 0px 5px;
+    height: 60%;
+    margin: 5px 5px 0px 5px;
     border-bottom: 1px solid #ccc;
-    background-color : white;
+    background-color: white;
+    position: relative;
+    display: flex;  /* Flexbox 사용 */
+    justify-content: flex-end;  /* 오른쪽 정렬 */
+}
+
+.tooth-chart-img {
+    height: calc(100% - 12px);
+    width: auto;
+    aspect-ratio: 1/1;
+    margin: 5px 5px 0px 5px;
+    object-fit: contain;
+    display: block;
+    border : 1px solid #ccc;
 }
 
 .prescription-center-bottom {
-    height: 60%;
+    height: 40%;
     margin : 5px;
     border : 1px solid #ccc;
     background-color : white;
