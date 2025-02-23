@@ -120,8 +120,6 @@
     border-bottom: 1px solid #ccc;
     background-color: white;
     position: relative;
-    display: flex;  /* Flexbox 사용 */
-    justify-content: flex-end;  /* 오른쪽 정렬 */
 }
 
 .tooth-chart-img {
@@ -147,8 +145,9 @@
 .prescription-center-bottom {
     height: 40%;
     margin: 0px 5px 5px 5px;
-    border : 1px solid #ccc;
-    background-color : white;
+    border: 1px solid #ccc;
+    background-color: white;
+    position: relative;
 }
 .prescription-right-container {
     width: 100%;  /* content-body-prescription2의 전체 너비 사용 */
@@ -242,7 +241,27 @@
     font-size: 12px;
     font-weight: bold;
     color: rgb(110, 110, 124);
-    margin: 15px 0 0 15px;  /* 상단과 좌측에 여백 */
+    margin: 15px 0 0 20px;  /* 상단과 좌측에 여백 */
+}
+
+/* 공통 타이틀 스타일 */
+.prescription-section-title {
+    position: absolute;
+    left: 15px;
+    top: 15px;
+    font-size: 12px;
+    font-weight: bold;
+    color: rgb(110, 110, 124);
+}
+
+/* 이미지와 캔버스를 감싸는 새로운 컨테이너 */
+.tooth-chart-container {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    display: flex;
+    justify-content: flex-end;
 }
 
 
