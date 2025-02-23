@@ -292,7 +292,56 @@
     border: 1px solid #ccc;
     border-radius: 4px;
     padding: 8px;
-    font-size: 13px;
+    font-size: 12px;
+    resize: none;
+    box-sizing: border-box;
+}
+
+.location-form {
+    margin: 15px 0 0 15px;  /* symptoms-form과의 간격 15px */
+    width: calc(100% - var(--chart-width) - 35px);
+}
+
+.location-label {
+    font-size: 10px;
+    color: rgb(110, 110, 124);
+    font-weight: bold;
+    margin-bottom: 5px;
+    width: 100%;
+}
+
+.location-input {
+    width: 100%;
+    height: 50px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 12px;
+    resize: none;
+    box-sizing: border-box;
+}
+
+.treatment-details-form {
+    margin: 15px 0 0 15px;
+    width: calc(100% - var(--chart-width) - 35px);
+    height: calc(100% - var(--upper-forms-height));  /* 상단 폼들의 높이를 뺀 나머지 */
+}
+
+.treatment-details-label {
+    font-size: 10px;
+    color: rgb(110, 110, 124);
+    font-weight: bold;
+    margin-bottom: 5px;
+    width: 100%;
+}
+
+.treatment-details-input {
+    width: 100%;
+    height: calc(100% - 40px);  /* form 높이에서 label 높이와 margin 제외 */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 12px;
     resize: none;
     box-sizing: border-box;
 }

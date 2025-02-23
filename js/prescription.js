@@ -86,6 +86,24 @@ function initializeCanvas() {
     `;
     document.querySelector('.prescription-center-top').appendChild(formDiv);
 
+    // Location 입력 폼 추가
+    const locationFormDiv = document.createElement('div');
+    locationFormDiv.className = 'location-form';
+    locationFormDiv.innerHTML = `
+        <div class="location-label">Location</div>
+        <textarea class="location-input"></textarea>
+    `;
+    document.querySelector('.prescription-center-top').appendChild(locationFormDiv);
+
+    // Treatment Details 입력 폼 추가
+    const treatmentDetailsFormDiv = document.createElement('div');
+    treatmentDetailsFormDiv.className = 'treatment-details-form';
+    treatmentDetailsFormDiv.innerHTML = `
+        <div class="treatment-details-label">Treatment Details</div>
+        <textarea class="treatment-details-input"></textarea>
+    `;
+    document.querySelector('.prescription-center-top').appendChild(treatmentDetailsFormDiv);
+
     // 기존 컨트롤 버튼들 제거
     const existingControls = document.querySelector('.chart-controls');
     if (existingControls) {
@@ -188,6 +206,13 @@ function initializeCanvas() {
     function updateFormWidth() {
         const chartWidth = document.querySelector('.tooth-chart-img').offsetWidth;
         document.documentElement.style.setProperty('--chart-width', `${chartWidth}px`);
+
+        // 상단 폼들의 전체 높이 계산 (margin 포함)
+        const symptomsHeight = document.querySelector('.symptoms-form').offsetHeight;
+        const locationHeight = document.querySelector('.location-form').offsetHeight;
+        const totalUpperHeight = symptomsHeight + locationHeight + 65;  // Medical Records 타이틀(50px) + 하단 여백(15px) 포함
+        
+        document.documentElement.style.setProperty('--upper-forms-height', `${totalUpperHeight}px`);
     }
 
     // 초기 설정 및 리사이즈 이벤트에 연결
