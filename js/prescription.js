@@ -55,41 +55,51 @@ function initializeCanvas() {
     let isDrawing = false;
     let lastX = 0;
     let lastY = 0;
-    const drawHistory = [];  // 그리기 기록 저장
-    
-    // Canvas 크기 설정
-    const img = document.querySelector('.tooth-chart-img');
-    canvas.width = img.width;
-    canvas.height = img.height;
+    const drawHistory = [];
 
-    // 그리기 설정
-    ctx.strokeStyle = '#FF0000';
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
+    // Canvas 크기 조정 함수
+    function resizeCanvas() {
+        const img = document.querySelector('.tooth-chart-img');
+        const rect = img.getBoundingClientRect();
+        
+        // Canvas의 표시 크기와 실제 크기를 일치시킴
+        canvas.style.width = `${rect.width}px`;
+        canvas.style.height = `${rect.height}px`;
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+        
+        // 컨텍스트 설정 복원
+        ctx.strokeStyle = '#FF0000';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        
+        // 이전 그림 복원
+        if (drawHistory.length > 0) {
+            ctx.putImageData(drawHistory[drawHistory.length - 1], 0, 0);
+        }
+    }
 
-    // 컨트롤 버튼 추가
-    const controlsDiv = document.createElement('div');
-    controlsDiv.className = 'chart-controls';
-    controlsDiv.innerHTML = `
-        <button class="undo-btn">Undo</button>
-        <button class="clear-btn">Clear</button>
-    `;
-    document.querySelector('.prescription-center-top').appendChild(controlsDiv);
+    // 초기 크기 설정
+    resizeCanvas();
 
-    // 버튼 이벤트 리스너
-    document.querySelector('.undo-btn').addEventListener('click', undo);
-    document.querySelector('.clear-btn').addEventListener('click', clearCanvas);
+    // 윈도우 리사이즈 이벤트에 대응
+    window.addEventListener('resize', resizeCanvas);
 
-    // 마우스 이벤트
-    canvas.addEventListener('mousedown', startDrawing);
-    canvas.addEventListener('mouseup', stopDrawing);
-    canvas.addEventListener('mouseleave', stopDrawing);
-    canvas.addEventListener('mousemove', draw);
+    // 마우스 이벤트 핸들러
+    function getMousePos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        return {
+            x: (e.clientX - rect.left) * scaleX,
+            y: (e.clientY - rect.top) * scaleY
+        };
+    }
 
     function startDrawing(e) {
         isDrawing = true;
-        [lastX, lastY] = [e.offsetX, e.offsetY];
-        // 새로운 선 시작시 현재 캔버스 상태 저장
+        const pos = getMousePos(e);
+        [lastX, lastY] = [pos.x, pos.y];
         drawHistory.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
     }
 
@@ -99,11 +109,12 @@ function initializeCanvas() {
 
     function draw(e) {
         if (!isDrawing) return;
+        const pos = getMousePos(e);
         ctx.beginPath();
         ctx.moveTo(lastX, lastY);
-        ctx.lineTo(e.offsetX, e.offsetY);
+        ctx.lineTo(pos.x, pos.y);
         ctx.stroke();
-        [lastX, lastY] = [e.offsetX, e.offsetY];
+        [lastX, lastY] = [pos.x, pos.y];
     }
 
     function undo() {
@@ -114,6 +125,23 @@ function initializeCanvas() {
 
     function clearCanvas() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawHistory.length = 0;  // 히스토리 초기화
+        drawHistory.length = 0;
     }
+
+    // 컨트롤 버튼 추가
+    const controlsDiv = document.createElement('div');
+    controlsDiv.className = 'chart-controls';
+    controlsDiv.innerHTML = `
+        <button class="undo-btn">Undo</button>
+        <button class="clear-btn">Clear</button>
+    `;
+    document.querySelector('.prescription-center-top').appendChild(controlsDiv);
+
+    // 이벤트 리스너 설정
+    document.querySelector('.undo-btn').addEventListener('click', undo);
+    document.querySelector('.clear-btn').addEventListener('click', clearCanvas);
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseleave', stopDrawing);
+    canvas.addEventListener('mousemove', draw);
 }
