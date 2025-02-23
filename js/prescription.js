@@ -71,6 +71,21 @@ function initializeCanvas() {
     let lastY = 0;
     const drawHistory = [];
 
+    // 기존 symptoms 폼이 있다면 제거
+    const existingForm = document.querySelector('.symptoms-form');
+    if (existingForm) {
+        existingForm.remove();
+    }
+
+    // Symptoms 입력 폼 추가
+    const formDiv = document.createElement('div');
+    formDiv.className = 'symptoms-form';
+    formDiv.innerHTML = `
+        <div class="symptoms-label">Symptoms</div>
+        <textarea class="symptoms-input"></textarea>
+    `;
+    document.querySelector('.prescription-center-top').appendChild(formDiv);
+
     // 기존 컨트롤 버튼들 제거
     const existingControls = document.querySelector('.chart-controls');
     if (existingControls) {
@@ -168,4 +183,14 @@ function initializeCanvas() {
     canvas.addEventListener('mouseup', stopDrawing);
     canvas.addEventListener('mouseleave', stopDrawing);
     canvas.addEventListener('mousemove', draw);
+
+    // tooth chart 크기에 따라 입력폼 너비 조정
+    function updateFormWidth() {
+        const chartWidth = document.querySelector('.tooth-chart-img').offsetWidth;
+        document.documentElement.style.setProperty('--chart-width', `${chartWidth}px`);
+    }
+
+    // 초기 설정 및 리사이즈 이벤트에 연결
+    updateFormWidth();
+    window.addEventListener('resize', updateFormWidth);
 }

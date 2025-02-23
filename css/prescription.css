@@ -256,7 +256,7 @@
 /* 공통 타이틀 스타일 */
 .prescription-section-title {
     position: absolute;
-    left: 15px;
+    left: 10px;
     top: 15px;
     font-size: 12px;
     font-weight: bold;
@@ -271,6 +271,30 @@
     height: 100%;
     display: flex;
     justify-content: flex-end;
+}
+
+.symptoms-form {
+    margin: 50px 0 0 15px;
+    width: calc(100% - var(--chart-width) - 35px);  /* form 자체의 너비 조절 */
+}
+
+.symptoms-label {
+    font-size: 10px;
+    color: rgb(110, 110, 124);
+    font-weight: bold;
+    margin-bottom: 5px;
+    width: 100%;  /* form의 전체 너비 사용 */
+}
+
+.symptoms-input {
+    width: 100%;  /* form의 전체 너비 사용 */
+    height: 60px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 13px;
+    resize: none;
+    box-sizing: border-box;
 }
 
 
