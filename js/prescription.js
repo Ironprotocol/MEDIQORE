@@ -39,6 +39,17 @@ export function initializePrescription() {
         // Canvas 초기화 추가
         initializeCanvas();
     });
+
+    // content-footer-prescription에 Send 버튼 추가
+    const sendBtn = document.createElement('button');
+    sendBtn.className = 'send-btn';
+    sendBtn.textContent = 'Send';
+    document.querySelector('.content-footer-prescription').appendChild(sendBtn);
+
+    // Send 버튼 추가 코드 위에 추가
+    const printBtn = document.createElement('button');
+    printBtn.className = 'print-btn';
+    document.querySelector('.content-footer-prescription').appendChild(printBtn);
 }
 
 // 현재 room 이름 업데이트 함수

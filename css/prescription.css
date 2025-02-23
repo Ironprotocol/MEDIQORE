@@ -215,7 +215,7 @@
 /* 현재 room 이름 스타일 */
 .current-room-name {
     position: absolute;
-    left: calc(28%); /* 세로선(30%) 기준으로 30px 떨어짐 */
+    left: calc(28% - 20px); /* 세로선(30%) 기준으로 30px 떨어짐 */
     font-size: 14px;
     color: rgb(110, 110, 124);
     font-weight: bold;
@@ -344,6 +344,42 @@
     font-size: 12px;
     resize: none;
     box-sizing: border-box;
+}
+
+.send-btn {
+    position: absolute;
+    right: 10px;
+    padding: 8px 16px;
+    background-color: #ccc;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    height: 33px;
+    width: 80px;
+}
+
+.send-btn:hover {
+    background-color: #30e026;
+}
+
+.print-btn {
+    position: absolute;
+    right: 110px;  /* send 버튼(80px) + 오른쪽 여백(10px) + 간격(20px) */
+    width: 35px;   /* Desk 메뉴 이미지와 동일한 크기 */
+    height: 35px;
+    border: none;
+    cursor: pointer;
+    background: url('../image/printer.png') no-repeat center;
+    background-size: 35px;  /* 내부 이미지 크기 */
+    transition: background-image 0.3s ease;
+}
+
+.print-btn:hover {
+    background: url('../image/printer_hover.png') no-repeat center;
+    background-size: 35px;
 }
 
 
