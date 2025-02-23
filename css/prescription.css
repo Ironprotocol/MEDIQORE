@@ -89,6 +89,15 @@
         font-size: 15px;
         color: #333;
         font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .content-title-prescription .gender-icon {
+        width: 20px;
+        height: 20px;
+        object-fit: contain;
     }
 
 .prescription-layout {

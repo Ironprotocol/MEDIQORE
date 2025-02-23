@@ -300,7 +300,7 @@ export async function checkCurrentRoomPatients(hospitalName, doctorName) {
 
 function handlePatientClick(patientElement) {
     const patientName = patientElement.querySelector('.patient-name').textContent;
-    const patientAge = patientElement.closest('.room-patient-item').querySelector('.patient-age').textContent;
+    const patientId = patientElement.dataset.patientId;
 
     // Prescription 메뉴로 전환
     const prescriptionMenu = Array.from(document.querySelectorAll('.menu-item')).find(
@@ -310,10 +310,26 @@ function handlePatientClick(patientElement) {
     if (prescriptionMenu) {
         prescriptionMenu.click();
 
-        // 환자 정보 이벤트 발생
-        const event = new CustomEvent('prescriptionPatientSelected', {
-            detail: { name: patientName, age: patientAge }
+        // 환자 정보 가져오기
+        const [hospitalName] = auth.currentUser.email.split('@')[0].split('.');
+        const patientRef = doc(db, 'hospitals', hospitalName, 'patient', patientId);
+        
+        getDoc(patientRef).then(patientDoc => {
+            if (patientDoc.exists()) {
+                const patientData = patientDoc.data();
+                const birthDate = patientData.info.birthDate.toDate();
+                
+                // 이벤트에 더 많은 정보 포함
+                const event = new CustomEvent('prescriptionPatientSelected', {
+                    detail: {
+                        name: patientName,
+                        gender: patientData.info.gender,
+                        birthDate: birthDate,
+                        age: new Date().getFullYear() - birthDate.getFullYear()
+                    }
+                });
+                document.dispatchEvent(event);
+            }
         });
-        document.dispatchEvent(event);
     }
 }

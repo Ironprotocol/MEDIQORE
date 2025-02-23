@@ -8,9 +8,23 @@ export function initializePrescription() {
 
     // Room의 환자 클릭 이벤트에 대한 처리
     document.addEventListener('prescriptionPatientSelected', (e) => {
-        const { name, age } = e.detail;
+        const { name, gender, birthDate, age } = e.detail;
+        
         if (prescriptionTitle) {
-            prescriptionTitle.textContent = `${name} Prescription`;
+            // 날짜 포맷팅
+            const formattedDate = birthDate.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            }).replace(/ /g, ' ');
+
+            // 타이틀 HTML 구성
+            prescriptionTitle.innerHTML = `
+                <span style="font-size: 16px; color: black; font-weight: bold;">${name}</span>
+                <img src="image/${gender || 'unknown'}.png" alt="${gender}" class="gender-icon" style="margin: 0 5px;">
+                <span style="margin-right: 5px;">${age}y</span>
+                <span style="color: #666;">(${formattedDate})</span>
+            `;
         }
         
         // 메시지 컨테이너 숨기고 레이아웃 표시
@@ -56,6 +70,28 @@ function initializeCanvas() {
     let lastX = 0;
     let lastY = 0;
     const drawHistory = [];
+
+    // 기존 컨트롤 버튼들 제거
+    const existingControls = document.querySelector('.chart-controls');
+    if (existingControls) {
+        existingControls.remove();
+    }
+
+    // 컨트롤 버튼 추가
+    const controlsDiv = document.createElement('div');
+    controlsDiv.className = 'chart-controls';
+    controlsDiv.innerHTML = `
+        <button class="undo-btn">Undo</button>
+        <button class="clear-btn">Clear</button>
+    `;
+    document.querySelector('.prescription-center-top').appendChild(controlsDiv);
+
+    // 이벤트 리스너 설정 - 직접 버튼 요소 가져오기
+    const undoBtn = controlsDiv.querySelector('.undo-btn');
+    const clearBtn = controlsDiv.querySelector('.clear-btn');
+
+    undoBtn.addEventListener('click', undo);
+    clearBtn.addEventListener('click', clearCanvas);
 
     // Canvas 크기 조정 함수
     function resizeCanvas() {
@@ -128,18 +164,6 @@ function initializeCanvas() {
         drawHistory.length = 0;
     }
 
-    // 컨트롤 버튼 추가
-    const controlsDiv = document.createElement('div');
-    controlsDiv.className = 'chart-controls';
-    controlsDiv.innerHTML = `
-        <button class="undo-btn">Undo</button>
-        <button class="clear-btn">Clear</button>
-    `;
-    document.querySelector('.prescription-center-top').appendChild(controlsDiv);
-
-    // 이벤트 리스너 설정
-    document.querySelector('.undo-btn').addEventListener('click', undo);
-    document.querySelector('.clear-btn').addEventListener('click', clearCanvas);
     canvas.addEventListener('mousedown', startDrawing);
     canvas.addEventListener('mouseup', stopDrawing);
     canvas.addEventListener('mouseleave', stopDrawing);
