@@ -6,6 +6,20 @@ export function initializePrescription() {
     const prescriptionBody2 = document.querySelector('#prescription-content .content-body-prescription2');
     const prescriptionFooter = document.querySelector('#prescription-content .content-footer-prescription');
 
+    // Close 버튼 추가
+    const closeButton = document.createElement('button');
+    closeButton.className = 'close-button';
+    document.querySelector('.content-header-prescription').appendChild(closeButton);
+
+    // Close 버튼 클릭 이벤트
+    closeButton.addEventListener('click', () => {
+        prescriptionBody.style.display = 'none';
+        prescriptionBody2.style.display = 'none';
+        prescriptionFooter.style.display = 'none';
+        patientSelectWrapper.style.display = 'flex';
+        document.querySelector('#prescription-content').style.display = 'none';
+    });
+
     // Room의 환자 클릭 이벤트에 대한 처리
     document.addEventListener('prescriptionPatientSelected', (e) => {
         const { name, gender, birthDate, age } = e.detail;
