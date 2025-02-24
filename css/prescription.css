@@ -273,7 +273,7 @@
     font-size: 12px;
     font-weight: bold;
     color: rgb(110, 110, 124);
-    margin: 15px 0 0 20px;  /* 상단과 좌측에 여백 */
+    margin: 10px 0 0 20px;  /* 상단과 좌측에 여백 */
 }
 
 /* 공통 타이틀 스타일 */
@@ -452,7 +452,7 @@
 
 .cc-item-text {
     flex-grow: 1;
-    font-size: 12px;
+    font-size: 10px;
     color: #333;
 }
 
@@ -489,6 +489,150 @@
 }
 
 .cc-autocomplete-item:hover {
+    background-color: #f0f0f0;
+}
+
+.medicine-search-container {
+    position: absolute;
+    top: 50px;
+    right: 10px;
+    width: calc(50% - 20px);  /* CC 검색폼과 동일한 너비 */
+}
+
+.medicine-search-input {
+    width: 100%;
+    height: 33px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 12px;
+    box-sizing: border-box;
+}
+
+.medicine-search-input::placeholder {
+    color: #999;
+    font-size: 12px;
+}
+
+.medicine-items-container {
+    position: absolute;
+    top: 90px;
+    right: 10px;
+    width: calc(50% - 20px);
+}
+
+.medicine-item {
+    display: flex;
+    align-items: center;  /* 세로 중앙 정렬 강화 */
+    margin-bottom: 5px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f8f9fa;
+    height: 35px;  /* 높이 고정 */
+    box-sizing: border-box;
+}
+.medicine-item img {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    flex-shrink: 0;  /* 아이콘 크기 고정 */
+}
+.medicine-item-text {
+    flex: 1;
+    min-width: 0;
+    font-size: 10px;
+    color: #333;
+    margin-right: 10px;
+    line-height: 20px;  /* 텍스트 세로 중앙 정렬 */
+    display: flex;
+    align-items: center;
+}
+
+.medicine-controls {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+    flex-shrink: 0;
+    align-items: center;  /* 드롭다운들 세로 중앙 정렬 */
+    height: 100%;  /* 부모 높이에 맞춤 */
+}
+
+.medicine-dropdown {
+    position: relative;
+    width: 60px;
+    height: 20px;  /* 드롭다운 버튼 높이 고정 */
+    display: flex;
+    align-items: center;
+}
+
+.medicine-dropdown-button {
+    width: 100%;
+    height: 100%;  /* 부모 높이에 맞춤 */
+    padding: 2px 4px;  /* 패딩 조정 */
+    font-size: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.medicine-dropdown-content {
+    position: absolute;
+    bottom: 100%;  /* 위로 펼쳐지기 */
+    left: 0;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    z-index: 1000;  /* 최상위 레이어 */
+    display: none;
+}
+
+.medicine-dropdown-item {
+    padding: 4px 8px;
+    font-size: 10px;  /* 글자 크기 축소 */
+    cursor: pointer;
+}
+
+.medicine-dropdown-item:hover {
+    background-color: #f0f0f0;
+}
+
+.medicine-item-remove {
+    cursor: pointer;
+    color: #999;
+    font-size: 16px;
+    padding: 0 5px;
+    flex-shrink: 0;  /* 삭제 버튼 크기 고정 */
+}
+
+.medicine-autocomplete {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+    z-index: 1000;
+}
+
+.medicine-autocomplete-item {
+    padding: 8px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.medicine-autocomplete-item:hover {
     background-color: #f0f0f0;
 }
 

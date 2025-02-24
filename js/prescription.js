@@ -71,12 +71,23 @@ export function initializePrescription() {
     const ccSearchContainer = document.createElement('div');
     ccSearchContainer.className = 'cc-search-container';
     ccSearchContainer.innerHTML = `
-        <input type="text" class="cc-search-input" placeholder="CC Typing">
+        <input type="text" class="cc-search-input" placeholder="CC...">
     `;
     document.querySelector('.prescription-center-bottom').appendChild(ccSearchContainer);
 
     // CC 검색 초기화 호출 추가
     initializeCCSearch();
+
+    // prescription-center-bottom에 Medicine 검색 폼 추가
+    const medicineSearchContainer = document.createElement('div');
+    medicineSearchContainer.className = 'medicine-search-container';
+    medicineSearchContainer.innerHTML = `
+        <input type="text" class="medicine-search-input" placeholder="Medicines...">
+    `;
+    document.querySelector('.prescription-center-bottom').appendChild(medicineSearchContainer);
+
+    // Medicine 검색 초기화
+    initializeMedicineSearch();
 }
 
 // 현재 room 이름 업데이트 함수
@@ -335,6 +346,165 @@ async function initializeCCSearch() {
     ccSearchInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter' && ccSearchInput.value.trim()) {
             addCCItem(ccSearchInput.value.trim());
+            e.preventDefault();
+        }
+    });
+}
+
+// Medicine 검색 초기화
+async function initializeMedicineSearch() {
+    const medicineSearchInput = document.querySelector('.medicine-search-input');
+    const medicineItemsContainer = document.createElement('div');
+    medicineItemsContainer.className = 'medicine-items-container';
+    document.querySelector('.prescription-center-bottom').appendChild(medicineItemsContainer);
+
+    // 자동완성 컨테이너
+    const autocompleteContainer = document.createElement('div');
+    autocompleteContainer.className = 'medicine-autocomplete';
+    medicineSearchInput.parentNode.appendChild(autocompleteContainer);
+
+    // Medicine 검색 처리
+    medicineSearchInput.addEventListener('input', async (e) => {
+        const searchText = e.target.value.trim().toLowerCase();
+        
+        if (searchText.length < 3) {  // 3글자 미만이면 검색하지 않음
+            autocompleteContainer.style.display = 'none';
+            return;
+        }
+
+        try {
+            // Medicine 문서 가져오기
+            const medicineDoc = await getDoc(doc(db, 'medicine', 'medicine'));
+            const medicineData = medicineDoc.data();
+            
+            let matches = [];
+            
+            // 모든 약물 필드를 순회
+            Object.entries(medicineData).forEach(([drugName, medicines]) => {
+                // 약물명이나 실제 약 이름이 검색어로 시작하는 경우
+                if (drugName.toLowerCase().startsWith(searchText)) {
+                    // 해당 약물의 모든 실제 약 이름을 matches에 추가
+                    Object.keys(medicines).forEach(medicineName => {
+                        matches.push(medicineName);
+                    });
+                } else {
+                    // 실제 약 이름으로 검색
+                    Object.keys(medicines).forEach(medicineName => {
+                        if (medicineName.toLowerCase().startsWith(searchText)) {
+                            matches.push(medicineName);
+                        }
+                    });
+                }
+            });
+
+            // 자동완성 목록 표시
+            autocompleteContainer.innerHTML = matches
+                .map(item => `<div class="medicine-autocomplete-item">${item}</div>`)
+                .join('');
+            
+            autocompleteContainer.style.display = matches.length ? 'block' : 'none';
+        } catch (error) {
+            console.error('Medicine 검색 중 오류:', error);
+        }
+    });
+
+    // Medicine 항목 추가 함수
+    function addMedicineItem(text) {
+        const medicineItem = document.createElement('div');
+        medicineItem.className = 'medicine-item';
+        medicineItem.innerHTML = `
+            <img src="image/medicine.png" alt="Medicine">
+            <span class="medicine-item-text">${text}</span>
+            <div class="medicine-controls">
+                <div class="medicine-dropdown">
+                    <button class="medicine-dropdown-button">p/dose</button>
+                    <div class="medicine-dropdown-content">
+                        ${Array.from({length: 7}, (_, i) => 
+                            `<div class="medicine-dropdown-item">${i + 1}/per</div>`
+                        ).join('')}
+                    </div>
+                </div>
+                <div class="medicine-dropdown">
+                    <button class="medicine-dropdown-button">p/day</button>
+                    <div class="medicine-dropdown-content">
+                        ${Array.from({length: 7}, (_, i) => 
+                            `<div class="medicine-dropdown-item">${i + 1}/d</div>`
+                        ).join('')}
+                    </div>
+                </div>
+                <div class="medicine-dropdown">
+                    <button class="medicine-dropdown-button">days</button>
+                    <div class="medicine-dropdown-content">
+                        ${Array.from({length: 30}, (_, i) => 
+                            `<div class="medicine-dropdown-item">${i + 1}days</div>`
+                        ).join('')}
+                    </div>
+                </div>
+            </div>
+            <span class="medicine-item-remove">×</span>
+        `;
+        medicineItemsContainer.appendChild(medicineItem);
+
+        // 드롭다운 이벤트 처리
+        setupDropdowns(medicineItem);
+
+        medicineSearchInput.value = '';
+        autocompleteContainer.style.display = 'none';
+    }
+
+    function setupDropdowns(medicineItem) {
+        const dropdowns = medicineItem.querySelectorAll('.medicine-dropdown');
+        
+        // 현재 열린 드롭다운을 추적
+        let openDropdown = null;
+
+        dropdowns.forEach(dropdown => {
+            const button = dropdown.querySelector('.medicine-dropdown-button');
+            const content = dropdown.querySelector('.medicine-dropdown-content');
+
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                
+                // 다른 열린 드롭다운 닫기
+                if (openDropdown && openDropdown !== content) {
+                    openDropdown.style.display = 'none';
+                }
+
+                // 현재 드롭다운 토글
+                content.style.display = content.style.display === 'block' ? 'none' : 'block';
+                openDropdown = content.style.display === 'block' ? content : null;
+            });
+
+            // 드롭다운 항목 선택
+            content.addEventListener('click', (e) => {
+                if (e.target.classList.contains('medicine-dropdown-item')) {
+                    button.textContent = e.target.textContent;
+                    content.style.display = 'none';
+                    openDropdown = null;
+                }
+            });
+        });
+
+        // 다른 영역 클릭 시 드롭다운 닫기
+        document.addEventListener('click', () => {
+            if (openDropdown) {
+                openDropdown.style.display = 'none';
+                openDropdown = null;
+            }
+        });
+    }
+
+    // 자동완성 항목 선택
+    autocompleteContainer.addEventListener('click', (e) => {
+        if (e.target.classList.contains('medicine-autocomplete-item')) {
+            addMedicineItem(e.target.textContent);
+        }
+    });
+
+    // 엔터 키 처리
+    medicineSearchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && medicineSearchInput.value.trim()) {
+            addMedicineItem(medicineSearchInput.value.trim());
             e.preventDefault();
         }
     });
