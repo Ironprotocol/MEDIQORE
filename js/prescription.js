@@ -349,6 +349,8 @@ async function initializeCCSearch() {
             e.preventDefault();
         }
     });
+
+    setupKeyboardNavigation(ccSearchInput, autocompleteContainer, addCCItem);
 }
 
 // Medicine 검색 초기화
@@ -507,5 +509,60 @@ async function initializeMedicineSearch() {
             addMedicineItem(medicineSearchInput.value.trim());
             e.preventDefault();
         }
+    });
+
+    setupKeyboardNavigation(medicineSearchInput, autocompleteContainer, addMedicineItem);
+}
+
+function setupKeyboardNavigation(searchInput, autocompleteContainer, addItemFunction) {
+    let selectedIndex = -1;
+    let items = [];
+
+    searchInput.addEventListener('keydown', (e) => {
+        items = autocompleteContainer.querySelectorAll('.cc-autocomplete-item, .medicine-autocomplete-item');
+        
+        switch(e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+                updateSelection();
+                break;
+                
+            case 'ArrowUp':
+                e.preventDefault();
+                selectedIndex = Math.max(selectedIndex - 1, -1);
+                updateSelection();
+                break;
+                
+            case 'Enter':
+                e.preventDefault();
+                if (selectedIndex >= 0 && items[selectedIndex]) {
+                    addItemFunction(items[selectedIndex].textContent);
+                    selectedIndex = -1;
+                }
+                break;
+        }
+    });
+
+    // 마우스가 움직일 때도 선택 상태 업데이트
+    autocompleteContainer.addEventListener('mousemove', (e) => {
+        if (e.target.matches('.cc-autocomplete-item, .medicine-autocomplete-item')) {
+            selectedIndex = Array.from(items).indexOf(e.target);
+            updateSelection();
+        }
+    });
+
+    function updateSelection() {
+        items.forEach((item, index) => {
+            item.classList.toggle('selected', index === selectedIndex);
+            if (index === selectedIndex) {
+                item.scrollIntoView({ block: 'nearest' });
+            }
+        });
+    }
+
+    // 검색어가 변경될 때마다 선택 초기화
+    searchInput.addEventListener('input', () => {
+        selectedIndex = -1;
     });
 }

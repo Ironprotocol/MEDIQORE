@@ -492,6 +492,10 @@
     background-color: #f0f0f0;
 }
 
+.cc-autocomplete-item.selected {
+    background-color: #e9ecef;
+}
+
 .medicine-search-container {
     position: absolute;
     top: 50px;
@@ -634,6 +638,10 @@
 
 .medicine-autocomplete-item:hover {
     background-color: #f0f0f0;
+}
+
+.medicine-autocomplete-item.selected {
+    background-color: #e9ecef;
 }
 
 
