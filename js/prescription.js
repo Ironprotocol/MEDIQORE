@@ -1,3 +1,5 @@
+import { auth, db, doc, getDoc } from './firebase-config.js';
+
 // Prescription 컨테이너 초기화
 export function initializePrescription() {
     const prescriptionTitle = document.querySelector('#prescription-content .content-title-prescription');
@@ -69,9 +71,12 @@ export function initializePrescription() {
     const ccSearchContainer = document.createElement('div');
     ccSearchContainer.className = 'cc-search-container';
     ccSearchContainer.innerHTML = `
-        <input type="text" class="cc-search-input" placeholder="CC Searching">
+        <input type="text" class="cc-search-input" placeholder="CC Typing">
     `;
     document.querySelector('.prescription-center-bottom').appendChild(ccSearchContainer);
+
+    // CC 검색 초기화 호출 추가
+    initializeCCSearch();
 }
 
 // 현재 room 이름 업데이트 함수
@@ -251,4 +256,86 @@ function initializeCanvas() {
     // 초기 설정 및 리사이즈 이벤트에 연결
     updateFormWidth();
     window.addEventListener('resize', updateFormWidth);
+}
+
+// CC 검색 및 자동완성 기능
+async function initializeCCSearch() {
+    const ccSearchInput = document.querySelector('.cc-search-input');
+    const ccItemsContainer = document.createElement('div');
+    ccItemsContainer.className = 'cc-items-container';
+    document.querySelector('.prescription-center-bottom').appendChild(ccItemsContainer);
+
+    // 병원 타입 가져오기 (한 번만 실행)
+    const [hospitalName] = auth.currentUser.email.split('@')[0].split('.');
+    const hospitalDoc = await getDoc(doc(db, 'hospitals', hospitalName));
+    const hospitalType = hospitalDoc.data().info.type;
+
+    // 자동완성 컨테이너
+    const autocompleteContainer = document.createElement('div');
+    autocompleteContainer.className = 'cc-autocomplete';
+    ccSearchInput.parentNode.appendChild(autocompleteContainer);
+
+    // CC 검색 처리
+    ccSearchInput.addEventListener('input', async (e) => {
+        const searchText = e.target.value.trim().toLowerCase();
+
+        if (!searchText) {
+            autocompleteContainer.style.display = 'none';
+            return;
+        }
+
+        try {
+            // CC 검색
+            const ccDoc = await getDoc(doc(db, 'cc', 'cc'));
+            const ccItems = ccDoc.data()[hospitalType] || [];
+
+            const matches = ccItems.filter(item => 
+                item.toLowerCase().startsWith(searchText)
+            );
+
+            // 자동완성 목록 표시
+            autocompleteContainer.innerHTML = matches
+                .map(item => `<div class="cc-autocomplete-item">${item}</div>`)
+                .join('');
+            
+            autocompleteContainer.style.display = matches.length ? 'block' : 'none';
+        } catch (error) {
+            console.error('CC 검색 중 오류:', error);  // 오류 발생 시 확인
+        }
+    });
+
+    // CC 항목 추가 함수
+    function addCCItem(text) {
+        const ccItem = document.createElement('div');
+        ccItem.className = 'cc-item';
+        ccItem.innerHTML = `
+            <img src="image/cc.png" alt="CC">
+            <span class="cc-item-text">${text}</span>
+            <span class="cc-item-remove">×</span>
+        `;
+        ccItemsContainer.appendChild(ccItem);
+
+        // X 버튼 클릭 이벤트
+        ccItem.querySelector('.cc-item-remove').addEventListener('click', () => {
+            ccItem.remove();
+        });
+
+        ccSearchInput.value = '';
+        autocompleteContainer.style.display = 'none';
+    }
+
+    // 자동완성 항목 선택
+    autocompleteContainer.addEventListener('click', (e) => {
+        if (e.target.classList.contains('cc-autocomplete-item')) {
+            addCCItem(e.target.textContent);
+        }
+    });
+
+    // 엔터 키 처리
+    ccSearchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && ccSearchInput.value.trim()) {
+            addCCItem(ccSearchInput.value.trim());
+            e.preventDefault();
+        }
+    });
 }
