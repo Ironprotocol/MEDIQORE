@@ -120,39 +120,14 @@ function initializeCanvas() {
     let lastY = 0;
     const drawHistory = [];
 
-    // 기존 symptoms 폼이 있다면 제거
-    const existingForm = document.querySelector('.symptoms-form');
-    if (existingForm) {
-        existingForm.remove();
+    // 폼이 없을 때만 생성
+    if (!document.querySelector('.symptoms-form')) {
+        createForms();
     }
 
-    // Symptoms 입력 폼 추가
-    const formDiv = document.createElement('div');
-    formDiv.className = 'symptoms-form';
-    formDiv.innerHTML = `
-        <div class="symptoms-label">Symptoms</div>
-        <textarea class="symptoms-input"></textarea>
-    `;
-    document.querySelector('.prescription-center-top').appendChild(formDiv);
-
-    // Location 입력 폼 추가
-    const locationFormDiv = document.createElement('div');
-    locationFormDiv.className = 'location-form';
-    locationFormDiv.innerHTML = `
-        <div class="location-label">Location</div>
-        <textarea class="location-input"></textarea>
-    `;
-    document.querySelector('.prescription-center-top').appendChild(locationFormDiv);
-
-    // Treatment Details 입력 폼 추가
-    const treatmentDetailsFormDiv = document.createElement('div');
-    treatmentDetailsFormDiv.className = 'treatment-details-form';
-    treatmentDetailsFormDiv.innerHTML = `
-        <div class="treatment-details-label">Treatment Details</div>
-        <textarea class="treatment-details-input"></textarea>
-    `;
-    document.querySelector('.prescription-center-top').appendChild(treatmentDetailsFormDiv);
-
+    // Canvas 초기화
+    clearCanvas();
+    
     // 기존 컨트롤 버튼들 제거
     const existingControls = document.querySelector('.chart-controls');
     if (existingControls) {
@@ -244,6 +219,11 @@ function initializeCanvas() {
     function clearCanvas() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawHistory.length = 0;
+        
+        // 입력 폼 초기화
+        document.querySelector('.symptoms-input').value = '';
+        document.querySelector('.location-input').value = '';
+        document.querySelector('.treatment-details-input').value = '';
     }
 
     canvas.addEventListener('mousedown', startDrawing);
@@ -267,6 +247,45 @@ function initializeCanvas() {
     // 초기 설정 및 리사이즈 이벤트에 연결
     updateFormWidth();
     window.addEventListener('resize', updateFormWidth);
+}
+
+// 폼 생성 함수 분리
+function createForms() {
+    // Symptoms 입력 폼 추가
+    const formDiv = document.createElement('div');
+    formDiv.className = 'symptoms-form';
+    formDiv.innerHTML = `
+        <div class="symptoms-label">Symptoms</div>
+        <textarea class="symptoms-input"></textarea>
+    `;
+    document.querySelector('.prescription-center-top').appendChild(formDiv);
+
+    // Location 입력 폼 추가
+    const locationFormDiv = document.createElement('div');
+    locationFormDiv.className = 'location-form';
+    locationFormDiv.innerHTML = `
+        <div class="location-label">Location</div>
+        <textarea class="location-input"></textarea>
+    `;
+    document.querySelector('.prescription-center-top').appendChild(locationFormDiv);
+
+    // Treatment Details 입력 폼 추가
+    const treatmentDetailsFormDiv = document.createElement('div');
+    treatmentDetailsFormDiv.className = 'treatment-details-form';
+    treatmentDetailsFormDiv.innerHTML = `
+        <div class="treatment-details-label">Treatment Details</div>
+        <textarea class="treatment-details-input"></textarea>
+    `;
+    document.querySelector('.prescription-center-top').appendChild(treatmentDetailsFormDiv);
+
+    // 컨트롤 버튼 추가
+    const controlsDiv = document.createElement('div');
+    controlsDiv.className = 'chart-controls';
+    controlsDiv.innerHTML = `
+        <button class="undo-btn">Undo</button>
+        <button class="clear-btn">Clear</button>
+    `;
+    document.querySelector('.prescription-center-top').appendChild(controlsDiv);
 }
 
 // CC 검색 및 자동완성 기능
