@@ -64,6 +64,14 @@ export function initializePrescription() {
     const printBtn = document.createElement('button');
     printBtn.className = 'print-btn';
     document.querySelector('.content-footer-prescription').appendChild(printBtn);
+
+    // prescription-center-bottom에 CC 검색 폼 추가
+    const ccSearchContainer = document.createElement('div');
+    ccSearchContainer.className = 'cc-search-container';
+    ccSearchContainer.innerHTML = `
+        <input type="text" class="cc-search-input" placeholder="CC Searching">
+    `;
+    document.querySelector('.prescription-center-bottom').appendChild(ccSearchContainer);
 }
 
 // 현재 room 이름 업데이트 함수
