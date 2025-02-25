@@ -1,4 +1,5 @@
 import { auth, db, doc, getDoc, setDoc, collection, getDocs, serverTimestamp, updateDoc } from './firebase-config.js';
+import { initializePrescriptionHistory } from './prescriptHistory.js';
 
 // Prescription 컨테이너 초기화
 export function initializePrescription() {
@@ -61,6 +62,9 @@ export function initializePrescription() {
 
         // Canvas 초기화 추가
         initializeCanvas();
+
+        // 처방전 히스토리 초기화 추가
+        initializePrescriptionHistory(patientId);
     });
 
     // content-footer-prescription에 Send 버튼 추가
@@ -158,6 +162,95 @@ export function initializePrescription() {
 
     // Medicine 검색 초기화
     initializeMedicineSearch();
+
+    // 히스토리 선택 이벤트 리스너 추가
+    document.addEventListener('prescriptionHistorySelected', (e) => {
+        const { prescriptionData, registerDate, doctor } = e.detail;
+        
+        // 기본 입력 필드 데이터 표시
+        document.querySelector('.symptoms-input').value = prescriptionData.symptoms || '';
+        document.querySelector('.location-input').value = prescriptionData.location || '';
+        document.querySelector('.treatment-details-input').value = prescriptionData.treatmentDetails || '';
+
+        // CC 목록 표시
+        const ccContainer = document.querySelector('.cc-items-container');
+        ccContainer.innerHTML = '';
+        prescriptionData.cc.forEach(cc => {
+            const ccItem = document.createElement('div');
+            ccItem.className = 'cc-item';
+            ccItem.innerHTML = `
+                <span class="cc-item-text">${cc}</span>
+            `;
+            ccContainer.appendChild(ccItem);
+        });
+
+        // 약 처방 목록 표시
+        const medicineContainer = document.querySelector('.medicine-items-container');
+        medicineContainer.innerHTML = '';
+        if (prescriptionData.medicines) {
+            prescriptionData.medicines.forEach(medicine => {
+                const medicineItem = document.createElement('div');
+                medicineItem.className = 'medicine-item';
+                medicineItem.innerHTML = `
+                    <span class="medicine-item-text">${medicine.name}</span>
+                    <div class="medicine-controls">
+                        <div class="medicine-dropdown">
+                            <button class="medicine-dropdown-button">${medicine.perDose}</button>
+                        </div>
+                        <div class="medicine-dropdown">
+                            <button class="medicine-dropdown-button">${medicine.perDay}</button>
+                        </div>
+                        <div class="medicine-dropdown">
+                            <button class="medicine-dropdown-button">${medicine.days}</button>
+                        </div>
+                    </div>
+                `;
+                medicineContainer.appendChild(medicineItem);
+            });
+        }
+
+        // 치아 차트 데이터 표시
+        const canvas = document.querySelector('.tooth-chart-canvas');
+        const ctx = canvas.getContext('2d');
+        if (e.detail.chartImage) {  // prescriptionData가 아닌 e.detail에서 직접 접근
+            const img = new Image();
+            img.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0);
+            };
+            img.src = e.detail.chartImage;
+        }
+
+        // Canvas 비활성화 추가
+        canvas.style.pointerEvents = 'none';  // 캔버스 이벤트 비활성화
+
+        // 모든 입력 필드 비활성화
+        document.querySelectorAll('.cc-search-input, .medicine-search-input, .symptoms-input, .location-input, .treatment-details-input').forEach(input => {
+            input.disabled = true;
+        });
+
+        // 드롭다운 버튼 비활성화
+        document.querySelectorAll('.medicine-dropdown-button').forEach(button => {
+            button.disabled = true;
+        });
+    });
+
+    // New Chart 버튼 클릭 시 초기화
+    document.querySelector('.new-chart-btn').addEventListener('click', () => {
+        // 모든 컨테이너 초기화
+        document.querySelector('.cc-items-container').innerHTML = '';
+        document.querySelector('.medicine-items-container').innerHTML = '';
+        
+        // Canvas 초기화
+        const canvas = document.querySelector('.tooth-chart-canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // 입력 필드 활성화
+        document.querySelectorAll('.cc-search-input, .medicine-search-input').forEach(input => {
+            input.disabled = false;
+        });
+    });
 }
 
 // 현재 room 이름 업데이트 함수

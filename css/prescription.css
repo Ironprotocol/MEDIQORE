@@ -644,4 +644,47 @@
     background-color: #e9ecef;
 }
 
+/* 처방전 히스토리 아이템 스타일 */
+.prescript-history-record {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin: 10px;
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.prescript-history-record:hover {
+    border: 2px solid #81d9fc;  /* Patient List와 동일한 hover 효과 */
+    padding: 9px;  /* border가 두꺼워진만큼 padding 감소 */
+}
+
+.prescript-history-record.selected {
+    border: 2px solid rgb(0, 102, 255);  /* Patient List와 동일한 선택 효과 */
+    padding: 9px;  /* border가 두꺼워진만큼 padding 감소 */
+}
+
+.prescript-history-record .record-date {
+    font-size: 14px;
+    font-weight: bold;
+    color: #000;
+}
+
+.prescript-history-record .record-date span {
+    color: #666;
+}
+
+.prescript-history-record .record-doctor {
+    font-size: 14px;
+    font-weight: bold;
+    color: #666;
+    margin-top: 5px;
+}
+
+.prescript-history-record .record-cc {
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+}
+
 
