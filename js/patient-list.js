@@ -84,8 +84,12 @@ async function createPatientElement(hospitalName, patientData, patientId, type, 
         <span class="complaint-span">${formatComplaint(patientData.primaryComplaint)}</span>
         <span class="time-span">${timeString}</span>
         <span class="progress-span">
-            <img src="image/${type === 'reservation' ? 'rsvd' : patientData.progress}.png" 
-                 alt="${type === 'reservation' ? 'rsvd' : patientData.progress}" 
+            <img src="image/${type === 'reservation' ? 'rsvd' : 
+                            type === 'active' ? 'active' : 
+                            patientData.progress}.png" 
+                 alt="${type === 'reservation' ? 'rsvd' : 
+                      type === 'active' ? 'active' : 
+                      patientData.progress}" 
                  style="width: 73px; height: 30.5px; object-fit: contain;">
         </span>
         <span class="doctor-dropdown-span">
@@ -328,7 +332,7 @@ async function createPatientElement(hospitalName, patientData, patientId, type, 
                         patients: [...currentPatients, {
                             id: patientId,
                             name: patientId.split('.')[0],
-                            status: type === 'reservation' ? 'waiting' : type
+                            progress: type === 'reservation' ? 'waiting' : type  // status를 progress로 변경
                         }]
                     });
 
@@ -420,13 +424,15 @@ export async function initializePatientList(hospitalName, currentDate) {
     const patientListBody = document.querySelector('#desk-content .content-body');
     if (!patientListBody) return;
 
-    // 컬렉션 참조
+    // 컬렉션 참조 - active 추가
     const waitingRef = collection(db, 'hospitals', hospitalName, 'dates', currentDate, 'waiting');
     const reservationRef = collection(db, 'hospitals', hospitalName, 'dates', currentDate, 'reservation');
+    const activeRef = collection(db, 'hospitals', hospitalName, 'dates', currentDate, 'active');  // 추가
 
-    // 쿼리 설정
+    // 쿼리 설정 - active 추가
     const waitingQuery = query(waitingRef, orderBy('timestamp', 'asc'));
     const reservationQuery = query(reservationRef, orderBy('rsvdTime', 'asc'));
+    const activeQuery = query(activeRef, orderBy('timestamp', 'asc'));  // 추가
 
     // 환자 목록 업데이트 및 정렬
     function updatePatientList() {
@@ -468,7 +474,6 @@ export async function initializePatientList(hospitalName, currentDate) {
         
         for (const doc of snapshot.docs) {
             const patientData = doc.data();
-            // currentDate 전달
             const element = await createPatientElement(hospitalName, patientData, doc.id, 'waiting', currentDate);
             if (element) {
                 allPatients.push({
@@ -487,7 +492,6 @@ export async function initializePatientList(hospitalName, currentDate) {
         
         for (const doc of snapshot.docs) {
             const patientData = doc.data();
-            // currentDate 전달
             const element = await createPatientElement(hospitalName, patientData, doc.id, 'reservation', currentDate);
             if (element) {
                 allPatients.push({
@@ -500,9 +504,28 @@ export async function initializePatientList(hospitalName, currentDate) {
         updatePatientList();
     });
 
+    // active 리스너 추가
+    const unsubscribeActive = onSnapshot(activeQuery, async (snapshot) => {
+        allPatients = allPatients.filter(p => p.type !== 'active');
+        
+        for (const doc of snapshot.docs) {
+            const patientData = doc.data();
+            const element = await createPatientElement(hospitalName, patientData, doc.id, 'active', currentDate);
+            if (element) {
+                allPatients.push({
+                    type: 'active',
+                    timestamp: patientData.timestamp,
+                    element: element
+                });
+            }
+        }
+        updatePatientList();
+    });
+
     return () => {
         unsubscribeWaiting();
         unsubscribeReservation();
+        unsubscribeActive();  // 추가
     };
 }
 

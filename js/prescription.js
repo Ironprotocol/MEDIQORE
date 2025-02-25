@@ -1,4 +1,4 @@
-import { auth, db, doc, getDoc, setDoc, collection, getDocs, serverTimestamp, updateDoc } from './firebase-config.js';
+import { auth, db, doc, getDoc, setDoc, collection, getDocs, serverTimestamp, updateDoc, deleteDoc } from './firebase-config.js';
 import { initializePrescriptionHistory } from './prescriptHistory.js';
 
 // Prescription 컨테이너 초기화
@@ -261,23 +261,103 @@ export function initializePrescription() {
     });
 
     // New Chart 버튼 클릭 시 초기화할 때는 다시 활성화
-    document.querySelector('.new-chart-btn').addEventListener('click', () => {
-        // 모든 컨테이너 초기화
-        document.querySelector('.cc-items-container').innerHTML = '';
-        document.querySelector('.medicine-items-container').innerHTML = '';
-        
-        // Canvas 초기화
-        const canvas = document.querySelector('.tooth-chart-canvas');
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    document.querySelector('.new-chart-btn').addEventListener('click', async () => {
+        try {
+            const [hospitalName] = auth.currentUser.email.split('@')[0].split('.');
+            
+            // 1. Prescription History UI 선택 해제
+            document.querySelectorAll('.prescript-history-record.selected').forEach(item => {
+                item.classList.remove('selected');
+            });
 
-        // 입력 필드와 버튼 활성화
-        document.querySelectorAll('.cc-search-input, .medicine-search-input, .symptoms-input, .location-input, .treatment-details-input, .clear-btn').forEach(element => {
-            element.disabled = false;
-        });
+            // 2. 처방전 입력 폼 완전 초기화
+            // CC, Medicine 컨테이너 초기화
+            document.querySelector('.cc-items-container').innerHTML = '';
+            document.querySelector('.medicine-items-container').innerHTML = '';
+            
+            // 입력 필드 초기화
+            document.querySelector('.symptoms-input').value = '';
+            document.querySelector('.location-input').value = '';
+            document.querySelector('.treatment-details-input').value = '';
+            
+            // Canvas 초기화
+            const canvas = document.querySelector('.tooth-chart-canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Canvas 활성화
-        canvas.style.pointerEvents = 'auto';
+            // 모든 입력 요소 활성화
+            document.querySelectorAll('.cc-search-input, .medicine-search-input, .symptoms-input, .location-input, .treatment-details-input, .clear-btn').forEach(element => {
+                element.disabled = false;
+            });
+            canvas.style.pointerEvents = 'auto';
+
+            // 3. 환자 상태 변경
+            const currentDate = new Date().toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            }).replace(/ /g, '.');
+
+            // waiting 문서에서 환자 데이터 가져오기
+            const waitingRef = doc(db, 'hospitals', hospitalName, 'dates', currentDate, 'waiting', currentPatientId);
+            const waitingDoc = await getDoc(waitingRef);
+            
+            if (waitingDoc.exists()) {
+                const patientData = waitingDoc.data();
+                
+                // active 컬렉션에 환자 데이터 복사하며 progress 변경
+                const activeRef = doc(db, 'hospitals', hospitalName, 'dates', currentDate, 'active', currentPatientId);
+                await setDoc(activeRef, {
+                    ...patientData,
+                    progress: 'active'
+                });
+
+                // waiting 문서 삭제
+                await deleteDoc(waitingRef);
+
+                // treatment.room의 patients 배열 업데이트
+                const roomsRef = collection(db, 'hospitals', hospitalName, 'treatment.room');
+                const roomsSnapshot = await getDocs(roomsRef);
+                
+                roomsSnapshot.forEach(async (roomDoc) => {
+                    const roomData = roomDoc.data();
+                    if (roomData.patients) {
+                        const updatedPatients = roomData.patients.map(patient => {
+                            if (patient.id === currentPatientId) {
+                                return { ...patient, progress: 'active' };
+                            }
+                            return patient;
+                        });
+                        
+                        await updateDoc(roomDoc.ref, { patients: updatedPatients });
+                    }
+                });
+
+                // register.date 문서 업데이트
+                const registerDateRef = doc(db, 'hospitals', hospitalName, 'patient', currentPatientId, 'register.date', currentRegisterDate);
+                await updateDoc(registerDateRef, {
+                    progress: 'active'
+                });
+
+                // 4. UI 상태 아이콘 업데이트
+                // Room UI의 환자 아이콘 업데이트 (47px × 20px)
+                document.querySelectorAll(`.room-patient-item[data-patient-id="${currentPatientId}"] .patient-status-icon`).forEach(icon => {
+                    icon.src = 'image/active.png';
+                    icon.style.width = '47px';
+                    icon.style.height = '20px';
+                });
+
+                // Patient List UI의 환자 아이콘 업데이트 (73px × 30.5px)
+                document.querySelectorAll(`.patient-info-container[data-patient-id="${currentPatientId}"] .progress-span img`).forEach(icon => {
+                    icon.src = 'image/active.png';
+                    icon.style.width = '73px';
+                    icon.style.height = '30.5px';
+                });
+            }
+        } catch (error) {
+            console.error('Error in New Chart:', error);
+            alert('Failed to initialize new chart');
+        }
     });
 }
 

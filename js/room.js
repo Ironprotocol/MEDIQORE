@@ -167,7 +167,7 @@ export async function initializeRoomManagement(hospitalName) {
                                          data-patient-id="${patient.id}">
                                         <span class="patient-name">${patient.name}</span>
                                         <span class="patient-age" style="display: none;">${patient.age || '0years'}</span>
-                                        <img src="image/${patient.status}.png" alt="${patient.status}" 
+                                        <img src="image/${patient.progress || 'waiting'}.png" alt="${patient.progress || 'waiting'}" 
                                              class="patient-status-icon">
                                     </div>
                                 `).join('')}
