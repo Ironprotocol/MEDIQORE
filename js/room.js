@@ -68,9 +68,6 @@ async function cleanupPatients(hospitalName) {
 
 // cleanup 초기화 함수 수정
 function initializeCleanup(hospitalName) {
-    // 즉시 한 번 실행
-    cleanupPatients(hospitalName);
-
     function scheduleNextCleanup() {
         const now = new Date();
         const tomorrow = new Date(now);
@@ -79,14 +76,13 @@ function initializeCleanup(hospitalName) {
 
         const timeUntilMidnight = tomorrow - now;
         
-        // 24시간마다 반복 실행
-        setInterval(() => {
-            cleanupPatients(hospitalName);
-        }, 24 * 60 * 60 * 1000);
-
-        // 다음 자정까지 첫 실행
+        // 다음 자정에 실행될 cleanup 예약
         setTimeout(() => {
             cleanupPatients(hospitalName);
+            // 이후 24시간마다 반복
+            setInterval(() => {
+                cleanupPatients(hospitalName);
+            }, 24 * 60 * 60 * 1000);
         }, timeUntilMidnight);
     }
 
