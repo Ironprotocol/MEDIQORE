@@ -96,8 +96,13 @@
             initializeUserName();       //common.js - 우측 상단 의사 이름 초기화
             initializeStatusSelector(); //common.js - 우측 상단 의사 상태 초기화
 
+            let roomUnsubscribe = null;
+
             auth.onAuthStateChanged(async (user) => {
                     if (!user) {
+                        if (roomUnsubscribe) {
+                            roomUnsubscribe();
+                        }
                         window.location.href = 'main.html';
                         return;
                     } //회원 아니면 돌려보냄
@@ -107,7 +112,7 @@
               const hospitalName = user.email.split('@')[0].split('.')[0]; // hospitalName 추출
               const currentDate = document.querySelector('.current-date').textContent; // 현재 날짜 가져오기
               await initializePatientList(hospitalName, currentDate); //patient-list.js - 환자 리스트 전체 관리
-              await initializeRoomManagement(hospitalName);  //room 관리 
+              roomUnsubscribe = await initializeRoomManagement(hospitalName);
               initializePrescription();  // Prescription 초기화
                 
               auth.onAuthStateChanged(async (user) => {

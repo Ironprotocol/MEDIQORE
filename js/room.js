@@ -6,54 +6,71 @@ const expandedRooms = new Map();
 let selectedPatientId = null;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// 자정에 이전 날짜의 환자 데이터 삭제 (room과 desk 모두)
+// 자정에 이전 날짜의 환자 데이터 삭제
 async function cleanupPatients(hospitalName) {
     const today = new Date();
-    today.setHours(0, 0, 0, 0);  // 오늘 자정
+    today.setHours(0, 0, 0, 0);
 
-    // Room 데이터 정리
-    const roomsRef = collection(db, 'hospitals', hospitalName, 'treatment.room');
-    const roomSnapshot = await getDocs(roomsRef);
+    try {
+        // 1. 이전 날짜의 waiting/reservation 문서 정리
+        const datesRef = collection(db, 'hospitals', hospitalName, 'dates');
+        const datesSnapshot = await getDocs(datesRef);
+        
+        for (const dateDoc of datesSnapshot.docs) {
+            const dateStr = dateDoc.id;
+            const dateTimestamp = new Date(dateStr);
+            
+            // 이전 날짜의 데이터만 처리
+            if (dateTimestamp < today) {
+                // waiting 컬렉션 삭제
+                const waitingRef = collection(dateDoc.ref, 'waiting');
+                const waitingDocs = await getDocs(waitingRef);
+                waitingDocs.forEach(async (doc) => {
+                    await deleteDoc(doc.ref);
+                });
 
-    roomSnapshot.forEach(async (roomDoc) => {
-        const patients = roomDoc.data().patients || [];
-        // 이전 날짜의 환자만 필터링하여 제거
-        const updatedPatients = patients.filter(patient => {
-            const rsvdTime = new Date(patient.rsvdTime);
-            return rsvdTime >= today;  // 오늘 이후 예약만 유지
-        });
-
-        // 환자 목록 업데이트
-        if (updatedPatients.length !== patients.length) {
-            await updateDoc(roomDoc.ref, {
-                patients: updatedPatients
-            });
+                // reservation 컬렉션 삭제
+                const reservationRef = collection(dateDoc.ref, 'reservation');
+                const reservationDocs = await getDocs(reservationRef);
+                reservationDocs.forEach(async (doc) => {
+                    await deleteDoc(doc.ref);
+                });
+            }
         }
-    });
 
-    // Desk(patient list) 데이터 정리
-    const desksRef = collection(db, 'hospitals', hospitalName, 'desk');
-    const deskSnapshot = await getDocs(desksRef);
+        // 2. treatment.room의 patients 배열 정리
+        const roomsRef = collection(db, 'hospitals', hospitalName, 'treatment.room');
+        const roomSnapshot = await getDocs(roomsRef);
 
-    deskSnapshot.forEach(async (deskDoc) => {
-        const patients = deskDoc.data().patients || [];
-        // 이전 날짜의 환자만 필터링하여 제거
-        const updatedPatients = patients.filter(patient => {
-            const rsvdTime = new Date(patient.rsvdTime);
-            return rsvdTime >= today;  // 오늘 이후 예약만 유지
-        });
-
-        // 환자 목록 업데이트
-        if (updatedPatients.length !== patients.length) {
-            await updateDoc(deskDoc.ref, {
-                patients: updatedPatients
+        for (const roomDoc of roomSnapshot.docs) {
+            const patients = roomDoc.data().patients || [];
+            const updatedPatients = patients.filter(patient => {
+                // timestamp나 rsvdTime이 오늘 이후인 환자만 유지
+                if (patient.timestamp) {
+                    return new Date(patient.timestamp.toDate()) >= today;
+                }
+                if (patient.rsvdTime) {
+                    return new Date(patient.rsvdTime.toDate()) >= today;
+                }
+                return false;  // timestamp나 rsvdTime이 없으면 제거
             });
+
+            if (updatedPatients.length !== patients.length) {
+                await updateDoc(roomDoc.ref, {
+                    patients: updatedPatients
+                });
+            }
         }
-    });
+    } catch (error) {
+        console.error('Error in cleanupPatients:', error);
+    }
 }
 
-// 매일 자정에 실행되는 스케줄러
+// cleanup 초기화 함수 수정
 function initializeCleanup(hospitalName) {
+    // 즉시 한 번 실행
+    cleanupPatients(hospitalName);
+
     function scheduleNextCleanup() {
         const now = new Date();
         const tomorrow = new Date(now);
@@ -61,9 +78,15 @@ function initializeCleanup(hospitalName) {
         tomorrow.setHours(0, 0, 0, 0);
 
         const timeUntilMidnight = tomorrow - now;
+        
+        // 24시간마다 반복 실행
+        setInterval(() => {
+            cleanupPatients(hospitalName);
+        }, 24 * 60 * 60 * 1000);
+
+        // 다음 자정까지 첫 실행
         setTimeout(() => {
             cleanupPatients(hospitalName);
-            scheduleNextCleanup();  // 다음 날 자정에 대한 스케줄 설정
         }, timeUntilMidnight);
     }
 
@@ -76,7 +99,7 @@ export async function initializeRoomManagement(hospitalName) {
     const desksRef = collection(db, 'hospitals', hospitalName, 'desk');
 
     // 실시간 업데이트 리스너
-    onSnapshot(roomsRef, async (roomSnapshot) => {
+    const unsubscribeRoom = onSnapshot(roomsRef, async (roomSnapshot) => {
         const rooms = [];
         roomSnapshot.forEach(doc => {
             rooms.push({ id: doc.id, type: 'room', ...doc.data() });
@@ -246,6 +269,11 @@ export async function initializeRoomManagement(hospitalName) {
 ///////////////////////////////////////////////////////////////////////////////////////동작안하면 삭제
     // 자동 삭제 기능 초기화
     initializeCleanup(hospitalName);
+
+    // 리스너 해제 함수 반환
+    return () => {
+        unsubscribeRoom();
+    };
 }
 ///////////////////////////////////////////////////////////////////////////////////////동작안하면 삭제
 // 로그아웃 감지 및 처리
