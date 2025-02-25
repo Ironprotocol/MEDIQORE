@@ -212,30 +212,55 @@ export function initializePrescription() {
         // 치아 차트 데이터 표시
         const canvas = document.querySelector('.tooth-chart-canvas');
         const ctx = canvas.getContext('2d');
-        if (e.detail.chartImage) {  // prescriptionData가 아닌 e.detail에서 직접 접근
+        if (e.detail.chartImage) {
             const img = new Image();
             img.onload = () => {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(img, 0, 0);
+                // 캔버스의 실제 크기를 저장
+                const canvasWidth = canvas.offsetWidth;
+                const canvasHeight = canvas.offsetHeight;
+                
+                // 캔버스의 drawing buffer 크기를 설정
+                canvas.width = canvasWidth;
+                canvas.height = canvasHeight;
+                
+                // 컨텍스트 초기화
+                ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+                
+                // 이미지를 캔버스 크기에 맞게 그리기
+                ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
             };
             img.src = e.detail.chartImage;
+
+            // 브라우저 리사이즈 이벤트 처리
+            window.addEventListener('resize', () => {
+                if (img.complete) {  // 이미지가 로드된 경우에만
+                    const canvasWidth = canvas.offsetWidth;
+                    const canvasHeight = canvas.offsetHeight;
+                    
+                    canvas.width = canvasWidth;
+                    canvas.height = canvasHeight;
+                    
+                    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+                    ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
+                }
+            });
         }
 
-        // Canvas 비활성화 추가
-        canvas.style.pointerEvents = 'none';  // 캔버스 이벤트 비활성화
-
-        // 모든 입력 필드 비활성화
-        document.querySelectorAll('.cc-search-input, .medicine-search-input, .symptoms-input, .location-input, .treatment-details-input').forEach(input => {
-            input.disabled = true;
+        // 모든 입력 필드와 버튼 비활성화
+        document.querySelectorAll('.cc-search-input, .medicine-search-input, .symptoms-input, .location-input, .treatment-details-input, .clear-btn').forEach(element => {
+            element.disabled = true;
         });
 
         // 드롭다운 버튼 비활성화
         document.querySelectorAll('.medicine-dropdown-button').forEach(button => {
             button.disabled = true;
         });
+
+        // Canvas 비활성화
+        canvas.style.pointerEvents = 'none';
     });
 
-    // New Chart 버튼 클릭 시 초기화
+    // New Chart 버튼 클릭 시 초기화할 때는 다시 활성화
     document.querySelector('.new-chart-btn').addEventListener('click', () => {
         // 모든 컨테이너 초기화
         document.querySelector('.cc-items-container').innerHTML = '';
@@ -246,10 +271,13 @@ export function initializePrescription() {
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // 입력 필드 활성화
-        document.querySelectorAll('.cc-search-input, .medicine-search-input').forEach(input => {
-            input.disabled = false;
+        // 입력 필드와 버튼 활성화
+        document.querySelectorAll('.cc-search-input, .medicine-search-input, .symptoms-input, .location-input, .treatment-details-input, .clear-btn').forEach(element => {
+            element.disabled = false;
         });
+
+        // Canvas 활성화
+        canvas.style.pointerEvents = 'auto';
     });
 }
 
