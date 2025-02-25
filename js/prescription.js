@@ -1,4 +1,4 @@
-import { auth, db, doc, getDoc } from './firebase-config.js';
+import { auth, db, doc, getDoc, setDoc, collection, getDocs, serverTimestamp, updateDoc } from './firebase-config.js';
 
 // Prescription 컨테이너 초기화
 export function initializePrescription() {
@@ -7,6 +7,9 @@ export function initializePrescription() {
     const prescriptionBody = document.querySelector('#prescription-content .content-body-prescription');
     const prescriptionBody2 = document.querySelector('#prescription-content .content-body-prescription2');
     const prescriptionFooter = document.querySelector('#prescription-content .content-footer-prescription');
+
+    let currentPatientId = null;
+    let currentRegisterDate = null;
 
     // Close 버튼 추가
     const closeButton = document.createElement('button');
@@ -24,7 +27,11 @@ export function initializePrescription() {
 
     // Room의 환자 클릭 이벤트에 대한 처리
     document.addEventListener('prescriptionPatientSelected', (e) => {
-        const { name, gender, birthDate, age } = e.detail;
+        const { name, gender, birthDate, age, patientId, registerDate } = e.detail;
+        
+        // 현재 환자 정보 저장
+        currentPatientId = patientId;
+        currentRegisterDate = registerDate;
         
         if (prescriptionTitle) {
             // 날짜 포맷팅
@@ -61,6 +68,69 @@ export function initializePrescription() {
     sendBtn.className = 'send-btn';
     sendBtn.textContent = 'Send';
     document.querySelector('.content-footer-prescription').appendChild(sendBtn);
+
+    // Send 버튼 클릭 이벤트 추가
+    sendBtn.addEventListener('click', async () => {
+        try {
+            if (!currentPatientId || !currentRegisterDate) {
+                throw new Error('Patient information not found');
+            }
+
+            const [hospitalName] = auth.currentUser.email.split('@')[0].split('.');
+            
+            // 3. 입력 데이터 수집
+            const symptoms = document.querySelector('.symptoms-input').value;
+            const location = document.querySelector('.location-input').value;
+            const treatmentDetails = document.querySelector('.treatment-details-input').value;
+            
+            // CC 항목들 수집
+            const ccItems = Array.from(document.querySelectorAll('.cc-item .cc-item-text'))
+                .map(item => item.textContent);
+            
+            // Medicine 항목들 수집
+            const medicineItems = Array.from(document.querySelectorAll('.medicine-item')).map(item => ({
+                name: item.querySelector('.medicine-item-text').textContent,
+                perDose: item.querySelector('.medicine-dropdown:nth-child(1) button').textContent,
+                perDay: item.querySelector('.medicine-dropdown:nth-child(2) button').textContent,
+                days: item.querySelector('.medicine-dropdown:nth-child(3) button').textContent
+            }));
+
+            // Canvas 이미지 데이터 가져오기
+            const canvas = document.querySelector('.tooth-chart-canvas');
+            const chartImage = canvas.toDataURL('image/png');
+
+            // 기존 문서에 prescription 데이터 추가
+            const prescriptionRef = doc(db, 'hospitals', hospitalName, 'patient', currentPatientId, 'register.date', currentRegisterDate);
+            
+            await updateDoc(prescriptionRef, {
+                prescription: {
+                    symptoms,
+                    location,
+                    treatmentDetails,
+                    cc: ccItems,
+                    medicines: medicineItems
+                },
+                chartImage
+            });
+
+            alert('Prescription saved successfully!');
+            
+            // 저장 후 폼 초기화
+            document.querySelector('.symptoms-input').value = '';
+            document.querySelector('.location-input').value = '';
+            document.querySelector('.treatment-details-input').value = '';
+            document.querySelectorAll('.cc-item').forEach(item => item.remove());
+            document.querySelectorAll('.medicine-item').forEach(item => item.remove());
+            
+            // Canvas 초기화
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        } catch (error) {
+            console.error('Error saving prescription:', error);
+            alert('Failed to save prescription. Please try again.');
+        }
+    });
 
     // Send 버튼 추가 코드 위에 추가
     const printBtn = document.createElement('button');

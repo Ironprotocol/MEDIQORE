@@ -338,21 +338,33 @@ function handlePatientClick(patientElement) {
         const [hospitalName] = auth.currentUser.email.split('@')[0].split('.');
         const patientRef = doc(db, 'hospitals', hospitalName, 'patient', patientId);
         
-        getDoc(patientRef).then(patientDoc => {
+        getDoc(patientRef).then(async patientDoc => {
             if (patientDoc.exists()) {
                 const patientData = patientDoc.data();
                 const birthDate = patientData.info.birthDate.toDate();
-                
-                // 이벤트에 더 많은 정보 포함
-                const event = new CustomEvent('prescriptionPatientSelected', {
-                    detail: {
-                        name: patientName,
-                        gender: patientData.info.gender,
-                        birthDate: birthDate,
-                        age: new Date().getFullYear() - birthDate.getFullYear()
-                    }
-                });
-                document.dispatchEvent(event);
+
+                // 오늘 날짜의 register.date 문서 찾기
+                const registerDateRef = collection(db, 'hospitals', hospitalName, 'patient', patientId, 'register.date');
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const registerQuery = query(registerDateRef, where('timestamp', '>=', today));
+                const registerSnapshot = await getDocs(registerQuery);
+
+                if (!registerSnapshot.empty) {
+                    const registerDoc = registerSnapshot.docs[0];
+                    
+                    const event = new CustomEvent('prescriptionPatientSelected', {
+                        detail: {
+                            name: patientName,
+                            gender: patientData.info.gender,
+                            birthDate: birthDate,
+                            age: new Date().getFullYear() - birthDate.getFullYear(),
+                            patientId: patientId,
+                            registerDate: registerDoc.id  // 오늘 날짜의 register.date 문서 ID
+                        }
+                    });
+                    document.dispatchEvent(event);
+                }
             }
         });
     }
