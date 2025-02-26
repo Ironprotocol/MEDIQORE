@@ -34,6 +34,18 @@ export function initializePrescription() {
         currentPatientId = patientId;
         currentRegisterDate = registerDate;
         
+        // 모든 입력 필드 활성화
+        document.querySelectorAll('.cc-search-input, .medicine-search-input, .symptoms-input, .location-input, .treatment-details-input, .clear-btn').forEach(element => {
+            element.disabled = false;
+        });
+        
+        // Canvas 활성화
+        document.querySelector('.tooth-chart-canvas').style.pointerEvents = 'auto';
+        
+        // CC와 Medicines 컨테이너 초기화
+        document.querySelector('.cc-items-container').innerHTML = '';
+        document.querySelector('.medicine-items-container').innerHTML = '';
+        
         if (prescriptionTitle) {
             // 날짜 포맷팅
             const formattedDate = birthDate.toLocaleDateString('en-GB', {
@@ -60,10 +72,10 @@ export function initializePrescription() {
         // 현재 room 이름 업데이트
         updateCurrentRoomName();
 
-        // Canvas 초기화 추가
+        // Canvas 초기화
         initializeCanvas();
 
-        // 처방전 히스토리 초기화 추가
+        // 처방전 히스토리 초기화
         initializePrescriptionHistory(patientId);
     });
 
@@ -390,6 +402,7 @@ function initializeCanvas() {
     let lastX = 0;
     let lastY = 0;
     const drawHistory = [];
+    let currentDrawing = null;  // 현재 그리기 작업 저장
 
     // 폼이 없을 때만 생성
     if (!document.querySelector('.symptoms-form')) {
@@ -426,20 +439,29 @@ function initializeCanvas() {
         const img = document.querySelector('.tooth-chart-img');
         const rect = img.getBoundingClientRect();
         
-        // Canvas의 표시 크기와 실제 크기를 일치시킴
+        // 현재 캔버스 상태 저장
+        currentDrawing = canvas.toDataURL();
+        
+        // Canvas 크기 조정
         canvas.style.width = `${rect.width}px`;
         canvas.style.height = `${rect.height}px`;
         canvas.width = rect.width;
         canvas.height = rect.height;
         
-        // 컨텍스트 설정 복원
+        // 컨텍스트 설정
         ctx.strokeStyle = '#FF0000';
         ctx.lineWidth = 2;
         ctx.lineCap = 'round';
         
-        // 이전 그림 복원
-        if (drawHistory.length > 0) {
-            ctx.putImageData(drawHistory[drawHistory.length - 1], 0, 0);
+        // 저장된 모든 그림 복원
+        if (currentDrawing) {
+            const img = new Image();
+            img.onload = () => {
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                // 현재 상태를 drawHistory에 추가
+                drawHistory.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+            };
+            img.src = currentDrawing;
         }
     }
 
@@ -737,6 +759,12 @@ async function initializeMedicineSearch() {
         `;
         medicineItemsContainer.appendChild(medicineItem);
 
+        // 삭제 버튼 이벤트 리스너 추가
+        const removeButton = medicineItem.querySelector('.medicine-item-remove');
+        removeButton.addEventListener('click', () => {
+            medicineItem.remove();
+        });
+
         // 드롭다운 이벤트 처리
         setupDropdowns(medicineItem);
 
@@ -825,10 +853,14 @@ function setupKeyboardNavigation(searchInput, autocompleteContainer, addItemFunc
                 break;
                 
             case 'Enter':
-                e.preventDefault();
                 if (selectedIndex >= 0 && items[selectedIndex]) {
+                    e.preventDefault();
                     addItemFunction(items[selectedIndex].textContent);
                     selectedIndex = -1;
+                } else if (searchInput.value.trim()) {
+                    // 선택된 항목이 없고 입력값이 있을 때
+                    e.preventDefault();
+                    addItemFunction(searchInput.value.trim());
                 }
                 break;
         }

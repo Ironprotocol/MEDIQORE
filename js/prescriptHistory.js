@@ -2,6 +2,12 @@ import { auth, db, collection, query, orderBy, getDocs } from './firebase-config
 
 export async function initializePrescriptionHistory(patientId) {
     const historyContainer = document.querySelector('.prescription-left-container');
+    const titleElement = historyContainer.querySelector('.prescription-left-title');
+    
+    // 컨테이너 내부를 비우고 타이틀만 다시 추가
+    historyContainer.innerHTML = '';
+    historyContainer.appendChild(titleElement);
+    
     const [hospitalName] = auth.currentUser.email.split('@')[0].split('.');
 
     // 환자의 처방전 기록 가져오기
@@ -9,10 +15,6 @@ export async function initializePrescriptionHistory(patientId) {
     const q = query(registerDateRef, orderBy('timestamp', 'desc'));
     const snapshot = await getDocs(q);
 
-    // 기존 히스토리 아이템들 제거 (타이틀은 유지)
-    const existingItems = historyContainer.querySelectorAll('.prescription-history-item');
-    existingItems.forEach(item => item.remove());
-    
     snapshot.forEach(doc => {
         const data = doc.data();
         if (data.prescription) {  // prescription 필드가 있는 경우만 표시
