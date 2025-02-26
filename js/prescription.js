@@ -92,18 +92,28 @@ export function initializePrescription() {
                 throw new Error('Patient information not found');
             }
 
+            // 필수 입력 항목 체크
+            const symptoms = document.querySelector('.symptoms-input').value.trim();
+            const location = document.querySelector('.location-input').value.trim();
+            const treatmentDetails = document.querySelector('.treatment-details-input').value.trim();
+            const ccItems = Array.from(document.querySelectorAll('.cc-item .cc-item-text'));
+
+            // 빈 항목 체크
+            const emptyFields = [];
+            if (!symptoms) emptyFields.push('Symptoms');
+            if (!location) emptyFields.push('Location');
+            if (!treatmentDetails) emptyFields.push('Treatment Details');
+            if (ccItems.length === 0) emptyFields.push('CC');
+
+            // 빈 항목이 있으면 알림 표시하고 중단
+            if (emptyFields.length > 0) {
+                alert(`Please fill in the following required fields:\n${emptyFields.join('\n')}`);
+                return;
+            }
+
             const [hospitalName] = auth.currentUser.email.split('@')[0].split('.');
             
-            // 3. 입력 데이터 수집
-            const symptoms = document.querySelector('.symptoms-input').value;
-            const location = document.querySelector('.location-input').value;
-            const treatmentDetails = document.querySelector('.treatment-details-input').value;
-            
-            // CC 항목들 수집
-            const ccItems = Array.from(document.querySelectorAll('.cc-item .cc-item-text'))
-                .map(item => item.textContent);
-            
-            // Medicine 항목들 수집
+            // Medicine 항목들 수집 (선택사항)
             const medicineItems = Array.from(document.querySelectorAll('.medicine-item')).map(item => ({
                 name: item.querySelector('.medicine-item-text').textContent,
                 perDose: item.querySelector('.medicine-dropdown:nth-child(1) button').textContent,
@@ -123,7 +133,7 @@ export function initializePrescription() {
                     symptoms,
                     location,
                     treatmentDetails,
-                    cc: ccItems,
+                    cc: ccItems.map(item => item.textContent),
                     medicines: medicineItems
                 },
                 chartImage
@@ -131,7 +141,10 @@ export function initializePrescription() {
 
             alert('Prescription saved successfully!');
             
-            // 저장 후 폼 초기화
+            // 저장 성공 후 History UI 즉시 업데이트
+            await initializePrescriptionHistory(currentPatientId);
+            
+            // 폼 초기화
             document.querySelector('.symptoms-input').value = '';
             document.querySelector('.location-input').value = '';
             document.querySelector('.treatment-details-input').value = '';
