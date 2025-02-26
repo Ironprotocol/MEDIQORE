@@ -207,6 +207,9 @@ function handleCellClick(hour, minute, column) {
             <label>Name</label>
             <input type="text" class="tooltip-name">
             
+            <label>ID Card / Passport Number</label>
+            <input type="text" class="tooltip-id-number">
+            
             <label>Gender</label>
             <div class="tooltip-gender-select">
                 <select class="tooltip-gender">
@@ -318,15 +321,16 @@ function handleCellClick(hour, minute, column) {
     rsvdButton.addEventListener('click', async (e) => {
         e.preventDefault();
         try {
-            const name = tooltip.querySelector('.tooltip-name').value;
+            const name = tooltip.querySelector('.tooltip-name').value.trim();
+            const idNumber = tooltip.querySelector('.tooltip-id-number').value.trim();
             const gender = tooltip.querySelector('.tooltip-gender').value;
             const birthDay = tooltip.querySelector('.tooltip-birth-select:nth-child(1) .birth-selected').textContent;
             const birthMonth = tooltip.querySelector('.tooltip-birth-select:nth-child(2) .birth-selected').textContent;
             const birthYear = tooltip.querySelector('.tooltip-birth-select:nth-child(3) .birth-selected').textContent;
             
-            // 이름과 생년월일만 필수값으로 체크
-            if (!name || birthDay === 'Day' || birthMonth === 'Month' || birthYear === 'Year') {
-                alert('Please enter name and birth date');
+            // 필수값 체크에 ID 번호 추가
+            if (!name || !idNumber || birthDay === 'Day' || birthMonth === 'Month' || birthYear === 'Year') {
+                alert('Please enter name, ID number and birth date');
                 return;
             }
 
@@ -340,25 +344,31 @@ function handleCellClick(hour, minute, column) {
             const user = auth.currentUser;
             const [hospitalName] = user.email.split('@')[0].split('.');
             console.log('[RSVD] Hospital Name:', hospitalName);
-            const patientId = `${name.replace(/\s+/g, '.')}`;
+            const patientId = `${name}.${idNumber}`;
 
             // 1. 환자 기본 정보 저장
             const birthDate = new Date(`${birthMonth} ${birthDay} ${birthYear}`);
             const patientInfoRef = doc(db, 'hospitals', hospitalName, 'patient', patientId);
-            await setDoc(patientInfoRef, {
-                info: {
-                    name: name,
-                    gender: gender,
-                    birthDate: Timestamp.fromDate(birthDate),
-                    phoneNumber: phoneNumber,
-                    address: null,
-                    insurance: {
-                        status: null,
-                        provider: null,
-                        cardNumber: null
+            const existingPatient = await getDoc(patientInfoRef);
+
+            // 새 환자인 경우에만 기본 정보 저장
+            if (!existingPatient.exists()) {
+                await setDoc(patientInfoRef, {
+                    info: {
+                        patientName: name,
+                        idNumber: idNumber,
+                        gender: gender,
+                        birthDate: Timestamp.fromDate(birthDate),
+                        phoneNumber: phoneNumber,
+                        address: null,
+                        insurance: {
+                            status: null,
+                            provider: null,
+                            cardNumber: null
+                        }
                     }
-                }
-            });
+                });
+            }
 
             // 선택된 날짜와 시간 가져오기
             const tooltipDate = tooltip.querySelector('.tooltip-date').textContent.trim().replace(/\s+/g, '.');

@@ -140,6 +140,7 @@
                 cursor: pointer;
                 font-size: 14px;
                 transition: background-color 0.3s ease;
+                margin-top : 10px;
                 }
     
                 .tooltip-rsvd-btn:hover {
@@ -202,14 +203,14 @@
                 background-color: #f8f9fa;
             }
     
-            /* 툴팁 폼 스타일 */
+            /*///////////////////////////// 툴팁 폼 스타일 ////////////////////////////*/
             .tooltip-form {
                 padding: 15px;
             }
     
             .tooltip-form label {
                 display: block;
-                margin-bottom: 5px;
+                margin-bottom: 0px;
                 font-size: 12px;
                 color: #495057;
                 font-weight: bold;
@@ -218,7 +219,6 @@
             .tooltip-form input {
                 width: 100%;
                 padding: 8px 12px;
-
                 border: 1px solid #e0e0e0;
                 border-radius: 4px;
                 font-size: 12px;
@@ -227,7 +227,7 @@
             .tooltip-form select {
                 width: 100%;
                 padding: 8px 12px;
-                margin-bottom: 15px;
+                margin-bottom: 5px;
                 border: 1px solid #e0e0e0;
                 border-radius: 4px;
                 font-size: 12px;
@@ -255,14 +255,13 @@
                 background-color: #f8f9fa;
             }
     
- 
-    
             .tooltip-buttons {
                 display: flex;
                 justify-content: flex-end;
                 margin-top: 20px;
             }
     
+
 /* 모든 입력폼 공통 스타일 */
 .tooltip-form input,
 .tooltip-complaint,
@@ -325,7 +324,7 @@
 /* 입력 필드 그룹 스타일 */
 .tooltip-form > div,  /* Primary Complaint, Doctor Select 등의 컨테이너 */
 .tooltip-form > label:not(:first-child) {  /* 라벨들 (첫번째 제외) */
-    margin-top: 20px;
+    margin-top: 5px;
 }
 
 /* 입력 필드 그룹 내부의 간격 */
@@ -333,7 +332,7 @@
 .tooltip-form label + .date-select-group,
 .tooltip-form label + .tooltip-complaint-select,
 .tooltip-form label + .tooltip-doctor-select {
-    margin-top: 8px;  /* 라벨과 입력폼 사이 간격 */
+    margin-top: 5px;  /* 라벨과 입력폼 사이 간격 */
 }
 
 /* 기존 margin 제거 (충돌 방지) */
@@ -341,6 +340,14 @@
 .tooltip-complaint-select,
 .tooltip-doctor-select,
 .date-select-group {
-    margin-bottom: 0;
+    margin-bottom: 0px;
 }
-    
+
+.tooltip-id-number {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
