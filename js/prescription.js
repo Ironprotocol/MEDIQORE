@@ -415,7 +415,8 @@ function initializeCanvas() {
     let lastX = 0;
     let lastY = 0;
     const drawHistory = [];
-    let currentDrawing = null;  // 현재 그리기 작업 저장
+    let currentDrawing = null;
+    let isNewPatient = true;  // 새 환자 여부를 추적하는 플래그 추가
 
     // 폼이 없을 때만 생성
     if (!document.querySelector('.symptoms-form')) {
@@ -453,7 +454,7 @@ function initializeCanvas() {
         const rect = img.getBoundingClientRect();
         
         // 현재 캔버스 상태 저장
-        currentDrawing = canvas.toDataURL();
+        const tempDrawing = isNewPatient ? null : canvas.toDataURL();
         
         // Canvas 크기 조정
         canvas.style.width = `${rect.width}px`;
@@ -466,17 +467,29 @@ function initializeCanvas() {
         ctx.lineWidth = 2;
         ctx.lineCap = 'round';
         
-        // 저장된 모든 그림 복원
-        if (currentDrawing) {
+        // 새 환자가 아닐 때만 그림 복원
+        if (tempDrawing && !isNewPatient) {
             const img = new Image();
             img.onload = () => {
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                // 현재 상태를 drawHistory에 추가
                 drawHistory.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
             };
-            img.src = currentDrawing;
+            img.src = tempDrawing;
         }
     }
+
+    // prescriptionPatientSelected 이벤트 리스너 추가
+    document.addEventListener('prescriptionPatientSelected', () => {
+        isNewPatient = true;  // 새 환자 선택 시 플래그 설정
+        clearCanvas();
+        currentDrawing = null;
+        drawHistory.length = 0;
+    });
+
+    // prescriptionHistorySelected 이벤트 리스너 추가
+    document.addEventListener('prescriptionHistorySelected', () => {
+        isNewPatient = false;  // 히스토리 선택 시 플래그 해제
+    });
 
     // 초기 크기 설정
     resizeCanvas();
