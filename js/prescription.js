@@ -128,6 +128,14 @@ export function initializePrescription() {
             const canvas = document.querySelector('.tooth-chart-canvas');
             const chartImage = canvas.toDataURL('image/png');
 
+            // 하지만 새로운 처방전 저장 시에는 형식 통일 필요
+            const now = new Date();
+            const dateId = `${now.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            }).replace(/ /g, '.')}_${now.getHours().toString().padStart(2,'0')}${now.getMinutes().toString().padStart(2,'0')}${now.getSeconds().toString().padStart(2,'0')}`;
+
             // 기존 문서에 prescription 데이터 추가
             const prescriptionRef = doc(db, 'hospitals', hospitalName, 'patient', currentPatientId, 'register.date', currentRegisterDate);
             

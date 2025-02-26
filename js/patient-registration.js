@@ -243,11 +243,11 @@ export function initializeRegistrationForm() {
 
             // 현재 날짜시간으로 문서 ID 생성
             const now = new Date();
-            const dateId = `${now.toLocaleDateString('en-ZA', {
+            const dateId = `${now.toLocaleDateString('en-GB', {
                 day: '2-digit',
-                month: '2-digit',
+                month: 'short',
                 year: 'numeric'
-            }).replace(/\//g, '.')}_${now.getHours().toString().padStart(2,'0')}${now.getMinutes().toString().padStart(2,'0')}${now.getSeconds().toString().padStart(2,'0')}`;
+            }).replace(/ /g, '.')}_${now.getHours().toString().padStart(2,'0')}${now.getMinutes().toString().padStart(2,'0')}${now.getSeconds().toString().padStart(2,'0')}`;
 
             // register.date 컬렉션에 방문 기록 문서 생성 시 gender 필드 추가
             const visitRef = doc(patientRef, 'register.date', dateId);
