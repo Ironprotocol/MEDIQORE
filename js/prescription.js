@@ -34,18 +34,7 @@ export function initializePrescription() {
         currentPatientId = patientId;
         currentRegisterDate = registerDate;
         
-        // 모든 입력 필드 활성화
-        document.querySelectorAll('.cc-search-input, .medicine-search-input, .symptoms-input, .location-input, .treatment-details-input, .clear-btn').forEach(element => {
-            element.disabled = false;
-        });
-        
-        // Canvas 활성화
-        document.querySelector('.tooth-chart-canvas').style.pointerEvents = 'auto';
-        
-        // CC와 Medicines 컨테이너 초기화
-        document.querySelector('.cc-items-container').innerHTML = '';
-        document.querySelector('.medicine-items-container').innerHTML = '';
-        
+        // 먼저 UI를 표시
         if (prescriptionTitle) {
             // 날짜 포맷팅
             const formattedDate = birthDate.toLocaleDateString('en-GB', {
@@ -77,6 +66,20 @@ export function initializePrescription() {
 
         // 처방전 히스토리 초기화
         initializePrescriptionHistory(patientId);
+
+        // UI가 생성된 후에 비활성화 처리
+        requestAnimationFrame(() => {
+            // 모든 입력 필드 비활성화
+            document.querySelectorAll('.cc-search-input, .medicine-search-input, .symptoms-input, .location-input, .treatment-details-input').forEach(element => {
+                element.disabled = true;
+            });
+            
+            // Canvas 비활성화
+            document.querySelector('.tooth-chart-canvas').style.pointerEvents = 'none';
+            
+            // Clear 버튼 비활성화
+            document.querySelector('.clear-btn').disabled = true;
+        });
     });
 
     // content-footer-prescription에 Send 버튼 추가
