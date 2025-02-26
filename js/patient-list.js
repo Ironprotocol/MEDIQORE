@@ -387,6 +387,9 @@ async function createPatientElement(hospitalName, patientData, patientId, type, 
                 } else if (type === 'reservation') {
                     const reservationRef = doc(db, 'hospitals', hospitalName, 'dates', currentDate, 'reservation', patientId);
                     await deleteDoc(reservationRef);
+                } else if (type === 'active') {  // active 상태 환자 삭제 추가
+                    const activeRef = doc(db, 'hospitals', hospitalName, 'dates', currentDate, 'active', patientId);
+                    await deleteDoc(activeRef);
                 }
 
                 // Room에서 환자 정보 삭제 //이 로직은 추후 삭제될수있음 2025-02-14
