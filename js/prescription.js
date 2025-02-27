@@ -128,6 +128,57 @@ export function initializePrescription() {
             const canvas = document.querySelector('.tooth-chart-canvas');
             const chartImage = canvas.toDataURL('image/png');
 
+            // 1. register.date 문서의 progress 업데이트
+            await updateDoc(doc(db, 'hospitals', hospitalName, 'patient', currentPatientId, 'register.date', currentRegisterDate), {
+                progress: 'payment'
+            });
+
+            // 2. dates 컬렉션 처리
+            const today = new Date();
+            const currentDate = today.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            }).replace(/ /g, '.');
+
+            // 기존 상태 문서 찾기 및 이동
+            const collections = ['waiting', 'reservation', 'active'];
+            for (const collectionName of collections) {
+                const docRef = doc(db, 'hospitals', hospitalName, 'dates', currentDate, collectionName, currentPatientId);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const patientData = docSnap.data();
+                    // 기존 문서 삭제
+                    await deleteDoc(docRef);
+                    // payment 컬렉션으로 이동
+                    await setDoc(doc(db, 'hospitals', hospitalName, 'dates', currentDate, 'payment', currentPatientId), {
+                        ...patientData,
+                        progress: 'payment'
+                    });
+                    break;
+                }
+            }
+
+            // 3. treatment.room의 patients 배열 업데이트
+            const roomsRef = collection(db, 'hospitals', hospitalName, 'treatment.room');
+            const roomsSnapshot = await getDocs(roomsRef);
+            
+            for (const roomDoc of roomsSnapshot.docs) {
+                const roomData = roomDoc.data();
+                if (roomData.patients) {
+                    const updatedPatients = roomData.patients.map(patient => {
+                        if (patient.id === currentPatientId) {
+                            return { ...patient, progress: 'payment' };
+                        }
+                        return patient;
+                    });
+
+                    if (JSON.stringify(roomData.patients) !== JSON.stringify(updatedPatients)) {
+                        await updateDoc(roomDoc.ref, { patients: updatedPatients });
+                    }
+                }
+            }
+
             // 하지만 새로운 처방전 저장 시에는 형식 통일 필요
             const now = new Date();
             const dateId = `${now.toLocaleDateString('en-GB', {
@@ -147,7 +198,8 @@ export function initializePrescription() {
                     cc: ccItems.map(item => item.textContent),
                     medicines: medicineItems
                 },
-                chartImage
+                chartImage,
+                progress: 'payment'
             });
 
             alert('Prescription saved successfully!');
@@ -167,8 +219,8 @@ export function initializePrescription() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         } catch (error) {
-            console.error('Error saving prescription:', error);
-            alert('Failed to save prescription. Please try again.');
+            console.error('Error sending prescription:', error);
+            alert('Failed to send prescription: ' + error.message);
         }
     });
 
