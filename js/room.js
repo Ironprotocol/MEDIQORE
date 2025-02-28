@@ -255,7 +255,7 @@ export async function initializeRoomManagement(hospitalName) {
                 });
             });
 
-            // Join 버튼 이벤트 리스너 (기존 코드 아래에 추가)
+            // Join 버튼 이벤트 리스너 (desk)
             document.querySelectorAll('.join-btn[data-desk]').forEach(btn => {
                 btn.addEventListener('click', async function() {
                     const deskId = this.dataset.desk;
@@ -281,6 +281,30 @@ export async function initializeRoomManagement(hospitalName) {
                         await updateDoc(userRef, {
                             work: 'start'
                         });
+
+                        // UI 즉시 업데이트
+                        const deskItem = btn.closest('.room-item');
+                        if (deskItem) {
+                            // Join 버튼 제거
+                            btn.remove();
+                            
+                            // 직원 이름과 환자 수 표시 추가
+                            const roomInfo = deskItem.querySelector('.room-info');
+                            const staffName = document.createElement('span');
+                            staffName.className = 'staff-name';
+                            staffName.textContent = userData.name;
+                            roomInfo.appendChild(staffName);
+
+                            // 환자 수 컨테이너 추가
+                            const patientCountContainer = document.createElement('div');
+                            patientCountContainer.className = 'patient-count-container';
+                            patientCountContainer.dataset.desk = deskId;
+                            patientCountContainer.innerHTML = `
+                                <span class="patient-count">0</span>
+                                <span class="triangle-icon">▲</span>
+                            `;
+                            deskItem.querySelector('.room-header').appendChild(patientCountContainer);
+                        }
 
                     } catch (error) {
                         console.error('Error joining desk:', error);

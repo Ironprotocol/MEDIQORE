@@ -84,7 +84,7 @@ export function setupCloseButtons() {
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// 로고 클릭 이벤트 핸들러////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 로고 클릭 이벤트 핸들러
 export function setupLogoLogout() {
     const logoContainer = document.querySelector('.logo-container');
     if (logoContainer) {
@@ -95,8 +95,8 @@ export function setupLogoLogout() {
 
                 const [hospitalName, role] = user.email.split('@')[0].split('.');
                 
-                // 로그아웃 시 의사인 경우 room 내부 환자 체크
                 if (role === 'doctor') {
+                    // 로그아웃 시 의사인 경우 room 내부 환자 체크
                     const staffRef = doc(db, 'hospitals', hospitalName, 'staff', user.email);
                     const staffDoc = await getDoc(staffRef);
                     const doctorName = staffDoc.data().name;
@@ -125,7 +125,33 @@ export function setupLogoLogout() {
                         work: 'logout',
                         lastUpdated: serverTimestamp()
                     });
+                } else if (role === 'desk') {
+                    // 로그아웃 확인
+                    if (!confirm('Do you want to logout?')) return;
+
+                    // desk 계정 로그아웃 처리
+                    const desksRef = collection(db, 'hospitals', hospitalName, 'desk');
+                    const desksSnapshot = await getDocs(desksRef);
+                    
+                    for (const deskDoc of desksSnapshot.docs) {
+                        if (deskDoc.data().email === user.email) {
+                            await updateDoc(doc(desksRef, deskDoc.id), {
+                                name: null,
+                                work: null,
+                                email: null
+                            });
+                            break;
+                        }
+                    }
                 }
+
+                // 공통 로그아웃 처리 - staff 문서 업데이트 (유지)
+                const userRef = doc(db, 'hospitals', hospitalName, 'staff', user.email);
+                await updateDoc(userRef, {
+                    work: 'logout',
+                    lastUpdated: serverTimestamp()
+                });
+
                 await auth.signOut();
                 window.location.href = 'main.html';
             } catch (error) {
@@ -154,7 +180,6 @@ export function initializeStatusSelector() {
                 const status = this.dataset.status;
                 const statusIcon = document.querySelector('.current-status img');
                 
-                // End Work 선택 시 로그아웃
                 if (status === 'end') {
                     try {
                         const user = auth.currentUser;
@@ -162,8 +187,8 @@ export function initializeStatusSelector() {
                         
                         const [hospitalName, role] = user.email.split('@')[0].split('.');
                         
-                        // 의사인 경우 환자 체크
                         if (role === 'doctor') {
+                            // 의사인 경우 환자 체크
                             const staffRef = doc(db, 'hospitals', hospitalName, 'staff', user.email);
                             const staffDoc = await getDoc(staffRef);
                             const doctorName = staffDoc.data().name;
@@ -173,7 +198,10 @@ export function initializeStatusSelector() {
                             if (!canLogout) return;
 
                             // 환자가 없는 경우 로그아웃 확인
-                            if (!confirm('Do you want to logout?')) return;
+                            if (!confirm('Do you want to logout?')) {
+                                dropdown.style.display = 'none';
+                                return;
+                            }
 
                             // 의사가 배정된 진료실 찾아서 초기화
                             const roomsRef = collection(db, 'hospitals', hospitalName, 'treatment.room');
@@ -187,11 +215,31 @@ export function initializeStatusSelector() {
                                     });
                                 }
                             }
+                        } else if (role === 'desk') {
+                            // 로그아웃 확인
+                            if (!confirm('Do you want to logout?')) {
+                                dropdown.style.display = 'none';
+                                return;
+                            }
+
+                            // desk 계정 로그아웃 처리
+                            const desksRef = collection(db, 'hospitals', hospitalName, 'desk');
+                            const desksSnapshot = await getDocs(desksRef);
+                            
+                            for (const deskDoc of desksSnapshot.docs) {
+                                if (deskDoc.data().email === user.email) {
+                                    await updateDoc(doc(desksRef, deskDoc.id), {
+                                        name: null,
+                                        work: null,
+                                        email: null
+                                    });
+                                    break;
+                                }
+                            }
                         }
                         
+                        // 공통 로그아웃 처리 - staff 문서 업데이트 (유지)
                         const userRef = doc(db, 'hospitals', hospitalName, 'staff', user.email);
-                        
-                        // work 상태를 'logout'으로 업데이트
                         await updateDoc(userRef, {
                             work: 'logout',
                             lastUpdated: serverTimestamp()
