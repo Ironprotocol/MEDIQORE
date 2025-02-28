@@ -86,9 +86,11 @@ async function createPatientElement(hospitalName, patientData, patientId, type, 
         <span class="progress-span">
             <img src="image/${type === 'reservation' ? 'rsvd' : 
                             type === 'active' ? 'active' : 
+                            type === 'payment' ? 'payment' : 
                             patientData.progress}.png" 
                  alt="${type === 'reservation' ? 'rsvd' : 
                       type === 'active' ? 'active' : 
+                      type === 'payment' ? 'payment' : 
                       patientData.progress}" 
                  style="width: 73px; height: 30.5px; object-fit: contain;">
         </span>
@@ -427,15 +429,17 @@ export async function initializePatientList(hospitalName, currentDate) {
     const patientListBody = document.querySelector('#desk-content .content-body');
     if (!patientListBody) return;
 
-    // 컬렉션 참조 - active 추가
+    // 컬렉션 참조 - payment 추가
     const waitingRef = collection(db, 'hospitals', hospitalName, 'dates', currentDate, 'waiting');
     const reservationRef = collection(db, 'hospitals', hospitalName, 'dates', currentDate, 'reservation');
-    const activeRef = collection(db, 'hospitals', hospitalName, 'dates', currentDate, 'active');  // 추가
+    const activeRef = collection(db, 'hospitals', hospitalName, 'dates', currentDate, 'active');
+    const paymentRef = collection(db, 'hospitals', hospitalName, 'dates', currentDate, 'payment'); // 추가
 
-    // 쿼리 설정 - active 추가
+    // 쿼리 설정 - payment 추가
     const waitingQuery = query(waitingRef, orderBy('timestamp', 'asc'));
     const reservationQuery = query(reservationRef, orderBy('rsvdTime', 'asc'));
-    const activeQuery = query(activeRef, orderBy('timestamp', 'asc'));  // 추가
+    const activeQuery = query(activeRef, orderBy('timestamp', 'asc'));
+    const paymentQuery = query(paymentRef, orderBy('timestamp', 'asc')); // 추가
 
     // 환자 목록 업데이트 및 정렬
     function updatePatientList() {
@@ -455,13 +459,23 @@ export async function initializePatientList(hospitalName, currentDate) {
         // 중복이 제거된 환자 목록을 다시 배열로 변환하여 정렬
         Array.from(uniquePatients.values())
             .sort((a, b) => {
+                // payment 상태 추가
                 if (a.type === 'waiting' && b.type === 'waiting') {
                     return a.timestamp - b.timestamp;
                 }
                 if (a.type === 'reservation' && b.type === 'reservation') {
                     return a.rsvdTime - b.rsvdTime;
                 }
+                if (a.type === 'payment' && b.type === 'payment') { // 추가
+                    return a.timestamp - b.timestamp;
+                }
+                // 정렬 순서: waiting -> active -> payment -> reservation
                 if (a.type === 'waiting') return -1;
+                if (b.type === 'waiting') return 1;
+                if (a.type === 'active') return -1;
+                if (b.type === 'active') return 1;
+                if (a.type === 'payment') return -1; // 추가
+                if (b.type === 'payment') return 1; // 추가
                 return 1;
             })
             .forEach(patient => {
@@ -525,10 +539,29 @@ export async function initializePatientList(hospitalName, currentDate) {
         updatePatientList();
     });
 
+    // payment 리스너 추가
+    const unsubscribePayment = onSnapshot(paymentQuery, async (snapshot) => {
+        allPatients = allPatients.filter(p => p.type !== 'payment');
+        
+        for (const doc of snapshot.docs) {
+            const patientData = doc.data();
+            const element = await createPatientElement(hospitalName, patientData, doc.id, 'payment', currentDate);
+            if (element) {
+                allPatients.push({
+                    type: 'payment',
+                    timestamp: patientData.timestamp,
+                    element: element
+                });
+            }
+        }
+        updatePatientList();
+    });
+
     return () => {
         unsubscribeWaiting();
         unsubscribeReservation();
-        unsubscribeActive();  // 추가
+        unsubscribeActive();
+        unsubscribePayment(); // 추가
     };
 }
 

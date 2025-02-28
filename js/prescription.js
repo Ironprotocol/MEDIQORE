@@ -264,9 +264,97 @@ export function initializePrescription() {
         }
     });
 
-    // Send 버튼 클릭 이벤트 비우기 (나중에 수납실 이동 기능 추가 예정)
+    // Send 버튼 클릭 이벤트 수정
     sendBtn.addEventListener('click', async () => {
-        alert('Send functionality will be implemented later.');
+        try {
+            // 처방전이 저장되지 않은 상태면 알림 표시
+            if (!sendBtn.disabled) {
+                // 확인 팝업 표시
+                if (confirm('Would you like to send this prescription?')) {
+                    if (!currentPatientId || !currentRegisterDate) {
+                        throw new Error('Patient information not found');
+                    }
+
+                    const [hospitalName] = auth.currentUser.email.split('@')[0].split('.');
+                    
+                    // 선택된 수납실 가져오기
+                    const deskSelect = document.querySelector('.desk-select');
+                    const selectedDesk = deskSelect.value;
+                    
+                    if (!selectedDesk) {
+                        alert('Please select a desk');
+                        return;
+                    }
+                    
+                    // 1. 현재 환자가 있는 진료실 찾기
+                    const roomsRef = collection(db, 'hospitals', hospitalName, 'treatment.room');
+                    const roomsSnapshot = await getDocs(roomsRef);
+                    
+                    let currentRoom = null;
+                    let patientData = null;
+                    
+                    for (const roomDoc of roomsSnapshot.docs) {
+                        const roomData = roomDoc.data();
+                        if (roomData.patients) {
+                            const patientIndex = roomData.patients.findIndex(p => p.id === currentPatientId);
+                            if (patientIndex !== -1) {
+                                currentRoom = roomDoc;
+                                patientData = roomData.patients[patientIndex];
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (!currentRoom) {
+                        throw new Error('Patient not found in any room');
+                    }
+                    
+                    // 2. 진료실에서 환자 제거
+                    const updatedRoomPatients = currentRoom.data().patients.filter(p => p.id !== currentPatientId);
+                    await updateDoc(currentRoom.ref, {
+                        patients: updatedRoomPatients
+                    });
+                    
+                    // 3. 수납실에 환자 추가
+                    const deskRef = doc(db, 'hospitals', hospitalName, 'desk', selectedDesk);
+                    const deskDoc = await getDoc(deskRef);
+                    
+                    if (deskDoc.exists()) {
+                        const deskData = deskDoc.data();
+                        const deskPatients = deskData.patients || [];
+                        
+                        // 환자 데이터 준비 (progress를 payment로 설정)
+                        const patientToAdd = {
+                            id: patientData.id,
+                            name: patientData.name,
+                            progress: 'payment'
+                        };
+                        
+                        // 중복 방지를 위해 기존 환자 확인
+                        const existingIndex = deskPatients.findIndex(p => p.id === currentPatientId);
+                        if (existingIndex !== -1) {
+                            deskPatients[existingIndex] = patientToAdd;
+                        } else {
+                            deskPatients.push(patientToAdd);
+                        }
+                        
+                        await updateDoc(deskRef, {
+                            patients: deskPatients
+                        });
+                        
+                        alert('Patient has been sent to the selected desk');
+                        
+                        // 처방전 컨테이너 닫기
+                        document.querySelector('.close-button').click();
+                    } else {
+                        throw new Error('Selected desk not found');
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error sending patient to desk:', error);
+            alert(`Failed to send patient: ${error.message}`);
+        }
     });
 
     // prescription-center-bottom에 CC 검색 폼 추가

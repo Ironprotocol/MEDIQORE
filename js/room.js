@@ -94,18 +94,28 @@ export async function initializeRoomManagement(hospitalName) {
     const roomsRef = collection(db, 'hospitals', hospitalName, 'treatment.room');
     const desksRef = collection(db, 'hospitals', hospitalName, 'desk');
 
-    // 실시간 업데이트 리스너
-    const unsubscribeRoom = onSnapshot(roomsRef, async (roomSnapshot) => {
-        const rooms = [];
-        roomSnapshot.forEach(doc => {
-            rooms.push({ id: doc.id, type: 'room', ...doc.data() });
-        });
+    // 데이터 저장용 변수
+    let rooms = [];
+    let desks = [];
 
-        // desk 데이터 가져오기
-        const deskSnapshot = await getDocs(desksRef);
-        const desks = [];
-        deskSnapshot.forEach(doc => {
-            desks.push({ id: doc.id, type: 'desk', ...doc.data() });
+    // UI 업데이트 함수
+    const updateRoomUI = async () => {
+        const currentUserEmail = auth.currentUser.email;
+        const [, role] = currentUserEmail.split('@')[0].split('.');
+        let currentDoctorName = '';
+        
+        if (role === 'doctor') {
+            const userRef = doc(db, 'hospitals', hospitalName, 'staff', currentUserEmail);
+            const userDoc = await getDoc(userRef);
+            currentDoctorName = userDoc.data().name;
+        }
+
+        // 현재 의사가 어떤 room에 있는지 확인
+        let doctorCurrentRoom = null;
+        rooms.forEach(room => {
+            if (room.doctor === currentDoctorName) {
+                doctorCurrentRoom = room.id;
+            }
         });
 
         // 정렬 (Room 먼저, 그 다음 Desk)
@@ -114,228 +124,230 @@ export async function initializeRoomManagement(hospitalName) {
             ...desks.sort((a, b) => a.id.localeCompare(b.id))
         ];
 
-        // UI 업데이트
-        const updateRoomUI = async () => {
-            const currentUserEmail = auth.currentUser.email;
-            const [, role] = currentUserEmail.split('@')[0].split('.');
-            let currentDoctorName = '';
+        roomContainer.innerHTML = allItems.map(item => {
+            // 환자 수 계산 - desk에도 patients 배열이 있으면 표시
+            const hasPatients = item.patients && item.patients.length > 0;
+            const patientCount = hasPatients ? item.patients.length : 0;
+            const isExpanded = expandedRooms.get(item.id) || false;
             
-            if (role === 'doctor') {
-                const userRef = doc(db, 'hospitals', hospitalName, 'staff', currentUserEmail);
-                const userDoc = await getDoc(userRef);
-                currentDoctorName = userDoc.data().name;
-            }
-
-            // 현재 의사가 어떤 room에 있는지 확인
-            let doctorCurrentRoom = null;
-            rooms.forEach(room => {
-                if (room.doctor === currentDoctorName) {
-                    doctorCurrentRoom = room.id;
-                }
-            });
-
-            roomContainer.innerHTML = allItems.map(item => {
-                const hasPatients = item.type === 'room' && item.patients && item.patients.length > 0;
-                const patientCount = hasPatients ? item.patients.length : 0;
-                const isExpanded = expandedRooms.get(item.id) || false;
-                
-                return `
-                    <div class="room-item ${hasPatients ? 'has-patients' : ''}" data-room-id="${item.id}">
-                        <div class="room-header">
-                            <div class="room-info">
-                                <span class="room-title">${item.id}</span>
-                                ${item.type === 'room' && item.doctor ? 
-                                    `<span class="doctor-name">${item.doctor}</span>` : 
-                                    item.type === 'desk' && item.name ? 
-                                    `<span class="staff-name">${item.name}</span>` :
-                                    ''}
-                            </div>
-                            ${item.type === 'room' ? 
-                                (!item.doctor && role === 'doctor' ? 
-                                    `<button class="join-btn" data-room="${item.id}" 
-                                        ${doctorCurrentRoom ? 'style="display: none;"' : ''}>
-                                        Join</button>` :
-                                    `<div class="patient-count-container" data-room="${item.id}">
+            return `
+                <div class="room-item ${hasPatients ? 'has-patients' : ''}" data-room-id="${item.id}">
+                    <div class="room-header">
+                        <div class="room-info">
+                            <span class="room-title">${item.id}</span>
+                            ${item.type === 'room' && item.doctor ? 
+                                `<span class="doctor-name">${item.doctor}</span>` : 
+                                item.type === 'desk' && item.name ? 
+                                `<span class="staff-name">${item.name}</span>` :
+                                ''}
+                        </div>
+                        ${item.type === 'room' ? 
+                            (!item.doctor && role === 'doctor' ? 
+                                `<button class="join-btn" data-room="${item.id}" 
+                                    ${doctorCurrentRoom ? 'style="display: none;"' : ''}>
+                                    Join</button>` :
+                                `<div class="patient-count-container" data-room="${item.id}">
+                                    <span class="patient-count">${patientCount}</span>
+                                    <span class="triangle-icon ${isExpanded ? 'expanded' : ''}">${isExpanded ? '▼' : '▲'}</span>
+                                </div>`
+                            ) : 
+                            // Desk UI에 대한 Join 버튼 또는 환자 수 표시
+                            (item.type === 'desk' ? 
+                                (!item.name && role === 'desk' ? 
+                                    `<button class="join-btn" data-desk="${item.id}">Join</button>` :
+                                    `<div class="patient-count-container" data-desk="${item.id}">
                                         <span class="patient-count">${patientCount}</span>
                                         <span class="triangle-icon ${isExpanded ? 'expanded' : ''}">${isExpanded ? '▼' : '▲'}</span>
                                     </div>`
-                                ) : 
-                                // Desk UI에 대한 Join 버튼 또는 환자 수 표시
-                                (item.type === 'desk' ? 
-                                    (!item.name && role === 'desk' ? // staff 대신 name으로 체크
-                                        `<button class="join-btn" data-desk="${item.id}">Join</button>` :
-                                        `<div class="patient-count-container" data-desk="${item.id}">
-                                            <span class="patient-count">0</span>
-                                            <span class="triangle-icon ${isExpanded ? 'expanded' : ''}">${isExpanded ? '▼' : '▲'}</span>
-                                        </div>`
-                                    ) : '')}
-                        </div>
-                        ${hasPatients ? 
-                            `<div class="patient-list" style="display: ${isExpanded ? 'block' : 'none'};">
-                                ${item.patients.map(patient => `
-                                    <div class="room-patient-item ${patient.id === selectedPatientId ? 'active' : ''}" 
-                                         data-patient-id="${patient.id}">
-                                        <span class="patient-name">${patient.name}</span>
-                                        <span class="patient-age" style="display: none;">${patient.age || '0years'}</span>
-                                        <img src="image/${patient.progress || 'waiting'}.png" alt="${patient.progress || 'waiting'}" 
-                                             class="patient-status-icon">
-                                    </div>
-                                `).join('')}
-                            </div>` : 
-                            ''}
+                                ) : '')}
                     </div>
-                `;
-            }).join('');
+                    ${hasPatients ? 
+                        `<div class="patient-list" style="display: ${isExpanded ? 'block' : 'none'};">
+                            ${item.patients.map(patient => `
+                                <div class="room-patient-item ${patient.id === selectedPatientId ? 'active' : ''}" 
+                                     data-patient-id="${patient.id}">
+                                    <span class="patient-name">${patient.name}</span>
+                                    <span class="patient-age" style="display: none;">${patient.age || '0years'}</span>
+                                    <img src="image/${patient.progress || 'waiting'}.png" alt="${patient.progress || 'waiting'}" 
+                                         class="patient-status-icon">
+                                </div>
+                            `).join('')}
+                        </div>` : 
+                        ''}
+                </div>
+            `;
+        }).join('');
 
-            // 환자 수 클릭 이벤트 리스너 수정
-            document.querySelectorAll('.patient-count-container').forEach(container => {
-                container.addEventListener('click', function() {
-                    const roomId = this.dataset.room;
-                    const roomItem = this.closest('.room-item');
-                    const patientList = roomItem.querySelector('.patient-list');
-                    const triangleIcon = this.querySelector('.triangle-icon');
-                    
-                    if (patientList) {
-                        const isExpanded = expandedRooms.get(roomId) || false;
-                        expandedRooms.set(roomId, !isExpanded);
-                        
-                        patientList.style.display = !isExpanded ? 'block' : 'none';
-                        triangleIcon.textContent = !isExpanded ? '▼' : '▲';
-                        triangleIcon.classList.toggle('expanded');
-                    }
-                });
+        // 이벤트 리스너 추가
+        addEventListeners();
+    };
+
+    // 이벤트 리스너 추가 함수
+    const addEventListeners = () => {
+        // 환자 수 클릭 이벤트 리스너
+        document.querySelectorAll('.patient-count-container').forEach(container => {
+            container.addEventListener('click', function() {
+                const roomId = this.dataset.room || this.dataset.desk;
+                const roomItem = this.closest('.room-item');
+                const patientList = roomItem.querySelector('.patient-list');
+                const triangleIcon = this.querySelector('.triangle-icon');
+                
+                if (patientList) {
+                    const isExpanded = patientList.style.display === 'block';
+                    patientList.style.display = isExpanded ? 'none' : 'block';
+                    triangleIcon.textContent = isExpanded ? '▲' : '▼';
+                    triangleIcon.classList.toggle('expanded', !isExpanded);
+                    expandedRooms.set(roomId, !isExpanded);
+                }
             });
+        });
 
-            // Join 버튼 이벤트 리스너
-            document.querySelectorAll('.join-btn').forEach(btn => {
-                btn.addEventListener('click', async function() {
-                    const roomId = this.dataset.room;
-                    const userEmail = auth.currentUser.email;
-                    const [hospitalName, role] = userEmail.split('@')[0].split('.');
+        // Join 버튼 이벤트 리스너
+        document.querySelectorAll('.join-btn[data-room]').forEach(btn => {
+            btn.addEventListener('click', async function() {
+                const roomId = this.dataset.room;
+                const userEmail = auth.currentUser.email;
+                const [hospitalName, role] = userEmail.split('@')[0].split('.');
 
-                    if (role !== 'doctor') return;
+                if (role !== 'doctor') return;
 
-                    try {
-                        const userRef = doc(db, 'hospitals', hospitalName, 'staff', userEmail);
-                        const userDoc = await getDoc(userRef);
-                        const userName = userDoc.data().name;
+                try {
+                    const userRef = doc(db, 'hospitals', hospitalName, 'staff', userEmail);
+                    const userDoc = await getDoc(userRef);
+                    const userName = userDoc.data().name;
 
-                        // 1. 선택한 room에 다른 의사가 있는지 확인
-                        const roomRef = doc(db, 'hospitals', hospitalName, 'treatment.room', roomId);
-                        const roomDoc = await getDoc(roomRef);
-                        const roomData = roomDoc.data();
+                    // 1. 선택한 room에 다른 의사가 있는지 확인
+                    const roomRef = doc(db, 'hospitals', hospitalName, 'treatment.room', roomId);
+                    const roomDoc = await getDoc(roomRef);
+                    const roomData = roomDoc.data();
 
-                        if (roomData.doctor) {
-                            alert("Another doctor is already working in your room");
-                            return;
-                        }
-
-                        // 2. room이 비어있는 경우, 시작 여부 확인
-                        if (!confirm("Would you like to start working?")) {
-                            return;
-                        }
-
-                        // 3. Join 진행
-                        await updateDoc(roomRef, {
-                            doctor: userName,
-                            work: 'start'
-                        });
-
-                        await updateDoc(userRef, {
-                            work: 'start'
-                        });
-
-                        const statusDot = document.querySelector('.status-dot');
-                        if (statusDot) {
-                            statusDot.style.backgroundColor = getStatusColor('start');
-                        }
-                    } catch (error) {
-                        console.error('Error joining room:', error);
+                    if (roomData.doctor) {
+                        alert("Another doctor is already working in your room");
+                        return;
                     }
-                });
-            });
 
-            // Join 버튼 이벤트 리스너 (desk)
-            document.querySelectorAll('.join-btn[data-desk]').forEach(btn => {
-                btn.addEventListener('click', async function() {
-                    const deskId = this.dataset.desk;
-                    const userEmail = auth.currentUser.email;
-                    const [hospitalName, role] = userEmail.split('@')[0].split('.');
-
-                    if (role !== 'desk') return;
-
-                    try {
-                        const userRef = doc(db, 'hospitals', hospitalName, 'staff', userEmail);
-                        const userDoc = await getDoc(userRef);
-                        const userData = userDoc.data();
-
-                        // Desk 문서 업데이트
-                        const deskRef = doc(db, 'hospitals', hospitalName, 'desk', deskId);
-                        await updateDoc(deskRef, {
-                            name: userData.name,
-                            work: 'start',
-                            email: userData.email
-                        });
-
-                        // Staff 문서의 work 상태 업데이트
-                        await updateDoc(userRef, {
-                            work: 'start'
-                        });
-
-                        // UI 즉시 업데이트
-                        const deskItem = btn.closest('.room-item');
-                        if (deskItem) {
-                            // Join 버튼 제거
-                            btn.remove();
-                            
-                            // 직원 이름과 환자 수 표시 추가
-                            const roomInfo = deskItem.querySelector('.room-info');
-                            const staffName = document.createElement('span');
-                            staffName.className = 'staff-name';
-                            staffName.textContent = userData.name;
-                            roomInfo.appendChild(staffName);
-
-                            // 환자 수 컨테이너 추가
-                            const patientCountContainer = document.createElement('div');
-                            patientCountContainer.className = 'patient-count-container';
-                            patientCountContainer.dataset.desk = deskId;
-                            patientCountContainer.innerHTML = `
-                                <span class="patient-count">0</span>
-                                <span class="triangle-icon">▲</span>
-                            `;
-                            deskItem.querySelector('.room-header').appendChild(patientCountContainer);
-                        }
-
-                    } catch (error) {
-                        console.error('Error joining desk:', error);
+                    // 2. room이 비어있는 경우, 시작 여부 확인
+                    if (!confirm("Would you like to start working?")) {
+                        return;
                     }
-                });
-            });
 
-            // 환자 클릭 이벤트 리스너 수정
-            document.querySelectorAll('.room-patient-item').forEach(patientItem => {
-                patientItem.addEventListener('click', function() {
-                    // 이전에 선택된 환자의 active 상태 제거
-                    document.querySelectorAll('.room-patient-item').forEach(item => {
-                        item.classList.remove('active');
+                    // 3. Join 진행
+                    await updateDoc(roomRef, {
+                        doctor: userName,
+                        work: 'start'
                     });
-                    // 현재 선택된 환자에 active 상태 추가
-                    this.classList.add('active');
-                    selectedPatientId = this.dataset.patientId;  // 선택된 환자 ID 저장
-                    handlePatientClick(this);
-                });
-            });
-        };
 
-        await updateRoomUI();
+                    await updateDoc(userRef, {
+                        work: 'start'
+                    });
+
+                    const statusDot = document.querySelector('.status-dot');
+                    if (statusDot) {
+                        statusDot.style.backgroundColor = getStatusColor('start');
+                    }
+                } catch (error) {
+                    console.error('Error joining room:', error);
+                }
+            });
+        });
+
+        // Desk Join 버튼 이벤트 리스너
+        document.querySelectorAll('.join-btn[data-desk]').forEach(btn => {
+            btn.addEventListener('click', async function() {
+                const deskId = this.dataset.desk;
+                const userEmail = auth.currentUser.email;
+                const [hospitalName, role] = userEmail.split('@')[0].split('.');
+
+                if (role !== 'desk') return;
+
+                try {
+                    const userRef = doc(db, 'hospitals', hospitalName, 'staff', userEmail);
+                    const userDoc = await getDoc(userRef);
+                    const userData = userDoc.data();
+
+                    // Desk 문서 업데이트
+                    const deskRef = doc(db, 'hospitals', hospitalName, 'desk', deskId);
+                    await updateDoc(deskRef, {
+                        name: userData.name,
+                        work: 'start',
+                        email: userData.email
+                    });
+
+                    // Staff 문서의 work 상태 업데이트
+                    await updateDoc(userRef, {
+                        work: 'start'
+                    });
+
+                    // UI 즉시 업데이트
+                    const deskItem = btn.closest('.room-item');
+                    if (deskItem) {
+                        // Join 버튼 제거
+                        btn.remove();
+                        
+                        // 직원 이름과 환자 수 표시 추가
+                        const roomInfo = deskItem.querySelector('.room-info');
+                        const staffName = document.createElement('span');
+                        staffName.className = 'staff-name';
+                        staffName.textContent = userData.name;
+                        roomInfo.appendChild(staffName);
+
+                        // 환자 수 컨테이너 추가
+                        const patientCountContainer = document.createElement('div');
+                        patientCountContainer.className = 'patient-count-container';
+                        patientCountContainer.dataset.desk = deskId;
+                        patientCountContainer.innerHTML = `
+                            <span class="patient-count">0</span>
+                            <span class="triangle-icon">▲</span>
+                        `;
+                        deskItem.querySelector('.room-header').appendChild(patientCountContainer);
+                    }
+
+                } catch (error) {
+                    console.error('Error joining desk:', error);
+                }
+            });
+        });
+
+        // 환자 클릭 이벤트 리스너
+        document.querySelectorAll('.room-patient-item').forEach(patientItem => {
+            patientItem.addEventListener('click', function() {
+                // 이전에 선택된 환자의 active 상태 제거
+                document.querySelectorAll('.room-patient-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                // 현재 선택된 환자에 active 상태 추가
+                this.classList.add('active');
+                selectedPatientId = this.dataset.patientId;  // 선택된 환자 ID 저장
+                handlePatientClick(this);
+            });
+        });
+    };
+
+    // Room 실시간 리스너
+    const unsubscribeRoom = onSnapshot(roomsRef, (snapshot) => {
+        rooms = [];
+        snapshot.forEach(doc => {
+            rooms.push({ id: doc.id, type: 'room', ...doc.data() });
+        });
+        updateRoomUI();
     });
-///////////////////////////////////////////////////////////////////////////////////////동작안하면 삭제
+
+    // Desk 실시간 리스너 추가
+    const unsubscribeDesk = onSnapshot(desksRef, (snapshot) => {
+        desks = [];
+        snapshot.forEach(doc => {
+            desks.push({ id: doc.id, type: 'desk', ...doc.data() });
+        });
+        updateRoomUI();
+    });
+
     // 자동 삭제 기능 초기화
     initializeCleanup(hospitalName);
 
     // 리스너 해제 함수 반환
     return () => {
         unsubscribeRoom();
+        unsubscribeDesk();
     };
 }
 ///////////////////////////////////////////////////////////////////////////////////////동작안하면 삭제
