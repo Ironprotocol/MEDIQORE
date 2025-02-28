@@ -66,28 +66,36 @@ export function initializePrescription() {
 
         // 처방전 히스토리 초기화
         initializePrescriptionHistory(patientId);
-
-        // UI가 생성된 후에 비활성화 처리
-        requestAnimationFrame(() => {
-            // 모든 입력 필드 비활성화
-            document.querySelectorAll('.cc-search-input, .medicine-search-input, .symptoms-input, .location-input, .treatment-details-input').forEach(element => {
-                element.disabled = true;
-            });
-            
-            // Canvas 비활성화
-            document.querySelector('.tooth-chart-canvas').style.pointerEvents = 'none';
-            
-            // Clear 버튼 비활성화
-            document.querySelector('.clear-btn').disabled = true;
-        });
+        
+ // UI가 생성된 후에 비활성화 처리
+ requestAnimationFrame(() => {
+    // 모든 입력 필드 비활성화
+    document.querySelectorAll('.cc-search-input, .medicine-search-input, .symptoms-input, .location-input, .treatment-details-input').forEach(element => {
+        element.disabled = true;
+    });
+    
+    // Canvas 비활성화
+    document.querySelector('.tooth-chart-canvas').style.pointerEvents = 'none';
+    
+    // Clear 버튼 비활성화
+    document.querySelector('.clear-btn').disabled = true;
+});
+        // 초기 상태는 저장되지 않은 상태로 설정
+        updateButtonStates(false);
     });
 
-    // 기존 프린터 버튼 생성 코드 바로 다음에 드롭다운 추가
+    // 프린터 버튼 생성
     const printBtn = document.createElement('button');
     printBtn.className = 'print-btn';
     document.querySelector('.content-footer-prescription').appendChild(printBtn);
 
-    // 프린터 버튼과 Send 버튼 사이에 드롭다운 추가
+    // Save 버튼 추가 (프린터 버튼 왼쪽에)
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'save-btn';
+    saveBtn.textContent = 'Save';
+    document.querySelector('.content-footer-prescription').insertBefore(saveBtn, printBtn);
+
+    // 수납실 선택 드롭다운 추가
     const deskSelect = document.createElement('select');
     deskSelect.className = 'desk-select';
 
@@ -115,8 +123,8 @@ export function initializePrescription() {
     sendBtn.textContent = 'Send';
     document.querySelector('.content-footer-prescription').appendChild(sendBtn);
 
-    // Send 버튼 클릭 이벤트 추가
-    sendBtn.addEventListener('click', async () => {
+    // Save 버튼 클릭 이벤트 추가
+    saveBtn.addEventListener('click', async () => {
         try {
             if (!currentPatientId || !currentRegisterDate) {
                 throw new Error('Patient information not found');
@@ -206,6 +214,7 @@ export function initializePrescription() {
                 }
             }
 
+            // 기존 문서에 prescription 데이터 추가하기 전에 추가
             // 하지만 새로운 처방전 저장 시에는 형식 통일 필요
             const now = new Date();
             const dateId = `${now.toLocaleDateString('en-GB', {
@@ -229,10 +238,14 @@ export function initializePrescription() {
                 progress: 'payment'
             });
 
-            alert('Prescription saved successfully!');
-            
             // 저장 성공 후 History UI 즉시 업데이트
             await initializePrescriptionHistory(currentPatientId);
+            
+            // 저장 성공 후 버튼 상태 업데이트
+            updateButtonStates(true);
+            
+            // 저장 성공 메시지
+            alert('Prescription saved successfully!');
             
             // 폼 초기화
             document.querySelector('.symptoms-input').value = '';
@@ -246,9 +259,14 @@ export function initializePrescription() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         } catch (error) {
-            console.error('Error sending prescription:', error);
-            alert('Failed to send prescription: ' + error.message);
+            console.error('Failed to save prescription:', error);
+            alert(`Failed to save prescription: ${error.message}`);
         }
+    });
+
+    // Send 버튼 클릭 이벤트 비우기 (나중에 수납실 이동 기능 추가 예정)
+    sendBtn.addEventListener('click', async () => {
+        alert('Send functionality will be implemented later.');
     });
 
     // prescription-center-bottom에 CC 검색 폼 추가
@@ -368,6 +386,9 @@ export function initializePrescription() {
 
         // Canvas 비활성화
         canvas.style.pointerEvents = 'none';
+
+        // 히스토리에서 선택한 경우 저장된 상태로 설정
+        updateButtonStates(true);
     });
 
     // New Chart 버튼 클릭 시 초기화할 때는 다시 활성화
@@ -998,4 +1019,26 @@ function setupKeyboardNavigation(searchInput, autocompleteContainer, addItemFunc
     searchInput.addEventListener('input', () => {
         selectedIndex = -1;
     });
+}
+
+// 버튼 상태 관리 함수 추가
+function updateButtonStates(isSaved) {
+    const saveBtn = document.querySelector('.save-btn');
+    const sendBtn = document.querySelector('.send-btn');
+    
+    if (isSaved) {
+        // 저장된 처방전인 경우
+        saveBtn.disabled = true;
+        saveBtn.classList.add('disabled');
+        
+        sendBtn.disabled = false;
+        sendBtn.classList.remove('disabled');
+    } else {
+        // 저장되지 않은 처방전인 경우
+        saveBtn.disabled = false;
+        saveBtn.classList.remove('disabled');
+        
+        sendBtn.disabled = true;
+        sendBtn.classList.add('disabled');
+    }
 }
