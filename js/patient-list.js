@@ -374,6 +374,14 @@ async function createPatientElement(hospitalName, patientData, patientId, type, 
         
         // 클릭된 환자 정보 UI에 selected 클래스 추가
         patientElement.classList.add('selected');
+
+        // 처방전 결제 컨테이너에 환자 정보 전달
+        const event = new CustomEvent('patientSelectedForPayment', {
+            detail: {
+                patientId: patientId
+            }
+        });
+        document.dispatchEvent(event);
     });
 
     // 삭제 버튼 이벤트 리스너 추가

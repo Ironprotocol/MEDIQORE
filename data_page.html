@@ -39,6 +39,7 @@
         import {CustomCalendar,initializeScheduler} from './js/calendar.js';
         import {handleComplaintChange, initializeNewPatientButton, loadDoctors, initializeAddressSearch, initializeInsuranceForm, initializeRegistrationForm} from './js/patient-registration.js';
         import {initializePrescription} from './js/prescription.js';
+        import {initializePrescriptionPayment} from './js/prescription-payment.js';
 
         // 전역 함수
         window.app = app;
@@ -152,6 +153,7 @@
             updateDate();               // 페이지 로드 시 날짜 업데이트
             initializeZoomPrevention(); // 확대/축소 방지 기능 초기화
             initializeScheduler();
+            initializePrescriptionPayment(); // Prescription Payment 초기화
 
 
     </script>
@@ -483,7 +485,7 @@
 
         <div id="desk-content-right" class="content-container-2 desk-container-right">
             <div class="content-header">
-                <div class="content-title">Prescript History</div>
+                <div class="content-title">Prescription Payment</div>
                 <button class="close-button">Close</button>
             </div>
         </div>
