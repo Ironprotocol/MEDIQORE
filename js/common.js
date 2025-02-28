@@ -145,15 +145,12 @@ export function setupLogoLogout() {
                     }
                 }
 
-                // 공통 로그아웃 처리 - staff 문서 업데이트 (유지)
-                const userRef = doc(db, 'hospitals', hospitalName, 'staff', user.email);
-                await updateDoc(userRef, {
-                    work: 'logout',
-                    lastUpdated: serverTimestamp()
-                });
-
-                await auth.signOut();
-                window.location.href = 'main.html';
+                // 로그아웃하는 사용자의 Firebase 인증만 로그아웃
+                const currentUser = auth.currentUser;
+                if (currentUser && currentUser.email === user.email) {
+                    await auth.signOut();
+                    window.location.href = 'main.html';
+                }
             } catch (error) {
                 console.error('Error during logout:', error);
             }
