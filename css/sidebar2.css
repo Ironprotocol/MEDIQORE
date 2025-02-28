@@ -157,11 +157,13 @@
         .join-btn:hover {
             background-color: rgb(0, 82, 204);
         }
-        .doctor-name {
-            margin-left: 10px;
+        .doctor-name,
+        .staff-name {
             font-size: 12px;
             font-weight: bold;
             color: #000000;
+            display: inline-block;
+            margin-left: 0;        /* 기존 margin-left 제거 */
         }
 
         /* Exit 버튼 스타일 */
@@ -276,6 +278,8 @@
             font-size: 12px;
             font-weight: bold;
             color: rgb(110, 110, 124);
+            display: inline-block;  /* 너비 설정을 위해 변경 */
+            width: 60px;           /* 고정 너비 설정 */
         }
        
         /* 환자 수 컨테이너 스타일 */

@@ -390,8 +390,8 @@
 
 .print-btn {
     position: absolute;
-    right: 110px;  /* send 버튼(80px) + 오른쪽 여백(10px) + 간격(20px) */
-    width: 35px;   /* Desk 메뉴 이미지와 동일한 크기 */
+    right: 220px;  /* desk-select(100px) + Send 버튼(80px) + 간격(40px) */
+    width: 35px;
     height: 35px;
     border: none;
     cursor: pointer;
@@ -685,6 +685,20 @@
     font-size: 12px;
     color: #666;
     margin-top: 5px;
+}
+
+/* 수납실 선택 드롭다운 추가 */
+.desk-select {
+    position: absolute;
+    right: 100px;  /* Send 버튼(80px) + 간격(20px) */
+    width: 100px;
+    height: 30px;
+    padding: 0 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 12px;
+    color: rgb(110, 110, 124);
+    background-color: white;
 }
 
 

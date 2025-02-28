@@ -146,11 +146,12 @@ export async function initializeRoomManagement(hospitalName) {
                                 <span class="room-title">${item.id}</span>
                                 ${item.type === 'room' && item.doctor ? 
                                     `<span class="doctor-name">${item.doctor}</span>` : 
+                                    item.type === 'desk' && item.name ? 
+                                    `<span class="staff-name">${item.name}</span>` :
                                     ''}
                             </div>
                             ${item.type === 'room' ? 
-                                (!item.doctor ? 
-                                    // 의사가 다른 room에 없을 때만 join 버튼 표시
+                                (!item.doctor && role === 'doctor' ? 
                                     `<button class="join-btn" data-room="${item.id}" 
                                         ${doctorCurrentRoom ? 'style="display: none;"' : ''}>
                                         Join</button>` :
@@ -158,7 +159,16 @@ export async function initializeRoomManagement(hospitalName) {
                                         <span class="patient-count">${patientCount}</span>
                                         <span class="triangle-icon ${isExpanded ? 'expanded' : ''}">${isExpanded ? '▼' : '▲'}</span>
                                     </div>`
-                                ) : ''}
+                                ) : 
+                                // Desk UI에 대한 Join 버튼 또는 환자 수 표시
+                                (item.type === 'desk' ? 
+                                    (!item.name && role === 'desk' ? // staff 대신 name으로 체크
+                                        `<button class="join-btn" data-desk="${item.id}">Join</button>` :
+                                        `<div class="patient-count-container" data-desk="${item.id}">
+                                            <span class="patient-count">0</span>
+                                            <span class="triangle-icon ${isExpanded ? 'expanded' : ''}">${isExpanded ? '▼' : '▲'}</span>
+                                        </div>`
+                                    ) : '')}
                         </div>
                         ${hasPatients ? 
                             `<div class="patient-list" style="display: ${isExpanded ? 'block' : 'none'};">
@@ -245,6 +255,39 @@ export async function initializeRoomManagement(hospitalName) {
                 });
             });
 
+            // Join 버튼 이벤트 리스너 (기존 코드 아래에 추가)
+            document.querySelectorAll('.join-btn[data-desk]').forEach(btn => {
+                btn.addEventListener('click', async function() {
+                    const deskId = this.dataset.desk;
+                    const userEmail = auth.currentUser.email;
+                    const [hospitalName, role] = userEmail.split('@')[0].split('.');
+
+                    if (role !== 'desk') return;
+
+                    try {
+                        const userRef = doc(db, 'hospitals', hospitalName, 'staff', userEmail);
+                        const userDoc = await getDoc(userRef);
+                        const userData = userDoc.data();
+
+                        // Desk 문서 업데이트
+                        const deskRef = doc(db, 'hospitals', hospitalName, 'desk', deskId);
+                        await updateDoc(deskRef, {
+                            name: userData.name,
+                            work: 'start',
+                            email: userData.email
+                        });
+
+                        // Staff 문서의 work 상태 업데이트
+                        await updateDoc(userRef, {
+                            work: 'start'
+                        });
+
+                    } catch (error) {
+                        console.error('Error joining desk:', error);
+                    }
+                });
+            });
+
             // 환자 클릭 이벤트 리스너 수정
             document.querySelectorAll('.room-patient-item').forEach(patientItem => {
                 patientItem.addEventListener('click', function() {
@@ -277,6 +320,7 @@ export async function handleRoomLogout() {
     expandedRooms.clear(); // 펼침 상태 초기화
     try {
         const [hospitalName, role] = auth.currentUser?.email.split('@')[0].split('.') || [];
+        
         if (role === 'doctor') {
             const userRef = doc(db, 'hospitals', hospitalName, 'staff', auth.currentUser.email);
             const userDoc = await getDoc(userRef);
@@ -288,6 +332,24 @@ export async function handleRoomLogout() {
                 if (roomDoc.data().doctor === userDoc.data().name) {
                     await updateDoc(doc(roomsRef, roomDoc.id), {
                         doctor: null
+                    });
+                }
+            });
+        } 
+        // desk 계정 로그아웃 처리 추가
+        else if (role === 'desk') {
+            const userRef = doc(db, 'hospitals', hospitalName, 'staff', auth.currentUser.email);
+            const userDoc = await getDoc(userRef);
+            
+            const desksRef = collection(db, 'hospitals', hospitalName, 'desk');
+            const desksSnapshot = await getDocs(desksRef);
+            
+            desksSnapshot.forEach(async (deskDoc) => {
+                if (deskDoc.data().email === auth.currentUser.email) {
+                    await updateDoc(doc(desksRef, deskDoc.id), {
+                        name: null,
+                        work: null,
+                        email: null
                     });
                 }
             });

@@ -82,6 +82,33 @@ export function initializePrescription() {
         });
     });
 
+    // 기존 프린터 버튼 생성 코드 바로 다음에 드롭다운 추가
+    const printBtn = document.createElement('button');
+    printBtn.className = 'print-btn';
+    document.querySelector('.content-footer-prescription').appendChild(printBtn);
+
+    // 프린터 버튼과 Send 버튼 사이에 드롭다운 추가
+    const deskSelect = document.createElement('select');
+    deskSelect.className = 'desk-select';
+
+    // 수납실 목록 가져오기
+    const [hospitalName] = auth.currentUser.email.split('@')[0].split('.');
+    const desksRef = collection(db, 'hospitals', hospitalName, 'desk');
+    getDocs(desksRef).then(snapshot => {
+        const desks = [];
+        snapshot.forEach(doc => desks.push(doc.id));
+        desks.sort();
+        
+        desks.forEach(deskId => {
+            const option = document.createElement('option');
+            option.value = deskId;
+            option.textContent = deskId;
+            deskSelect.appendChild(option);
+        });
+    });
+
+    document.querySelector('.content-footer-prescription').appendChild(deskSelect);
+
     // content-footer-prescription에 Send 버튼 추가
     const sendBtn = document.createElement('button');
     sendBtn.className = 'send-btn';
@@ -223,11 +250,6 @@ export function initializePrescription() {
             alert('Failed to send prescription: ' + error.message);
         }
     });
-
-    // Send 버튼 추가 코드 위에 추가
-    const printBtn = document.createElement('button');
-    printBtn.className = 'print-btn';
-    document.querySelector('.content-footer-prescription').appendChild(printBtn);
 
     // prescription-center-bottom에 CC 검색 폼 추가
     const ccSearchContainer = document.createElement('div');
