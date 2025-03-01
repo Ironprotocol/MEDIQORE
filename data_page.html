@@ -39,7 +39,6 @@
         import {CustomCalendar,initializeScheduler} from './js/calendar.js';
         import {handleComplaintChange, initializeNewPatientButton, loadDoctors, initializeAddressSearch, initializeInsuranceForm, initializeRegistrationForm} from './js/patient-registration.js';
         import {initializePrescription} from './js/prescription.js';
-        import {initializePrescriptionPayment} from './js/prescription-payment.js';
 
         // 전역 함수
         window.app = app;
@@ -153,7 +152,6 @@
             updateDate();               // 페이지 로드 시 날짜 업데이트
             initializeZoomPrevention(); // 확대/축소 방지 기능 초기화
             initializeScheduler();
-            initializePrescriptionPayment(); // Prescription Payment 초기화
 
 
     </script>
@@ -311,8 +309,41 @@
     <div class="main-content">
         <div id="data-content" class="content-container data-container">
             <div class="content-header">
-                <div class="content-title">Data</div>
+                <div class="content-title">Data Management</div>
                 <button class="close-button">Close</button>
+            </div>
+            <div class="content-body">
+                <!-- Data 컨텐츠 내용 -->
+                <div style="padding: 20px;">
+                    <h2>Hospital Data Dashboard</h2>
+                    <p>Welcome to the data management dashboard. Select a category below to view data.</p>
+                    
+                    <div style="margin-top: 30px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                        <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                            <h3>Patient Records</h3>
+                            <p>View and manage patient information and medical history.</p>
+                            <button style="margin-top: 10px; padding: 8px 15px; background: #f0f0f0; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">View Records</button>
+                        </div>
+                        
+                        <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                            <h3>Prescription Data</h3>
+                            <p>Access prescription history and medication analytics.</p>
+                            <button style="margin-top: 10px; padding: 8px 15px; background: #f0f0f0; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">View Prescriptions</button>
+                        </div>
+                        
+                        <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                            <h3>Financial Reports</h3>
+                            <p>Review revenue, expenses, and financial performance.</p>
+                            <button style="margin-top: 10px; padding: 8px 15px; background: #f0f0f0; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">View Reports</button>
+                        </div>
+                        
+                        <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                            <h3>Staff Management</h3>
+                            <p>Manage staff information and schedules.</p>
+                            <button style="margin-top: 10px; padding: 8px 15px; background: #f0f0f0; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">View Staff</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         

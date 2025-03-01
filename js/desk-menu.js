@@ -105,12 +105,13 @@ export function initializeMenuEvents() {
                 container.style.display = 'none';
             });
 
-            // 기존 메뉴 처리 로직...
+            // 메뉴 매핑 업데이트 - Data 메뉴 추가
             const menuToContainer = {
                 'home': 'home-content',
                 'reservation': 'reservation-content',
                 'pharmacy': 'pharmacy-content',
-                'desk': ['desk-content', 'desk-content-right']
+                'desk': ['desk-content', 'desk-content-right'],
+                'data': 'data-content'  // Data 메뉴 추가
             };
             
             // Reservation 메뉴 클릭 시 특별 처리
