@@ -61,6 +61,30 @@ async function cleanupPatients(hospitalName) {
                 });
             }
         }
+        
+        /////////////////////////////////////////// 3. desk의 patients 배열 정리 (추가된 부분) - 동작 안하면 삭제
+        const desksRef = collection(db, 'hospitals', hospitalName, 'desk');
+        const deskSnapshot = await getDocs(desksRef);
+
+        for (const deskDoc of deskSnapshot.docs) {
+            const patients = deskDoc.data().patients || [];
+            const updatedPatients = patients.filter(patient => {
+                // timestamp나 rsvdTime이 오늘 이후인 환자만 유지
+                if (patient.timestamp) {
+                    return new Date(patient.timestamp.toDate()) >= today;
+                }
+                if (patient.rsvdTime) {
+                    return new Date(patient.rsvdTime.toDate()) >= today;
+                }
+                return false;  // timestamp나 rsvdTime이 없으면 제거
+            });
+
+            if (updatedPatients.length !== patients.length) {
+                await updateDoc(deskDoc.ref, {
+                    patients: updatedPatients
+                });
+            }
+        }  /////////////////////////////////////////// 
     } catch (error) {
         console.error('Error in cleanupPatients:', error);
     }
