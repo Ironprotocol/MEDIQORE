@@ -40,6 +40,7 @@
         import {handleComplaintChange, initializeNewPatientButton, loadDoctors, initializeAddressSearch, initializeInsuranceForm, initializeRegistrationForm} from './js/patient-registration.js';
         import {initializePrescription} from './js/prescription.js';
         import {initializeDataMenu} from './js/data-menu.js';
+        import {initializePrescriptionPayment} from './js/prescription-payment.js';
 
         // 전역 함수
         window.app = app;
@@ -158,6 +159,7 @@
             initializeScheduler();
 
             initializeDataMenu();
+            initializePrescriptionPayment(); // Prescription Payment 초기화
 
     </script>
 </head>
