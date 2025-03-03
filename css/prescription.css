@@ -744,4 +744,36 @@
     width: 80px;
 }
 
+.medicine-input-group {
+    margin-right: 8px;
+    display: flex;
+    flex-direction: column;
+}
+
+.medicine-input {
+    width: 25px;
+    padding: 4px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 10px;
+}
+
+.medicine-controls {
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+}
+
+.medicine-text-info {
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+}
+
+.medicine-text-info span {
+    margin-right: 15px;
+    font-size: 12px;
+    color: #555;
+}
+
 

@@ -89,26 +89,28 @@ async function loadPrescriptionDetails(patientId, container) {
         
         const prescriptionData = registerData.prescription;
         
-        // 약품 목록 HTML 생성
+        // 약품 목록 HTML 생성 - 수정된 부분
         let medicinesHTML = '';
         if (prescriptionData.medicines && prescriptionData.medicines.length > 0) {
             medicinesHTML = `
-                <div class="medicines-list" style="margin-bottom:20px;">
-                    <h3 style="margin-top:0; margin-bottom:10px; font-size:16px; color:#333;">Medicines:</h3>
-                    <ol style="margin:0; padding-left:25px;">
-                        ${prescriptionData.medicines.map(medicine => {
-                            return `<li style="margin-bottom:5px;">
-                                ${medicine.name || 'Unknown'} - 
-                                ${medicine.perDose || '0'} dose(s), 
-                                ${medicine.perDay || '0'} time(s) per day, 
-                                for ${medicine.days || '0'} day(s)
-                            </li>`;
-                        }).join('')}
-                    </ol>
+                <div class="medicines-section" style="margin-top:20px; border-top:1px solid #eee; padding-top:15px;">
+                    <h3 style="margin:0 0 10px 0; color:#333; font-size:16px;">Prescribed Medicines</h3>
+                    <ul style="list-style:none; padding:0; margin:0;">
+                        ${prescriptionData.medicines.map(medicine => `
+                            <li style="margin-bottom:10px; padding:8px; background-color:#f9f9f9; border-radius:4px;">
+                                <div style="font-weight:bold;">${medicine.name}</div>
+                                <div style="display:flex; font-size:13px; color:#555; margin-top:5px;">
+                                    <span style="margin-right:15px;">Dose: ${medicine.perDose}</span>
+                                    <span style="margin-right:15px;">Frequency: ${medicine.perDay}</span>
+                                    <span>Duration: ${medicine.days}</span>
+                                </div>
+                            </li>
+                        `).join('')}
+                    </ul>
                 </div>
             `;
         } else {
-            medicinesHTML = `<p>No medicines prescribed.</p>`;
+            medicinesHTML = `<p style="color:#666; margin-top:15px;">No medicines prescribed.</p>`;
         }
         
         // 디버깅을 위해 처방전 데이터 구조 확인

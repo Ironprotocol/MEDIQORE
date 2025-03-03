@@ -189,12 +189,12 @@ export function initializePrescription() {
 
             const [hospitalName] = auth.currentUser.email.split('@')[0].split('.');
             
-            // Medicine 항목들 수집 (선택사항)
+            // Medicine 항목들 수집 (선택사항) - 수정된 부분
             const medicineItems = Array.from(document.querySelectorAll('.medicine-item')).map(item => ({
                 name: item.querySelector('.medicine-item-text').textContent,
-                perDose: item.querySelector('.medicine-dropdown:nth-child(1) button').textContent,
-                perDay: item.querySelector('.medicine-dropdown:nth-child(2) button').textContent,
-                days: item.querySelector('.medicine-dropdown:nth-child(3) button').textContent
+                perDose: item.querySelector('.dose-input').value || 'Dose per time',
+                perDay: item.querySelector('.frequency-input').value || 'Times per day',
+                days: item.querySelector('.duration-input').value || 'Duration (days)'
             }));
 
             // Canvas 이미지 데이터 가져오기
@@ -438,7 +438,7 @@ export function initializePrescription() {
             ccContainer.appendChild(ccItem);
         });
 
-        // 약 처방 목록 표시
+        // 약 처방 목록 표시 - 수정된 부분
         const medicineContainer = document.querySelector('.medicine-items-container');
         medicineContainer.innerHTML = '';
         if (prescriptionData.medicines) {
@@ -446,17 +446,12 @@ export function initializePrescription() {
                 const medicineItem = document.createElement('div');
                 medicineItem.className = 'medicine-item';
                 medicineItem.innerHTML = `
+                    <img src="image/medicine.png" alt="Medicine">
                     <span class="medicine-item-text">${medicine.name}</span>
-                    <div class="medicine-controls">
-                        <div class="medicine-dropdown">
-                            <button class="medicine-dropdown-button">${medicine.perDose}</button>
-                        </div>
-                        <div class="medicine-dropdown">
-                            <button class="medicine-dropdown-button">${medicine.perDay}</button>
-                        </div>
-                        <div class="medicine-dropdown">
-                            <button class="medicine-dropdown-button">${medicine.days}</button>
-                        </div>
+                    <div class="medicine-text-info">
+                        <span>${medicine.perDose}</span>
+                        <span>${medicine.perDay}</span>
+                        <span>${medicine.days}</span>
                     </div>
                 `;
                 medicineContainer.appendChild(medicineItem);
@@ -988,29 +983,14 @@ async function initializeMedicineSearch() {
             <img src="image/medicine.png" alt="Medicine">
             <span class="medicine-item-text">${text}</span>
             <div class="medicine-controls">
-                <div class="medicine-dropdown">
-                    <button class="medicine-dropdown-button">p/dose</button>
-                    <div class="medicine-dropdown-content">
-                        ${Array.from({length: 7}, (_, i) => 
-                            `<div class="medicine-dropdown-item">${i + 1}/per</div>`
-                        ).join('')}
-                    </div>
+                <div class="medicine-input-group">
+                    <input type="text" class="medicine-input dose-input" placeholder="Dose">
                 </div>
-                <div class="medicine-dropdown">
-                    <button class="medicine-dropdown-button">p/day</button>
-                    <div class="medicine-dropdown-content">
-                        ${Array.from({length: 7}, (_, i) => 
-                            `<div class="medicine-dropdown-item">${i + 1}/d</div>`
-                        ).join('')}
-                    </div>
+                <div class="medicine-input-group">
+                    <input type="text" class="medicine-input frequency-input" placeholder="Time">
                 </div>
-                <div class="medicine-dropdown">
-                    <button class="medicine-dropdown-button">days</button>
-                    <div class="medicine-dropdown-content">
-                        ${Array.from({length: 30}, (_, i) => 
-                            `<div class="medicine-dropdown-item">${i + 1}days</div>`
-                        ).join('')}
-                    </div>
+                <div class="medicine-input-group">
+                    <input type="text" class="medicine-input duration-input" placeholder="Dura">
                 </div>
             </div>
             <span class="medicine-item-remove">×</span>
@@ -1022,9 +1002,6 @@ async function initializeMedicineSearch() {
         removeButton.addEventListener('click', () => {
             medicineItem.remove();
         });
-
-        // 드롭다운 이벤트 처리
-        setupDropdowns(medicineItem);
 
         medicineSearchInput.value = '';
         autocompleteContainer.style.display = 'none';
