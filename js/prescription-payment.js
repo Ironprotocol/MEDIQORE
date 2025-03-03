@@ -93,7 +93,7 @@ async function loadPrescriptionDetails(patientId, container) {
         let medicinesHTML = '';
         if (prescriptionData.medicines && prescriptionData.medicines.length > 0) {
             medicinesHTML = `
-                <div class="medicines-section" style="margin-top:20px; border-top:1px solid #eee; padding-top:15px;">
+                <div class="medicines-section" style="margin-top:20px; padding-top:15px;">
                     <h3 style="margin:0 0 10px 0; color:#333; font-size:16px;">Prescribed Medicines</h3>
                     <ul style="list-style:none; padding:0; margin:0;">
                         ${prescriptionData.medicines.map(medicine => `
@@ -113,14 +113,10 @@ async function loadPrescriptionDetails(patientId, container) {
             medicinesHTML = `<p style="color:#666; margin-top:15px;">No medicines prescribed.</p>`;
         }
         
-        // 디버깅을 위해 처방전 데이터 구조 확인
-        console.log('Prescription Data:', prescriptionData);
-        
-        // 처방전 정보 표시
+        // 처방전 정보 표시 - 질병 정보 제거하고 약 정보만 표시
         container.innerHTML = `
             <div class="prescription-payment-details" style="background-color:white; border-radius:8px; padding:20px; height:calc(100% - 40px); overflow-y:auto;">
                 <div class="prescription-header" style="border-bottom:1px solid #eee; padding-bottom:15px; margin-bottom:20px;">
-                    <h2 style="margin:0 0 10px 0; color:#333; font-size:20px;">Prescription Details</h2>
                     <p class="prescription-date" style="color:#666; font-size:14px; margin:0;">Date: ${formattedDate}</p>
                 </div>
                 

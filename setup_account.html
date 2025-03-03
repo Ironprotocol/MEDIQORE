@@ -27,6 +27,12 @@
         h2 {
             margin-top: 0;
         }
+        .credential-fields {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed #ccc;
+        }
     </style>
 </head>
 <body>
@@ -42,11 +48,21 @@
         </div>
         <div class="form-group">
             <label>역할:</label>
-            <select id="role">
+            <select id="role" onchange="toggleCredentialFields()">
                 <option value="doctor">Doctor</option>
                 <option value="desk">Desk</option>
                 <option value="chemist">Chemist</option>
             </select>
+        </div>
+        <div id="credentialFields" class="credential-fields">
+            <div class="form-group">
+                <label>자격증명:</label>
+                <input type="text" id="credentialName" placeholder="예: 의사면허증">
+            </div>
+            <div class="form-group">
+                <label>자격증번호:</label>
+                <input type="text" id="credentialNumber" placeholder="예: 12345-67890">
+            </div>
         </div>
     </div>
 
@@ -69,12 +85,43 @@
             <input type="text" id="type" placeholder="예: dental">
         </div>
         <div class="form-group">
+            <label>병원 전화번호:</label>
+            <input type="tel" id="hospitalPhone" placeholder="예: +27-123-456-7890">
+        </div>
+        <div class="form-group">
+            <label>병원 팩스번호:</label>
+            <input type="tel" id="hospitalFax" placeholder="예: +27-123-456-7891">
+        </div>
+        <div class="form-group">
+            <label>병원 공식 이메일:</label>
+            <input type="email" id="hospitalEmail" placeholder="예: info@mediqoredental.com">
+        </div>
+        <div class="form-group">
             <label>담당자 이름:</label>
             <input type="text" id="staffName" placeholder="예: John Doe">
         </div>
     </div>
 
     <button onclick="setupAccount()">계정 생성</button>
+
+    <script>
+        // 역할에 따라 자격증 필드 표시/숨김 처리
+        function toggleCredentialFields() {
+            const role = document.getElementById('role').value;
+            const credentialFields = document.getElementById('credentialFields');
+            
+            if (role === 'doctor' || role === 'chemist') {
+                credentialFields.style.display = 'block';
+            } else {
+                credentialFields.style.display = 'none';
+            }
+        }
+        
+        // 페이지 로드 시 초기 상태 설정
+        window.onload = function() {
+            toggleCredentialFields();
+        };
+    </script>
 
     <script type="module">
         // Firebase SDK 임포트
@@ -108,6 +155,25 @@
                 const region = document.getElementById('region').value;
                 const type = document.getElementById('type').value;
                 const staffName = document.getElementById('staffName').value;
+                
+                // 새로 추가된 필드들
+                const hospitalPhone = document.getElementById('hospitalPhone').value;
+                const hospitalFax = document.getElementById('hospitalFax').value;
+                const hospitalEmail = document.getElementById('hospitalEmail').value;
+                
+                // 자격증 정보 (Doctor나 Chemist인 경우에만)
+                let credentialInfo = {};
+                if (role === 'doctor' || role === 'chemist') {
+                    const credentialName = document.getElementById('credentialName').value;
+                    const credentialNumber = document.getElementById('credentialNumber').value;
+                    
+                    if (credentialName && credentialNumber) {
+                        credentialInfo = {
+                            name: credentialName,
+                            number: credentialNumber
+                        };
+                    }
+                }
 
                 // 이메일에서 병원ID 추출
                 const [hospitalId] = email.split('@')[0].split('.');
@@ -120,7 +186,8 @@
                     work: 'logout',  // 기본 work 상태를 'logout'으로 설정
                     createdAt: serverTimestamp(),
                     name: staffName,
-                    email: email
+                    email: email,
+                    credential: Object.keys(credentialInfo).length > 0 ? credentialInfo : null
                 });
 
                 // 병원 정보 저장
@@ -130,7 +197,10 @@
                         name: hospitalName,
                         code: hospitalCode,
                         region: region,
-                        type: type
+                        type: type,
+                        phone: hospitalPhone,
+                        fax: hospitalFax,
+                        email: hospitalEmail
                     }
                 }, { merge: true });
 
