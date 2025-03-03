@@ -300,3 +300,65 @@ export function initializeZoomPrevention() {
         }
     }, { passive: false });
 }
+
+// 사용자 로그인 상태 동기화 함수 추가
+export async function synchronizeUserState(user) {
+    try {
+        if (!user) return;
+        
+        const [hospitalName, role] = user.email.split('@')[0].split('.');
+        const userRef = doc(db, 'hospitals', hospitalName, 'staff', user.email);
+        const userDoc = await getDoc(userRef);
+        
+        if (!userDoc.exists()) return;
+        
+        const userData = userDoc.data();
+        
+        // 이미 room이나 desk에 join되어 있는지 확인
+        if (role === 'doctor') {
+            // 의사가 이미 room에 배정되어 있는지 확인
+            const roomsRef = collection(db, 'hospitals', hospitalName, 'treatment.room');
+            const roomsSnapshot = await getDocs(roomsRef);
+            let isAssigned = false;
+            
+            for (const roomDoc of roomsSnapshot.docs) {
+                if (roomDoc.data().doctor === userData.name) {
+                    isAssigned = true;
+                    // 이미 room에 배정되어 있으면 work 상태를 'start'로 유지
+                    if (userData.work !== 'start') {
+                        await updateDoc(userRef, { work: 'start' });
+                    }
+                    break;
+                }
+            }
+            
+            // room에 배정되어 있지 않고 work 상태가 'start'인 경우 'login'으로 변경
+            if (!isAssigned && userData.work === 'start') {
+                await updateDoc(userRef, { work: 'login' });
+            }
+        } else if (role === 'desk') {
+            // desk 계정이 이미 desk에 배정되어 있는지 확인
+            const desksRef = collection(db, 'hospitals', hospitalName, 'desk');
+            const desksSnapshot = await getDocs(desksRef);
+            let isAssigned = false;
+            
+            for (const deskDoc of desksSnapshot.docs) {
+                if (deskDoc.data().email === user.email) {
+                    isAssigned = true;
+                    // 이미 desk에 배정되어 있으면 work 상태를 'start'로 유지
+                    if (userData.work !== 'start') {
+                        await updateDoc(userRef, { work: 'start' });
+                    }
+                    break;
+                }
+            }
+            
+            // desk에 배정되어 있지 않고 work 상태가 'start'인 경우 'login'으로 변경
+            if (!isAssigned && userData.work === 'start') {
+                await updateDoc(userRef, { work: 'login' });
+            }
+        }
+    } catch (error) {
+        console.error('Error synchronizing user state:', error);
+    }
+}

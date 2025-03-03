@@ -31,7 +31,7 @@
     </style>
     <script type="module">
         import {app, auth, db, doc, getDoc, setDoc, collection, query, where, getDocs, updateDoc,  serverTimestamp, Timestamp,onSnapshot,orderBy } from './js/firebase-config.js';
-        import {setupCloseButtons, setupLogoLogout, initializeStatusSelector, initializeZoomPrevention, displayUserName, initializeUserName} from './js/common.js';
+        import {setupCloseButtons, setupLogoLogout, initializeStatusSelector, initializeZoomPrevention, displayUserName, initializeUserName, synchronizeUserState} from './js/common.js';
         import {checkUserPermissions, initializeMenuEvents} from './js/desk-menu.js';
         import {initializePatientList} from './js/patient-list.js';
         import {initializeRoomManagement, handleRoomLogout} from './js/room.js';
@@ -108,6 +108,9 @@
                         return;
                     } //회원 아니면 돌려보냄
          
+            // 사용자 상태 동기화 추가
+            await synchronizeUserState(user);
+            
             try {
               await checkUserPermissions(user);
               const hospitalName = user.email.split('@')[0].split('.')[0]; // hospitalName 추출
