@@ -26,9 +26,40 @@ export function initializePrescription() {
         document.querySelector('#prescription-content').style.display = 'none';
     });
 
+    // 처방전 내용 초기화 함수 추가
+    function clearPrescriptionForm() {
+        // CC 항목 초기화
+        const ccItemsContainer = document.querySelector('.cc-items-container');
+        if (ccItemsContainer) {
+            ccItemsContainer.innerHTML = '';
+        }
+        
+        // Medicine 항목 초기화
+        const medicineItemsContainer = document.querySelector('.medicine-items-container');
+        if (medicineItemsContainer) {
+            medicineItemsContainer.innerHTML = '';
+        }
+        
+        // 입력 필드 초기화
+        document.querySelectorAll('.cc-search-input, .medicine-search-input, .symptoms-input, .location-input, .treatment-details-input').forEach(element => {
+            element.value = '';
+        });
+        
+        // Canvas 초기화
+        const canvas = document.querySelector('.tooth-chart-canvas');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            initializeCanvas(); // 캔버스 다시 초기화
+        }
+    }
+
     // Room의 환자 클릭 이벤트에 대한 처리
     document.addEventListener('prescriptionPatientSelected', (e) => {
         const { name, gender, birthDate, age, patientId, registerDate } = e.detail;
+        
+        // 환자가 변경되었을 때 처방전 내용 초기화
+        clearPrescriptionForm();
         
         // 현재 환자 정보 저장
         currentPatientId = patientId;
@@ -67,21 +98,28 @@ export function initializePrescription() {
         // 처방전 히스토리 초기화
         initializePrescriptionHistory(patientId);
         
- // UI가 생성된 후에 비활성화 처리
- requestAnimationFrame(() => {
-    // 모든 입력 필드 비활성화
-    document.querySelectorAll('.cc-search-input, .medicine-search-input, .symptoms-input, .location-input, .treatment-details-input').forEach(element => {
-        element.disabled = true;
-    });
-    
-    // Canvas 비활성화
-    document.querySelector('.tooth-chart-canvas').style.pointerEvents = 'none';
-    
-    // Clear 버튼 비활성화
-    document.querySelector('.clear-btn').disabled = true;
-});
+        // UI가 생성된 후에 비활성화 처리
+        requestAnimationFrame(() => {
+            // 모든 입력 필드 비활성화
+            document.querySelectorAll('.cc-search-input, .medicine-search-input, .symptoms-input, .location-input, .treatment-details-input').forEach(element => {
+                element.disabled = true;
+            });
+            
+            // Canvas 비활성화
+            document.querySelector('.tooth-chart-canvas').style.pointerEvents = 'none';
+            
+            // Clear 버튼 비활성화
+            document.querySelector('.clear-btn').disabled = true;
+        });
+        
         // 초기 상태는 저장되지 않은 상태로 설정
         updateButtonStates(false);
+    });
+
+    // 처방전 히스토리 선택 이벤트 처리 - 히스토리 선택 시에도 폼 초기화
+    document.addEventListener('prescriptionHistorySelected', () => {
+        // 히스토리 선택 시에도 폼 초기화
+        clearPrescriptionForm();
     });
 
     // 프린터 버튼 생성
