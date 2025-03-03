@@ -364,6 +364,11 @@ async function createPatientElement(hospitalName, patientData, patientId, type, 
         // 이미 선택된 요소를 다시 클릭한 경우
         if (patientElement.classList.contains('selected')) {
             patientElement.classList.remove('selected');
+            
+            // 환자 선택 해제 이벤트 발생
+            const deselectEvent = new CustomEvent('patientDeselected');
+            document.dispatchEvent(deselectEvent);
+            
             return;
         }
 
@@ -374,7 +379,7 @@ async function createPatientElement(hospitalName, patientData, patientId, type, 
         
         // 클릭된 환자 정보 UI에 selected 클래스 추가
         patientElement.classList.add('selected');
-
+        
         // 처방전 결제 컨테이너에 환자 정보 전달
         const event = new CustomEvent('patientSelectedForPayment', {
             detail: {

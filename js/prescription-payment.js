@@ -14,17 +14,27 @@ export function initializePrescriptionPayment() {
     }
     
     // 초기 메시지 표시
-    contentBody.innerHTML = `
-        <div class="payment-message" style="display:flex; justify-content:center; align-items:center; height:100%; color:#666;">
-            <p>Select a patient from the list to view prescription details.</p>
-        </div>
-    `;
+    showInitialMessage(contentBody);
     
     // 환자 선택 이벤트 리스너 등록
     document.addEventListener('patientSelectedForPayment', async (e) => {
         const { patientId } = e.detail;
         await loadPrescriptionDetails(patientId, contentBody);
     });
+    
+    // 환자 선택 해제 이벤트 리스너 등록
+    document.addEventListener('patientDeselected', () => {
+        showInitialMessage(contentBody);
+    });
+}
+
+// 초기 메시지 표시 함수
+function showInitialMessage(container) {
+    container.innerHTML = `
+        <div class="payment-message" style="display:flex; justify-content:center; align-items:center; height:100%; color:#666;">
+            <p>Select a patient from the list to view prescription details.</p>
+        </div>
+    `;
 }
 
 // 처방전 상세 정보 로드
