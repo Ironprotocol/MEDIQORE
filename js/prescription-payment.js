@@ -137,6 +137,14 @@ async function loadPrescriptionDetails(patientId, container) {
                         <span class="detail-label" style="width:150px; font-weight:bold; color:#555;">Doctor:</span>
                         <span class="detail-value">${registerData.doctor || 'N/A'}</span>
                     </div>
+                    <div class="detail-row" style="display:flex; margin-bottom:8px;">
+                        <span class="detail-label" style="width:150px; font-weight:bold; color:#555;">Credential Name:</span>
+                        <span class="detail-value">${prescriptionData.credential ? prescriptionData.credential.name : 'N/A'}</span>
+                    </div>
+                    <div class="detail-row" style="display:flex; margin-bottom:8px;">
+                        <span class="detail-label" style="width:150px; font-weight:bold; color:#555;">License Number:</span>
+                        <span class="detail-value">${prescriptionData.credential ? prescriptionData.credential.number : 'N/A'}</span>
+                    </div>
                 </div>
                 
                 ${medicinesHTML}

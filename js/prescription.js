@@ -189,6 +189,18 @@ export function initializePrescription() {
 
             const [hospitalName] = auth.currentUser.email.split('@')[0].split('.');
             
+            // 현재 로그인한 계정의 자격증 정보 가져오기
+            const currentUserEmail = auth.currentUser.email;
+            const staffRef = doc(db, 'hospitals', hospitalName, 'staff', currentUserEmail);
+            const staffDoc = await getDoc(staffRef);
+            
+            // 자격증 정보 추출
+            let credential = null;
+            if (staffDoc.exists()) {
+                const staffData = staffDoc.data();
+                credential = staffData.credential || null;
+            }
+            
             // Medicine 항목들 수집 (선택사항) - 수정된 부분
             const medicineItems = Array.from(document.querySelectorAll('.medicine-item')).map(item => ({
                 name: item.querySelector('.medicine-item-text').textContent,
@@ -270,7 +282,8 @@ export function initializePrescription() {
                     location,
                     treatmentDetails,
                     cc: ccItems.map(item => item.textContent),
-                    medicines: medicineItems
+                    medicines: medicineItems,
+                    credential: credential  // 자격증 정보 추가
                 },
                 chartImage,
                 progress: 'payment'
