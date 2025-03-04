@@ -339,8 +339,6 @@ async function completePayment(patientId) {
 // QR 코드 생성
 function generateQRCodes(patientId, prescriptionData, hospitalName, doctorName) {
     try {
-        console.log('QR 코드 생성 시작...');
-        
         // QR 코드에 포함할 데이터 생성
         const qrData = {
             patientId: patientId,
@@ -353,72 +351,121 @@ function generateQRCodes(patientId, prescriptionData, hospitalName, doctorName) 
         
         // 데이터를 JSON 문자열로 변환
         const qrString = JSON.stringify(qrData);
-        console.log('QR 데이터:', qrString);
         
         // 왼쪽 QR 코드 생성
         const qrCodeLeftElement = document.getElementById('qrcode-left');
-        console.log('왼쪽 QR 코드 요소:', qrCodeLeftElement);
         
         if (qrCodeLeftElement) {
             // 기존 QR 코드가 있으면 제거
             qrCodeLeftElement.innerHTML = '';
             
             try {
-                // QR 코드 생성
-                new QRCode(qrCodeLeftElement, {
-                    text: qrString,
+                // QR Code Styling 라이브러리를 사용하여 QR 코드 생성
+                const qrCodeLeft = new QRCodeStyling({
                     width: 80,
                     height: 80,
-                    colorDark: "#000000",
-                    colorLight: "#ffffff"
+                    type: "svg",
+                    data: qrString,
+                    dotsOptions: {
+                        color: "#000000",
+                        type: "square"
+                    },
+                    backgroundOptions: {
+                        color: "transparent",
+                    },
+                    cornersSquareOptions: {
+                        type: "square"
+                    },
+                    cornersDotOptions: {
+                        type: "square"
+                    },
+                    qrOptions: {
+                        errorCorrectionLevel: "M"
+                    }
                 });
-                console.log('왼쪽 QR 코드 생성 완료');
+                
+                // QR 코드를 DOM에 추가
+                qrCodeLeft.append(qrCodeLeftElement);
             } catch (qrError) {
-                console.error('왼쪽 QR 코드 생성 중 오류:', qrError);
                 qrCodeLeftElement.innerHTML = '<p style="color:red;">QR Error</p>';
                 
-                // 대체 방법으로 시도
+                // 오류 발생 시 더 간단한 설정으로 다시 시도
                 try {
-                    new QRCode(qrCodeLeftElement, qrString);
-                    console.log('대체 방법으로 왼쪽 QR 코드 생성 완료');
+                    const simpleQrCodeLeft = new QRCodeStyling({
+                        width: 80,
+                        height: 80,
+                        data: qrString,
+                        backgroundOptions: {
+                            color: "transparent",
+                        },
+                        qrOptions: {
+                            errorCorrectionLevel: "L"
+                        }
+                    });
+                    simpleQrCodeLeft.append(qrCodeLeftElement);
                 } catch (fallbackError) {
-                    console.error('대체 방법으로도 QR 코드 생성 실패:', fallbackError);
+                    // 오류 처리
                 }
             }
         }
         
         // 오른쪽 QR 코드 생성
         const qrCodeRightElement = document.getElementById('qrcode-right');
-        console.log('오른쪽 QR 코드 요소:', qrCodeRightElement);
         
         if (qrCodeRightElement) {
             // 기존 QR 코드가 있으면 제거
             qrCodeRightElement.innerHTML = '';
             
             try {
-                // QR 코드 생성
-                new QRCode(qrCodeRightElement, {
-                    text: qrString,
+                // QR Code Styling 라이브러리를 사용하여 QR 코드 생성
+                const qrCodeRight = new QRCodeStyling({
                     width: 80,
                     height: 80,
-                    colorDark: "#000000",
-                    colorLight: "#ffffff"
+                    type: "svg",
+                    data: qrString,
+                    dotsOptions: {
+                        color: "#000000",
+                        type: "square"
+                    },
+                    backgroundOptions: {
+                        color: "transparent",
+                    },
+                    cornersSquareOptions: {
+                        type: "square"
+                    },
+                    cornersDotOptions: {
+                        type: "square"
+                    },
+                    qrOptions: {
+                        errorCorrectionLevel: "M"
+                    }
                 });
-                console.log('오른쪽 QR 코드 생성 완료');
+                
+                // QR 코드를 DOM에 추가
+                qrCodeRight.append(qrCodeRightElement);
             } catch (qrError) {
-                console.error('오른쪽 QR 코드 생성 중 오류:', qrError);
                 qrCodeRightElement.innerHTML = '<p style="color:red;">QR Error</p>';
                 
-                // 대체 방법으로 시도
+                // 오류 발생 시 더 간단한 설정으로 다시 시도
                 try {
-                    new QRCode(qrCodeRightElement, qrString);
-                    console.log('대체 방법으로 오른쪽 QR 코드 생성 완료');
+                    const simpleQrCodeRight = new QRCodeStyling({
+                        width: 80,
+                        height: 80,
+                        data: qrString,
+                        backgroundOptions: {
+                            color: "transparent",
+                        },
+                        qrOptions: {
+                            errorCorrectionLevel: "L"
+                        }
+                    });
+                    simpleQrCodeRight.append(qrCodeRightElement);
                 } catch (fallbackError) {
-                    console.error('대체 방법으로도 QR 코드 생성 실패:', fallbackError);
+                    // 오류 처리
                 }
             }
         }
     } catch (error) {
-        console.error('QR 코드 생성 중 오류 발생:', error);
+        // 오류 처리
     }
 } 
