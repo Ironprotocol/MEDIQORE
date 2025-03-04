@@ -28,11 +28,27 @@
 
 /* 테이블 제목 행 */
 .prescription-title {
-    text-align: center;
     font-size: 18px;
     font-weight: bold;
+    text-align: center;
     padding: 10px;
+    background-color: #f0f0f0;
     border-bottom: 2px solid #000;
+}
+
+/* 처방전 타이틀 컨테이너 - QR 코드와 타이틀 텍스트를 함께 배치 */
+.prescription-title-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* 처방전 타이틀 텍스트 */
+.prescription-title-text {
+    font-size: 18px;
+    font-weight: bold;
+    flex: 1;
+    text-align: center;
 }
 
 /* 테이블 헤더 셀 */
@@ -163,4 +179,28 @@
     .prescription-footer {
         display: none !important;
     }
+}
+
+/* QR 코드 셀 */
+.qr-code-cell {
+    display: none; /* 더 이상 사용하지 않음 */
+}
+
+/* QR 코드 */
+.qr-code {
+    width: 80px;
+    height: 80px;
+    min-height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 3px solid #000;
+    background-color: #fff;
+    box-sizing: border-box;
+    margin: 0 10px;
+}
+
+.qr-code img {
+    max-width: 100%;
+    max-height: 100%;
 }
