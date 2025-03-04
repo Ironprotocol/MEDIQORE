@@ -89,6 +89,10 @@ async function loadPrescriptionDetails(patientId, container) {
         
         const prescriptionData = registerData.prescription;
         
+        // 디버깅을 위한 로그
+        console.log('처방전 데이터:', prescriptionData);
+        console.log('의사 정보:', registerData.doctor);
+        
         // 병원 정보 가져오기
         const hospitalRef = doc(db, 'hospitals', hospitalName);
         const hospitalDoc = await getDoc(hospitalRef);
@@ -98,21 +102,24 @@ async function loadPrescriptionDetails(patientId, container) {
             hospitalInfo = hospitalDoc.data().info || {};
         }
         
+        // 의사 이름 가져오기
+        const doctorName = registerData.doctor || 'N/A';
+        
         // 약품 목록 HTML 생성
         let medicinesHTML = '';
         if (prescriptionData.medicines && prescriptionData.medicines.length > 0) {
             medicinesHTML = prescriptionData.medicines.map(medicine => `
                 <tr class="medicine-row">
-                    <td class="medicine-name">${medicine.name}</td>
-                    <td class="medicine-dose">${medicine.perDose || 'N/A'}</td>
-                    <td class="medicine-frequency">${medicine.perDay || 'N/A'}</td>
-                    <td class="medicine-duration">${medicine.days || 'N/A'}</td>
+                    <td>${medicine.name}</td>
+                    <td>${medicine.perDose || 'N/A'}</td>
+                    <td>${medicine.perDay || 'N/A'}</td>
+                    <td>${medicine.days || 'N/A'}</td>
                 </tr>
             `).join('');
         } else {
             medicinesHTML = `
                 <tr class="medicine-row">
-                    <td colspan="4" style="text-align: center; color: #666;">No medicines prescribed.</td>
+                    <td colspan="4" style="text-align: center;">No medicines prescribed.</td>
                 </tr>
             `;
         }
@@ -121,48 +128,73 @@ async function loadPrescriptionDetails(patientId, container) {
         container.innerHTML = `
             <div class="prescription-payment-details" style="background-color:white; border-radius:8px; padding:20px; height:calc(100% - 40px); overflow-y:auto;">
                 <table class="prescription-table">
-                    <tr class="header-row">
-                        <td colspan="4" class="title-cell">PRESCRIPTION</td>
+                    <tr>
+                        <td colspan="2" class="title-cell">PRESCRIPTION</td>
                     </tr>
                     <tr>
-                        <td colspan="2" class="issue-number">Issue No: ${formattedDate} No.00001</td>
-                        <td rowspan="3" class="vertical-header">Medical<br>Facility</td>
-                        <td>Name: ${hospitalInfo.name || hospitalName}</td>
+                        <td class="label-cell">Issue No</td>
+                        <td class="value-cell">${formattedDate} No.00001</td>
                     </tr>
                     <tr>
-                        <td rowspan="2" class="vertical-header">Patient</td>
-                        <td>Name: ${patientId.split('.')[0]}</td>
-                        <td>Phone: ${hospitalInfo.phone || 'N/A'}</td>
+                        <td class="label-cell">Hospital Name</td>
+                        <td class="value-cell">${hospitalInfo.name || hospitalName}</td>
                     </tr>
                     <tr>
-                        <td>ID Card: ${patientId.split('.')[1] || 'N/A'}</td>
-                        <td>Fax: ${hospitalInfo.fax || 'N/A'}<br>Email: ${hospitalInfo.email || 'N/A'}</td>
+                        <td class="label-cell">Hospital Phone</td>
+                        <td class="value-cell">${hospitalInfo.phone || 'N/A'}</td>
                     </tr>
                     <tr>
-                        <td colspan="2">License Name: ${prescriptionData.credential ? prescriptionData.credential.name : 'N/A'}</td>
-                        <td colspan="2">License Number: ${prescriptionData.credential ? prescriptionData.credential.number : 'N/A'}</td>
+                        <td class="label-cell">Hospital Fax</td>
+                        <td class="value-cell">${hospitalInfo.fax || 'N/A'}</td>
                     </tr>
-                    <tr class="medicine-header">
-                        <td>Medicine Name</td>
-                        <td>Dose</td>
-                        <td>Frequency</td>
-                        <td>Duration</td>
+                    <tr>
+                        <td class="label-cell">Hospital Email</td>
+                        <td class="value-cell">${hospitalInfo.email || 'N/A'}</td>
+                    </tr>
+                    <tr>
+                        <td class="label-cell">Patient Name</td>
+                        <td class="value-cell">${patientId.split('.')[0]}</td>
+                    </tr>
+                    <tr>
+                        <td class="label-cell">Patient ID</td>
+                        <td class="value-cell">${patientId.split('.')[1] || 'N/A'}</td>
+                    </tr>
+                    <tr>
+                        <td class="label-cell">Doctor</td>
+                        <td class="value-cell">${doctorName}</td>
+                    </tr>
+                    <tr>
+                        <td class="label-cell">License Name</td>
+                        <td class="value-cell">${prescriptionData.credential ? prescriptionData.credential.name : 'N/A'}</td>
+                    </tr>
+                    <tr>
+                        <td class="label-cell">License Number</td>
+                        <td class="value-cell">${prescriptionData.credential ? prescriptionData.credential.number : 'N/A'}</td>
+                    </tr>
+                </table>
+
+                <table class="prescription-table medicine-table">
+                    <tr>
+                        <td class="label-cell">Medicine Name</td>
+                        <td class="label-cell">Dose</td>
+                        <td class="label-cell">Frequency</td>
+                        <td class="label-cell">Duration</td>
                     </tr>
                     ${medicinesHTML}
+                </table>
+
+                <table class="prescription-table">
                     <tr>
-                        <td colspan="4" class="usage-period">Usage Period: Valid for 3 days from issue date</td>
+                        <td class="label-cell">Usage Period</td>
+                        <td class="value-cell">Valid for 3 days from issue date</td>
                     </tr>
                     <tr>
-                        <td colspan="4" class="signature-area">
-                            <div class="signature-line">
-                                <span>Doctor's Signature:</span>
-                                <div class="signature-box"></div>
-                            </div>
-                            <div class="date-line">
-                                <span>Date:</span>
-                                <span>${formattedDate}</span>
-                            </div>
-                        </td>
+                        <td class="label-cell">Doctor's Signature</td>
+                        <td class="value-cell"><div class="signature-box"></div></td>
+                    </tr>
+                    <tr>
+                        <td class="label-cell">Date</td>
+                        <td class="value-cell">${formattedDate}</td>
                     </tr>
                 </table>
                 
@@ -178,13 +210,13 @@ async function loadPrescriptionDetails(patientId, container) {
             .prescription-table {
                 width: 100%;
                 border-collapse: collapse;
-                border: 2px solid #000;
+                border: 2px solid rgb(0, 102, 255);
                 margin-bottom: 20px;
                 font-family: Arial, sans-serif;
             }
             
             .prescription-table td {
-                border: 1px solid #000;
+                border: 1px solid rgb(0, 102, 255);
                 padding: 8px;
                 vertical-align: middle;
             }
@@ -194,69 +226,34 @@ async function loadPrescriptionDetails(patientId, container) {
                 font-size: 24px;
                 font-weight: bold;
                 padding: 10px;
-                background-color: #f0f0f0;
+                background-color: rgb(211, 228, 255);
             }
             
-            .vertical-header {
-                width: 50px;
-                text-align: center;
-                font-weight: bold;
-                background-color: #f0f0f0;
-            }
-            
-            .issue-number {
+            .label-cell {
                 font-size: 14px;
+                font-weight: bold;
+                background-color: rgb(211, 228, 255);
+                width: 150px;
             }
             
-            .medicine-header td {
-                font-weight: bold;
-                text-align: center;
-                background-color: #f0f0f0;
+            .value-cell {
+                font-size: 12px;
+            }
+            
+            .medicine-table .label-cell {
+                width: auto;
             }
             
             .medicine-row td {
-                height: 30px;
-            }
-            
-            .medicine-name {
-                width: 40%;
-            }
-            
-            .medicine-dose, .medicine-frequency, .medicine-duration {
-                width: 20%;
-                text-align: center;
-            }
-            
-            .usage-period {
-                font-size: 14px;
-                background-color: #f0f0f0;
-            }
-            
-            .signature-area {
-                height: 80px;
-                vertical-align: bottom;
-            }
-            
-            .signature-line {
-                display: flex;
-                align-items: center;
-                margin-bottom: 10px;
+                font-size: 12px;
+                padding: 8px;
+                background-color: white;
             }
             
             .signature-box {
                 width: 200px;
                 height: 40px;
                 border-bottom: 1px solid #000;
-                margin-left: 10px;
-            }
-            
-            .date-line {
-                display: flex;
-                align-items: center;
-            }
-            
-            .date-line span:first-child {
-                margin-right: 10px;
             }
         `;
         document.head.appendChild(style);
