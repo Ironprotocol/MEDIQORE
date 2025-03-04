@@ -334,7 +334,7 @@ async function createPatientElement(hospitalName, patientData, patientId, type, 
                         patients: [...currentPatients, {
                             id: patientId,
                             name: patientId.split('.')[0],
-                            progress: type === 'reservation' ? 'waiting' : type  // status를 progress로 변경
+                            progress: type === 'reservation' ? 'waiting' : type  // timestamp 제거
                         }]
                     });
 
@@ -402,9 +402,12 @@ async function createPatientElement(hospitalName, patientData, patientId, type, 
                 } else if (type === 'reservation') {
                     const reservationRef = doc(db, 'hospitals', hospitalName, 'dates', currentDate, 'reservation', patientId);
                     await deleteDoc(reservationRef);
-                } else if (type === 'active') {  // active 상태 환자 삭제 추가
+                } else if (type === 'active') {
                     const activeRef = doc(db, 'hospitals', hospitalName, 'dates', currentDate, 'active', patientId);
                     await deleteDoc(activeRef);
+                } else if (type === 'payment') {  // payment 상태 추가
+                    const paymentRef = doc(db, 'hospitals', hospitalName, 'dates', currentDate, 'payment', patientId);
+                    await deleteDoc(paymentRef);
                 }
 
                 // Room에서 환자 정보 삭제 //이 로직은 추후 삭제될수있음 2025-02-14

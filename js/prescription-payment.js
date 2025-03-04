@@ -89,71 +89,177 @@ async function loadPrescriptionDetails(patientId, container) {
         
         const prescriptionData = registerData.prescription;
         
-        // 약품 목록 HTML 생성 - 수정된 부분
-        let medicinesHTML = '';
-        if (prescriptionData.medicines && prescriptionData.medicines.length > 0) {
-            medicinesHTML = `
-                <div class="medicines-section" style="margin-top:20px; padding-top:15px;">
-                    <h3 style="margin:0 0 10px 0; color:#333; font-size:16px;">Prescribed Medicines</h3>
-                    <ul style="list-style:none; padding:0; margin:0;">
-                        ${prescriptionData.medicines.map(medicine => `
-                            <li style="margin-bottom:10px; padding:8px; background-color:#f9f9f9; border-radius:4px;">
-                                <div style="font-weight:bold;">${medicine.name}</div>
-                                <div style="display:flex; font-size:13px; color:#555; margin-top:5px;">
-                                    <span style="margin-right:15px;">Dose: ${medicine.perDose}</span>
-                                    <span style="margin-right:15px;">Frequency: ${medicine.perDay}</span>
-                                    <span>Duration: ${medicine.days}</span>
-                                </div>
-                            </li>
-                        `).join('')}
-                    </ul>
-                </div>
-            `;
-        } else {
-            medicinesHTML = `<p style="color:#666; margin-top:15px;">No medicines prescribed.</p>`;
+        // 병원 정보 가져오기
+        const hospitalRef = doc(db, 'hospitals', hospitalName);
+        const hospitalDoc = await getDoc(hospitalRef);
+        let hospitalInfo = {};
+        
+        if (hospitalDoc.exists()) {
+            hospitalInfo = hospitalDoc.data().info || {};
         }
         
-        // 처방전 정보 표시 - 질병 정보 제거하고 약 정보만 표시
+        // 약품 목록 HTML 생성
+        let medicinesHTML = '';
+        if (prescriptionData.medicines && prescriptionData.medicines.length > 0) {
+            medicinesHTML = prescriptionData.medicines.map(medicine => `
+                <tr class="medicine-row">
+                    <td class="medicine-name">${medicine.name}</td>
+                    <td class="medicine-dose">${medicine.perDose || 'N/A'}</td>
+                    <td class="medicine-frequency">${medicine.perDay || 'N/A'}</td>
+                    <td class="medicine-duration">${medicine.days || 'N/A'}</td>
+                </tr>
+            `).join('');
+        } else {
+            medicinesHTML = `
+                <tr class="medicine-row">
+                    <td colspan="4" style="text-align: center; color: #666;">No medicines prescribed.</td>
+                </tr>
+            `;
+        }
+        
+        // 처방전 정보 표시 - 테이블 형식으로 변경
         container.innerHTML = `
             <div class="prescription-payment-details" style="background-color:white; border-radius:8px; padding:20px; height:calc(100% - 40px); overflow-y:auto;">
-                <div class="prescription-header" style="border-bottom:1px solid #eee; padding-bottom:15px; margin-bottom:20px;">
-                    <p class="prescription-date" style="color:#666; font-size:14px; margin:0;">Date: ${formattedDate}</p>
-                </div>
-                
-                <div class="patient-details" style="margin-bottom:20px;">
-                    <div class="detail-row" style="display:flex; margin-bottom:8px;">
-                        <span class="detail-label" style="width:150px; font-weight:bold; color:#555;">Patient Name:</span>
-                        <span class="detail-value">${patientId.split('.')[0]}</span>
-                    </div>
-                    <div class="detail-row" style="display:flex; margin-bottom:8px;">
-                        <span class="detail-label" style="width:150px; font-weight:bold; color:#555;">Age:</span>
-                        <span class="detail-value">${age} years</span>
-                    </div>
-                    <div class="detail-row" style="display:flex; margin-bottom:8px;">
-                        <span class="detail-label" style="width:150px; font-weight:bold; color:#555;">ID Card Number:</span>
-                        <span class="detail-value">${patientId.split('.')[1] || 'N/A'}</span>
-                    </div>
-                    <div class="detail-row" style="display:flex; margin-bottom:8px;">
-                        <span class="detail-label" style="width:150px; font-weight:bold; color:#555;">Doctor:</span>
-                        <span class="detail-value">${registerData.doctor || 'N/A'}</span>
-                    </div>
-                    <div class="detail-row" style="display:flex; margin-bottom:8px;">
-                        <span class="detail-label" style="width:150px; font-weight:bold; color:#555;">Credential Name:</span>
-                        <span class="detail-value">${prescriptionData.credential ? prescriptionData.credential.name : 'N/A'}</span>
-                    </div>
-                    <div class="detail-row" style="display:flex; margin-bottom:8px;">
-                        <span class="detail-label" style="width:150px; font-weight:bold; color:#555;">License Number:</span>
-                        <span class="detail-value">${prescriptionData.credential ? prescriptionData.credential.number : 'N/A'}</span>
-                    </div>
-                </div>
-                
-                ${medicinesHTML}
+                <table class="prescription-table">
+                    <tr class="header-row">
+                        <td colspan="4" class="title-cell">PRESCRIPTION</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="issue-number">Issue No: ${formattedDate} No.00001</td>
+                        <td rowspan="3" class="vertical-header">Medical<br>Facility</td>
+                        <td>Name: ${hospitalInfo.name || hospitalName}</td>
+                    </tr>
+                    <tr>
+                        <td rowspan="2" class="vertical-header">Patient</td>
+                        <td>Name: ${patientId.split('.')[0]}</td>
+                        <td>Phone: ${hospitalInfo.phone || 'N/A'}</td>
+                    </tr>
+                    <tr>
+                        <td>ID Card: ${patientId.split('.')[1] || 'N/A'}</td>
+                        <td>Fax: ${hospitalInfo.fax || 'N/A'}<br>Email: ${hospitalInfo.email || 'N/A'}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">License Name: ${prescriptionData.credential ? prescriptionData.credential.name : 'N/A'}</td>
+                        <td colspan="2">License Number: ${prescriptionData.credential ? prescriptionData.credential.number : 'N/A'}</td>
+                    </tr>
+                    <tr class="medicine-header">
+                        <td>Medicine Name</td>
+                        <td>Dose</td>
+                        <td>Frequency</td>
+                        <td>Duration</td>
+                    </tr>
+                    ${medicinesHTML}
+                    <tr>
+                        <td colspan="4" class="usage-period">Usage Period: Valid for 3 days from issue date</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" class="signature-area">
+                            <div class="signature-line">
+                                <span>Doctor's Signature:</span>
+                                <div class="signature-box"></div>
+                            </div>
+                            <div class="date-line">
+                                <span>Date:</span>
+                                <span>${formattedDate}</span>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
                 
                 <div class="payment-actions" style="margin-top:30px; text-align:center;">
                     <button class="payment-complete-btn" style="background-color:#4CAF50; color:white; border:none; padding:10px 20px; border-radius:4px; cursor:pointer; font-size:16px;">Complete Payment</button>
                 </div>
             </div>
         `;
+        
+        // CSS 스타일 추가
+        const style = document.createElement('style');
+        style.textContent = `
+            .prescription-table {
+                width: 100%;
+                border-collapse: collapse;
+                border: 2px solid #000;
+                margin-bottom: 20px;
+                font-family: Arial, sans-serif;
+            }
+            
+            .prescription-table td {
+                border: 1px solid #000;
+                padding: 8px;
+                vertical-align: middle;
+            }
+            
+            .title-cell {
+                text-align: center;
+                font-size: 24px;
+                font-weight: bold;
+                padding: 10px;
+                background-color: #f0f0f0;
+            }
+            
+            .vertical-header {
+                width: 50px;
+                text-align: center;
+                font-weight: bold;
+                background-color: #f0f0f0;
+            }
+            
+            .issue-number {
+                font-size: 14px;
+            }
+            
+            .medicine-header td {
+                font-weight: bold;
+                text-align: center;
+                background-color: #f0f0f0;
+            }
+            
+            .medicine-row td {
+                height: 30px;
+            }
+            
+            .medicine-name {
+                width: 40%;
+            }
+            
+            .medicine-dose, .medicine-frequency, .medicine-duration {
+                width: 20%;
+                text-align: center;
+            }
+            
+            .usage-period {
+                font-size: 14px;
+                background-color: #f0f0f0;
+            }
+            
+            .signature-area {
+                height: 80px;
+                vertical-align: bottom;
+            }
+            
+            .signature-line {
+                display: flex;
+                align-items: center;
+                margin-bottom: 10px;
+            }
+            
+            .signature-box {
+                width: 200px;
+                height: 40px;
+                border-bottom: 1px solid #000;
+                margin-left: 10px;
+            }
+            
+            .date-line {
+                display: flex;
+                align-items: center;
+            }
+            
+            .date-line span:first-child {
+                margin-right: 10px;
+            }
+        `;
+        document.head.appendChild(style);
         
         // 결제 완료 버튼 이벤트 리스너
         const paymentCompleteBtn = container.querySelector('.payment-complete-btn');

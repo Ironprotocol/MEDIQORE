@@ -12,7 +12,7 @@ async function cleanupPatients(hospitalName) {
     today.setHours(0, 0, 0, 0);
 
     try {
-        // 1. 이전 날짜의 waiting/reservation 문서 정리
+        // 1. 이전 날짜의 waiting/reservation/payment 문서 정리
         const datesRef = collection(db, 'hospitals', hospitalName, 'dates');
         const datesSnapshot = await getDocs(datesRef);
         
@@ -33,6 +33,13 @@ async function cleanupPatients(hospitalName) {
                 const reservationRef = collection(dateDoc.ref, 'reservation');
                 const reservationDocs = await getDocs(reservationRef);
                 reservationDocs.forEach(async (doc) => {
+                    await deleteDoc(doc.ref);
+                });
+
+                // payment 컬렉션 삭제 (추가)
+                const paymentRef = collection(dateDoc.ref, 'payment');
+                const paymentDocs = await getDocs(paymentRef);
+                paymentDocs.forEach(async (doc) => {
                     await deleteDoc(doc.ref);
                 });
             }
