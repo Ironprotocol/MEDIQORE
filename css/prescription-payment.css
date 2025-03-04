@@ -1,0 +1,164 @@
+/* Prescription Payment 스타일 */
+
+/* 초기 메시지 스타일 */
+.payment-message {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    color: #666;
+}
+
+/* 처방전 상세 정보 컨테이너 */
+.prescription-payment-details {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    height: calc(100% - 80px);
+    overflow-y: auto;
+}
+
+/* 처방전 메인 테이블 */
+.prescription-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 2px solid #000;
+    margin-bottom: 20px;
+}
+
+/* 테이블 제목 행 */
+.prescription-title {
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 10px;
+    border-bottom: 2px solid #000;
+}
+
+/* 테이블 헤더 셀 */
+.table-header {
+    padding: 8px;
+    border: 1px solid #000;
+    font-weight: bold;
+    background-color: #f5f5f5;
+    font-size: 14px;
+}
+
+/* 테이블 데이터 셀 */
+.table-data {
+    padding: 8px;
+    border: 1px solid #000;
+    font-size: 12px;
+}
+
+/* 테이블 라벨 셀 */
+.table-label {
+    padding: 8px;
+    border: 1px solid #000;
+    font-weight: bold;
+    font-size: 14px;
+    text-align: center;
+}
+
+/* 약품 정보 테이블 */
+.medicines-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 2px solid #000;
+    margin-bottom: 20px;
+}
+
+/* 약품 테이블 제목 */
+.medicines-title {
+    text-align: center;
+    font-weight: bold;
+    padding: 8px;
+    border-bottom: 2px solid #000;
+    background-color: #f5f5f5;
+    font-size: 14px;
+}
+
+/* 약품 테이블 헤더 */
+.medicines-header {
+    padding: 8px;
+    border: 1px solid #000;
+    font-weight: bold;
+    background-color: #f5f5f5;
+    font-size: 14px;
+}
+
+/* 약품 테이블 데이터 */
+.medicines-data {
+    padding: 8px;
+    border: 1px solid #000;
+    font-size: 12px;
+}
+
+/* 사용 기간 테이블 */
+.usage-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 2px solid #000;
+}
+
+/* 하단 고정 Footer */
+.prescription-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50px;
+    border-top: 1px solid #ddd;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0 20px;
+}
+
+/* 프린트 버튼 */
+.print-btn {
+    width: 35px;
+    height: 35px;
+    border: none;
+    cursor: pointer;
+    background: url('../image/printer.png') no-repeat center;
+    background-size: 35px;
+    margin-right: 15px;
+}
+
+/* 결제 완료 버튼 */
+.payment-complete-btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+/* 프린트 관련 스타일 */
+.print-container {
+    padding: 20px;
+}
+
+@media print {
+    body {
+        padding: 0;
+        margin: 0;
+    }
+    
+    .print-container {
+        width: 100%;
+    }
+    
+    .prescription-table,
+    .medicines-table,
+    .usage-table {
+        page-break-inside: avoid;
+    }
+    
+    .prescription-footer {
+        display: none !important;
+    }
+}
