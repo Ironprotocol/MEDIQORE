@@ -105,96 +105,92 @@ async function loadPrescriptionDetails(patientId, container) {
         // 의사 이름 가져오기
         const doctorName = registerData.doctor || 'N/A';
         
-        // 약품 목록 HTML 생성
-        let medicinesHTML = '';
-        if (prescriptionData.medicines && prescriptionData.medicines.length > 0) {
-            medicinesHTML = prescriptionData.medicines.map(medicine => `
-                <tr class="medicine-row">
-                    <td>${medicine.name}</td>
-                    <td>${medicine.perDose || 'N/A'}</td>
-                    <td>${medicine.perDay || 'N/A'}</td>
-                    <td>${medicine.days || 'N/A'}</td>
-                </tr>
-            `).join('');
-        } else {
-            medicinesHTML = `
-                <tr class="medicine-row">
-                    <td colspan="4" style="text-align: center;">No medicines prescribed.</td>
-                </tr>
-            `;
-        }
-        
         // 처방전 정보 표시 - 테이블 형식으로 변경
         container.innerHTML = `
             <div class="prescription-payment-details" style="background-color:white; border-radius:8px; padding:20px; height:calc(100% - 40px); overflow-y:auto;">
-                <table class="prescription-table">
+                <!-- 처방전 메인 테이블 -->
+                <table style="width:100%; border-collapse:collapse; border:2px solid #000; margin-bottom:20px;">
+                    <!-- 제목 행 -->
                     <tr>
-                        <td colspan="2" class="title-cell">PRESCRIPTION</td>
+                        <td colspan="6" style="text-align:center; font-size:18px; font-weight:bold; padding:10px; border-bottom:2px solid #000;">PRESCRIPTION</td>
                     </tr>
+                    
+                    <!-- Issue No 행 -->
                     <tr>
-                        <td class="label-cell">Issue No</td>
-                        <td class="value-cell">${formattedDate} No.00001</td>
+                        <td style="width:15%; padding:8px; border:1px solid #000; font-weight:bold; background-color:#f5f5f5; font-size:14px;">Issue No</td>
+                        <td colspan="5" style="padding:8px; border:1px solid #000; font-size:12px;">${formattedDate} No.00001</td>
                     </tr>
+                    
+                    <!-- 환자 및 병원 정보 행 -->
                     <tr>
-                        <td class="label-cell">Hospital Name</td>
-                        <td class="value-cell">${hospitalInfo.name || hospitalName}</td>
+                        <td style="width:15%; padding:8px; border:1px solid #000; font-weight:bold; background-color:#f5f5f5; font-size:14px;" rowspan="2">Patient</td>
+                        <td style="width:15%; padding:8px; border:1px solid #000; font-weight:bold; font-size:14px; text-align:center;">Name</td>
+                        <td style="width:20%; padding:8px; border:1px solid #000; font-size:12px;">${patientId.split('.')[0]}</td>
+                        <td style="width:15%; padding:8px; border:1px solid #000; font-weight:bold; background-color:#f5f5f5; font-size:14px;" rowspan="4">Hospital</td>
+                        <td style="width:15%; padding:8px; border:1px solid #000; font-weight:bold; font-size:14px; text-align:center;">Name</td>
+                        <td style="width:20%; padding:8px; border:1px solid #000; font-size:12px;">${hospitalInfo.name || hospitalName}</td>
                     </tr>
+                    
                     <tr>
-                        <td class="label-cell">Hospital Phone</td>
-                        <td class="value-cell">${hospitalInfo.phone || 'N/A'}</td>
+                        <td style="padding:8px; border:1px solid #000; font-weight:bold; font-size:14px; text-align:center;">ID</td>
+                        <td style="padding:8px; border:1px solid #000; font-size:12px;">${patientId.split('.')[1] || 'N/A'}</td>
+                        <td style="padding:8px; border:1px solid #000; font-weight:bold; font-size:14px; text-align:center;">Phone</td>
+                        <td style="padding:8px; border:1px solid #000; font-size:12px;">${hospitalInfo.phone || 'N/A'}</td>
                     </tr>
+                    
                     <tr>
-                        <td class="label-cell">Hospital Fax</td>
-                        <td class="value-cell">${hospitalInfo.fax || 'N/A'}</td>
+                        <td style="padding:8px; border:1px solid #000; font-weight:bold; background-color:#f5f5f5; font-size:14px;" rowspan="2">License</td>
+                        <td style="padding:8px; border:1px solid #000; font-weight:bold; font-size:14px; text-align:center;">Name</td>
+                        <td style="padding:8px; border:1px solid #000; font-size:12px;">${prescriptionData.credential ? prescriptionData.credential.name : 'N/A'}</td>
+                        <td style="padding:8px; border:1px solid #000; font-weight:bold; font-size:14px; text-align:center;">Fax</td>
+                        <td style="padding:8px; border:1px solid #000; font-size:12px;">${hospitalInfo.fax || 'N/A'}</td>
                     </tr>
+                    
                     <tr>
-                        <td class="label-cell">Hospital Email</td>
-                        <td class="value-cell">${hospitalInfo.email || 'N/A'}</td>
+                        <td style="padding:8px; border:1px solid #000; font-weight:bold; font-size:14px; text-align:center;">Number</td>
+                        <td style="padding:8px; border:1px solid #000; font-size:12px;">${prescriptionData.credential ? prescriptionData.credential.number : 'N/A'}</td>
+                        <td style="padding:8px; border:1px solid #000; font-weight:bold; font-size:14px; text-align:center;">Email</td>
+                        <td style="padding:8px; border:1px solid #000; font-size:12px;">${hospitalInfo.email || 'N/A'}</td>
                     </tr>
+                    
+                    <!-- 의사와 서명 행 -->
                     <tr>
-                        <td class="label-cell">Patient Name</td>
-                        <td class="value-cell">${patientId.split('.')[0]}</td>
-                    </tr>
-                    <tr>
-                        <td class="label-cell">Patient ID</td>
-                        <td class="value-cell">${patientId.split('.')[1] || 'N/A'}</td>
-                    </tr>
-                    <tr>
-                        <td class="label-cell">Doctor</td>
-                        <td class="value-cell">${doctorName}</td>
-                    </tr>
-                    <tr>
-                        <td class="label-cell">License Name</td>
-                        <td class="value-cell">${prescriptionData.credential ? prescriptionData.credential.name : 'N/A'}</td>
-                    </tr>
-                    <tr>
-                        <td class="label-cell">License Number</td>
-                        <td class="value-cell">${prescriptionData.credential ? prescriptionData.credential.number : 'N/A'}</td>
+                        <td style="padding:8px; border:1px solid #000; font-weight:bold; background-color:#f5f5f5; font-size:14px;">Doctor</td>
+                        <td style="padding:8px; border:1px solid #000; font-size:12px;" colspan="2">${doctorName}</td>
+                        <td style="padding:8px; border:1px solid #000; font-weight:bold; background-color:#f5f5f5; font-size:14px;">Doctor's Signature</td>
+                        <td style="padding:8px; border:1px solid #000; height:40px;" colspan="2"></td>
                     </tr>
                 </table>
-
-                <table class="prescription-table medicine-table">
+                
+                <!-- 약품 정보 테이블 -->
+                <table style="width:100%; border-collapse:collapse; border:2px solid #000; margin-bottom:20px;">
                     <tr>
-                        <td class="label-cell">Medicine Name</td>
-                        <td class="label-cell">Dose</td>
-                        <td class="label-cell">Frequency</td>
-                        <td class="label-cell">Duration</td>
+                        <td colspan="4" style="text-align:center; font-weight:bold; padding:8px; border-bottom:2px solid #000; background-color:#f5f5f5; font-size:14px;">MEDICINES</td>
                     </tr>
-                    ${medicinesHTML}
+                    <tr>
+                        <td style="width:40%; padding:8px; border:1px solid #000; font-weight:bold; background-color:#f5f5f5; font-size:14px;">Medicine Name</td>
+                        <td style="width:20%; padding:8px; border:1px solid #000; font-weight:bold; background-color:#f5f5f5; font-size:14px;">Dose</td>
+                        <td style="width:20%; padding:8px; border:1px solid #000; font-weight:bold; background-color:#f5f5f5; font-size:14px;">Frequency</td>
+                        <td style="width:20%; padding:8px; border:1px solid #000; font-weight:bold; background-color:#f5f5f5; font-size:14px;">Duration</td>
+                    </tr>
+                    ${prescriptionData.medicines && prescriptionData.medicines.length > 0 ? 
+                        prescriptionData.medicines.map(medicine => `
+                            <tr>
+                                <td style="padding:8px; border:1px solid #000; font-size:12px;">${medicine.name}</td>
+                                <td style="padding:8px; border:1px solid #000; font-size:12px;">${medicine.perDose || 'N/A'}</td>
+                                <td style="padding:8px; border:1px solid #000; font-size:12px;">${medicine.perDay || 'N/A'}</td>
+                                <td style="padding:8px; border:1px solid #000; font-size:12px;">${medicine.days || 'N/A'}</td>
+                            </tr>
+                        `).join('') : 
+                        `<tr><td colspan="4" style="text-align:center; padding:8px; border:1px solid #000; font-size:12px;">No medicines prescribed.</td></tr>`
+                    }
                 </table>
-
-                <table class="prescription-table">
+                
+                <!-- 사용 기간 테이블 -->
+                <table style="width:100%; border-collapse:collapse; border:2px solid #000;">
                     <tr>
-                        <td class="label-cell">Usage Period</td>
-                        <td class="value-cell">Valid for 3 days from issue date</td>
-                    </tr>
-                    <tr>
-                        <td class="label-cell">Doctor's Signature</td>
-                        <td class="value-cell"><div class="signature-box"></div></td>
-                    </tr>
-                    <tr>
-                        <td class="label-cell">Date</td>
-                        <td class="value-cell">${formattedDate}</td>
+                        <td style="width:30%; padding:8px; border:1px solid #000; font-weight:bold; background-color:#f5f5f5; font-size:14px;">Usage Period</td>
+                        <td style="padding:8px; border:1px solid #000; font-size:12px;">Valid for 3 days from issue date</td>
                     </tr>
                 </table>
                 
@@ -204,91 +200,36 @@ async function loadPrescriptionDetails(patientId, container) {
             </div>
         `;
         
-        // CSS 스타일 추가
-        const style = document.createElement('style');
-        style.textContent = `
-            .prescription-table {
-                width: 100%;
-                border-collapse: collapse;
-                border: 2px solid rgb(0, 102, 255);
-                margin-bottom: 20px;
-                font-family: Arial, sans-serif;
-            }
-            
-            .prescription-table td {
-                border: 1px solid rgb(0, 102, 255);
-                padding: 8px;
-                vertical-align: middle;
-            }
-            
-            .title-cell {
-                text-align: center;
-                font-size: 24px;
-                font-weight: bold;
-                padding: 10px;
-                background-color: rgb(211, 228, 255);
-            }
-            
-            .label-cell {
-                font-size: 14px;
-                font-weight: bold;
-                background-color: rgb(211, 228, 255);
-                width: 150px;
-            }
-            
-            .value-cell {
-                font-size: 12px;
-            }
-            
-            .medicine-table .label-cell {
-                width: auto;
-            }
-            
-            .medicine-row td {
-                font-size: 12px;
-                padding: 8px;
-                background-color: white;
-            }
-            
-            .signature-box {
-                width: 200px;
-                height: 40px;
-                border-bottom: 1px solid #000;
-            }
-        `;
-        document.head.appendChild(style);
-        
-        // 결제 완료 버튼 이벤트 리스너
+        // 결제 완료 버튼 이벤트 리스너 추가
         const paymentCompleteBtn = container.querySelector('.payment-complete-btn');
         if (paymentCompleteBtn) {
-            paymentCompleteBtn.addEventListener('click', async () => {
-                if (confirm('Mark this prescription as paid?')) {
-                    try {
-                        // 환자 상태 업데이트 (payment 컬렉션에서 제거)
-                        const paymentRef = doc(db, 'hospitals', hospitalName, 'dates', formattedDate, 'payment', patientId);
-                        await deleteDoc(paymentRef);
-                        
-                        alert('Payment completed successfully');
-                        
-                        // 컨테이너 초기화
-                        container.innerHTML = `
-                            <div class="payment-message" style="display:flex; justify-content:center; align-items:center; height:100%; color:#666;">
-                                <p>Payment completed. Select another patient from the list.</p>
-                            </div>
-                        `;
-                    } catch (error) {
-                        console.error('Error completing payment:', error);
-                        alert('Failed to complete payment: ' + error.message);
-                    }
-                }
-            });
+            paymentCompleteBtn.addEventListener('click', () => completePayment(patientId));
         }
     } catch (error) {
-        console.error('Error loading prescription details:', error);
-        container.innerHTML = `
-            <div class="payment-message" style="display:flex; justify-content:center; align-items:center; height:100%; color:#666;">
-                <p>Error loading prescription details: ${error.message}</p>
-            </div>
-        `;
+        console.log('Error loading prescription details:', error);
+        container.innerHTML = `<div class="payment-message" style="display:flex; justify-content:center; align-items:center; height:100%; color:#666;"><p>Error loading prescription details: ${error.message}</p></div>`;
+    }
+}
+
+// 결제 완료 함수
+async function completePayment(patientId) {
+    if (confirm('Mark this prescription as paid?')) {
+        try {
+            // 환자 상태 업데이트 (payment 컬렉션에서 제거)
+            const paymentRef = doc(db, 'hospitals', hospitalName, 'dates', formattedDate, 'payment', patientId);
+            await deleteDoc(paymentRef);
+            
+            alert('Payment completed successfully');
+            
+            // 컨테이너 초기화
+            container.innerHTML = `
+                <div class="payment-message" style="display:flex; justify-content:center; align-items:center; height:100%; color:#666;">
+                    <p>Payment completed. Select another patient from the list.</p>
+                </div>
+            `;
+        } catch (error) {
+            console.error('Error completing payment:', error);
+            alert('Failed to complete payment: ' + error.message);
+        }
     }
 } 
