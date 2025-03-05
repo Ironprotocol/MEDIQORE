@@ -53,6 +53,38 @@ export function initializePrescription() {
             initializeCanvas(); // 캔버스 다시 초기화
         }
     }
+    
+    // 처방전 화면 초기화 함수
+    function resetPrescriptionView() {
+        // 현재 환자 정보 초기화
+        currentPatientId = null;
+        currentRegisterDate = null;
+        
+        // 처방전 내용 초기화
+        clearPrescriptionForm();
+        
+        // 처방전 화면 숨기기
+        prescriptionBody.style.display = 'none';
+        prescriptionBody2.style.display = 'none';
+        prescriptionFooter.style.display = 'none';
+        
+        // 환자 선택 메시지 표시
+        patientSelectWrapper.style.display = 'flex';
+        
+        // 처방전 타이틀 초기화
+        if (prescriptionTitle) {
+            prescriptionTitle.innerHTML = '';
+        }
+    }
+
+    // 환자 삭제 이벤트 리스너 등록
+    document.addEventListener('patientDeleted', (e) => {
+        const { patientId } = e.detail;
+        // 현재 표시 중인 환자가 삭제된 환자인 경우에만 초기화
+        if (patientId === currentPatientId) {
+            resetPrescriptionView();
+        }
+    });
 
     // Room의 환자 클릭 이벤트에 대한 처리
     document.addEventListener('prescriptionPatientSelected', (e) => {

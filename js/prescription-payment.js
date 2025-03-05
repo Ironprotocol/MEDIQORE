@@ -26,6 +26,11 @@ export function initializePrescriptionPayment() {
     document.addEventListener('patientDeselected', () => {
         showInitialMessage(contentBody);
     });
+    
+    // 환자 삭제 이벤트 리스너 등록
+    document.addEventListener('patientDeleted', () => {
+        showInitialMessage(contentBody);
+    });
 }
 
 // 초기 메시지 표시 함수

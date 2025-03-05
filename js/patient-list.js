@@ -431,6 +431,14 @@ async function createPatientElement(hospitalName, patientData, patientId, type, 
                     }
                 });
 
+                // 환자 삭제 이벤트 발생 - Payment 컨테이너와 Prescription 화면 초기화를 위해
+                const patientDeletedEvent = new CustomEvent('patientDeleted', {
+                    detail: {
+                        patientId: patientId
+                    }
+                });
+                document.dispatchEvent(patientDeletedEvent);
+
             } catch (error) {
                 console.error('Error deleting patient:', error);
                 alert('Failed to delete patient');
