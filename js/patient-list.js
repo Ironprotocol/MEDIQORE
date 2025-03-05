@@ -393,55 +393,65 @@ async function createPatientElement(hospitalName, patientData, patientId, type, 
     const deleteBtn = patientElement.querySelector('.delete-patient-btn');
     deleteBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
+        
+        // 첫 번째 확인 창
         if (confirm('Are you sure you want to delete this patient?')) {
-            try {
-                // 환자 문서 삭제
-                if (type === 'waiting') {
-                    const waitingRef = doc(db, 'hospitals', hospitalName, 'dates', currentDate, 'waiting', patientId);
-                    await deleteDoc(waitingRef);
-                } else if (type === 'reservation') {
-                    const reservationRef = doc(db, 'hospitals', hospitalName, 'dates', currentDate, 'reservation', patientId);
-                    await deleteDoc(reservationRef);
-                } else if (type === 'active') {
-                    const activeRef = doc(db, 'hospitals', hospitalName, 'dates', currentDate, 'active', patientId);
-                    await deleteDoc(activeRef);
-                } else if (type === 'payment') {  // payment 상태 추가
-                    const paymentRef = doc(db, 'hospitals', hospitalName, 'dates', currentDate, 'payment', patientId);
-                    await deleteDoc(paymentRef);
-                }
+            // 두 번째 확인 창 - 커스텀 모달 사용
+            const confirmed = await showWarningModal(
+                'When deleting a registered patient, you will need to re-register them in the patient list.',
+                'Warning'
+            );
+            
+            if (confirmed) {
+                try {
+                    // 환자 문서 삭제
+                    if (type === 'waiting') {
+                        const waitingRef = doc(db, 'hospitals', hospitalName, 'dates', currentDate, 'waiting', patientId);
+                        await deleteDoc(waitingRef);
+                    } else if (type === 'reservation') {
+                        const reservationRef = doc(db, 'hospitals', hospitalName, 'dates', currentDate, 'reservation', patientId);
+                        await deleteDoc(reservationRef);
+                    } else if (type === 'active') {
+                        const activeRef = doc(db, 'hospitals', hospitalName, 'dates', currentDate, 'active', patientId);
+                        await deleteDoc(activeRef);
+                    } else if (type === 'payment') {  // payment 상태 추가
+                        const paymentRef = doc(db, 'hospitals', hospitalName, 'dates', currentDate, 'payment', patientId);
+                        await deleteDoc(paymentRef);
+                    }
 
-                // Room에서 환자 정보 삭제 //이 로직은 추후 삭제될수있음 2025-02-14
-                const roomsRef = collection(db, 'hospitals', hospitalName, 'treatment.room');
-                const roomsSnapshot = await getDocs(roomsRef);
-                
-                roomsSnapshot.forEach(async roomDoc => {
-                    const roomData = roomDoc.data();
-                    if (roomData.patients) {
-                        // 삭제된 환자를 제외한 환자 목록 생성
-                        const updatedPatients = roomData.patients.filter(
-                            patient => patient.id !== patientId
-                        );
-                        
-                        // 환자 목록이 변경된 경우에만 업데이트
-                        if (updatedPatients.length !== roomData.patients.length) {
-                            await updateDoc(doc(roomsRef, roomDoc.id), {
-                                patients: updatedPatients
-                            });
+                    // Room에서 환자 정보 삭제 //이 로직은 추후 삭제될수있음 2025-02-14
+                    const roomsRef = collection(db, 'hospitals', hospitalName, 'treatment.room');
+                    const roomsSnapshot = await getDocs(roomsRef);
+                    
+                    roomsSnapshot.forEach(async roomDoc => {
+                        const roomData = roomDoc.data();
+                        if (roomData.patients) {
+                            // 삭제된 환자를 제외한 환자 목록 생성
+                            const updatedPatients = roomData.patients.filter(
+                                patient => patient.id !== patientId
+                            );
+                            
+                            // 환자 목록이 변경된 경우에만 업데이트
+                            if (updatedPatients.length !== roomData.patients.length) {
+                                await updateDoc(doc(roomsRef, roomDoc.id), {
+                                    patients: updatedPatients
+                                });
+                            }
                         }
-                    }
-                });
+                    });
 
-                // 환자 삭제 이벤트 발생 - Payment 컨테이너와 Prescription 화면 초기화를 위해
-                const patientDeletedEvent = new CustomEvent('patientDeleted', {
-                    detail: {
-                        patientId: patientId
-                    }
-                });
-                document.dispatchEvent(patientDeletedEvent);
+                    // 환자 삭제 이벤트 발생 - Payment 컨테이너와 Prescription 화면 초기화를 위해
+                    const patientDeletedEvent = new CustomEvent('patientDeleted', {
+                        detail: {
+                            patientId: patientId
+                        }
+                    });
+                    document.dispatchEvent(patientDeletedEvent);
 
-            } catch (error) {
-                console.error('Error deleting patient:', error);
-                alert('Failed to delete patient');
+                } catch (error) {
+                    console.error('Error deleting patient:', error);
+                    alert('Failed to delete patient');
+                }
             }
         }
     });
@@ -593,5 +603,109 @@ export async function initializePatientList(hospitalName, currentDate) {
 export function clearPatientSelection() {
     document.querySelectorAll('.patient-info-container').forEach(container => {
         container.classList.remove('selected');
+    });
+}
+
+// 커스텀 경고 모달 함수 추가
+function showWarningModal(message, title = 'Warning') {
+    return new Promise((resolve) => {
+        // 기존 모달이 있으면 제거
+        const existingModal = document.getElementById('warning-modal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        // 모달 컨테이너 생성
+        const modalContainer = document.createElement('div');
+        modalContainer.id = 'warning-modal';
+        modalContainer.style.position = 'fixed';
+        modalContainer.style.top = '0';
+        modalContainer.style.left = '0';
+        modalContainer.style.width = '100%';
+        modalContainer.style.height = '100%';
+        modalContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        modalContainer.style.display = 'flex';
+        modalContainer.style.justifyContent = 'center';
+        modalContainer.style.alignItems = 'center';
+        modalContainer.style.zIndex = '9999';
+
+        // 모달 콘텐츠 생성
+        const modalContent = document.createElement('div');
+        modalContent.style.backgroundColor = 'white';
+        modalContent.style.padding = '20px';
+        modalContent.style.borderRadius = '5px';
+        modalContent.style.width = '400px';
+        modalContent.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+
+        // 제목 생성
+        const titleElement = document.createElement('h3');
+        titleElement.textContent = title;
+        titleElement.style.color = '#d9534f'; // 빨간색 경고 색상
+        titleElement.style.textAlign = 'center';
+        titleElement.style.margin = '0 0 20px 0';
+        titleElement.style.fontWeight = 'bold';
+
+        // 메시지 생성
+        const messageElement = document.createElement('p');
+        messageElement.textContent = message;
+        messageElement.style.textAlign = 'center';
+        messageElement.style.margin = '0 0 20px 0';
+
+        // 버튼 컨테이너
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.display = 'flex';
+        buttonContainer.style.justifyContent = 'center';
+        buttonContainer.style.gap = '10px';
+
+        // Yes 버튼
+        const yesButton = document.createElement('button');
+        yesButton.textContent = 'Yes';
+        yesButton.style.padding = '8px 16px';
+        yesButton.style.backgroundColor = '#d9534f';
+        yesButton.style.color = 'white';
+        yesButton.style.border = 'none';
+        yesButton.style.borderRadius = '4px';
+        yesButton.style.cursor = 'pointer';
+
+        // No 버튼
+        const noButton = document.createElement('button');
+        noButton.textContent = 'No';
+        noButton.style.padding = '8px 16px';
+        noButton.style.backgroundColor = '#f0f0f0';
+        noButton.style.border = 'none';
+        noButton.style.borderRadius = '4px';
+        noButton.style.cursor = 'pointer';
+
+        // 이벤트 리스너 추가
+        yesButton.addEventListener('click', () => {
+            modalContainer.remove();
+            resolve(true);
+        });
+
+        noButton.addEventListener('click', () => {
+            modalContainer.remove();
+            resolve(false);
+        });
+
+        // 모달 외부 클릭 시 닫기
+        modalContainer.addEventListener('click', (e) => {
+            if (e.target === modalContainer) {
+                modalContainer.remove();
+                resolve(false);
+            }
+        });
+
+        // 요소 조립
+        buttonContainer.appendChild(noButton);
+        buttonContainer.appendChild(yesButton);
+        
+        modalContent.appendChild(titleElement);
+        modalContent.appendChild(messageElement);
+        modalContent.appendChild(buttonContainer);
+        
+        modalContainer.appendChild(modalContent);
+        
+        // 모달을 body에 추가
+        document.body.appendChild(modalContainer);
     });
 }

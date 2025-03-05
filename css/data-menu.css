@@ -1,8 +1,111 @@
 /* 데이터 메뉴 스타일 */
 
+/* 컨텐츠 래퍼 스타일 */
+.data-content-wrapper {
+    padding: 20px;
+}
+
+/* 검색 및 필터 영역 스타일 */
+.data-search-filter-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.data-search-container {
+    flex: 1;
+    max-width: 300px;
+}
+
+.data-search-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.data-filter-container {
+    display: flex;
+    gap: 15px;
+}
+
+/* 필터 버튼 스타일 */
+.data-filter-btn {
+    padding: 6px 12px;
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 80px;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+
+/* 필터 버튼 호버 효과 */
+.data-filter-btn:hover {
+    background-color: rgb(0, 82, 204);
+    border-color: #ced4da;
+    color : white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* 활성화된 필터 버튼 스타일 */
+.data-filter-btn.active {
+    background-color: #4e73df;
+    color: white;
+    border-color: #4e73df;
+    font-weight: 500;
+}
+
+/* 활성화된 필터 버튼 호버 효과 */
+.data-filter-btn.active:hover {
+    background-color: #3a5ccc;
+    border-color: #3a5ccc;
+}
+
+/* 데이터 테이블 스타일 */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+}
+
+.data-table-header {
+    background-color: #D3E4FF;
+    border-bottom: 2px solid #ddd;
+}
+
+.data-table-th {
+    padding: 5px 15px;
+    text-align: left;
+    font-weight: 500;
+    font-size: 12px;
+}
+
+.loading-message {
+    text-align: center;
+    padding: 20px;
+    font-size: 12px;
+}
+
+/* 데이터 테이블 컨테이너 스타일 */
+#data-display-area {
+    margin-top: 10px;
+    padding: 0;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    min-height: 400px;
+    height: calc(100vh - 300px); /* 브라우저 높이에 따라 동적으로 조정 - footer 영역 고려 */
+    background-color: #ffffff;
+    overflow-x: auto;
+    overflow-y: auto; /* 세로 스크롤 추가 */
+}
+
 /* 테이블 행 스타일 */
 .data-table-row {
     border-bottom: 1px solid #eee;
+    height: 40px; /* 행 높이 고정 */
 }
 
 /* 테이블 셀 스타일 */
@@ -33,23 +136,49 @@
     border: 1px solid #ddd;
     border-radius: 3px;
     cursor: pointer;
+    font-size: 12px;
 }
 
-/* 활성화된 페이지 버튼 스타일 */
+/* 활성화된 페이지네이션 버튼 스타일 */
 .pagination-btn.active {
-    background: #e0e0e0;
-    border: 1px solid #ccc;
+    background-color: #e0e0e0;
+    border-color: #ccc;
+    font-weight: 500;
 }
 
 /* 데이터 없음 메시지 스타일 */
 .no-data-message {
     text-align: center;
     padding: 20px;
+    font-size: 12px;
+    color: #888;
 }
 
-/* 오류 메시지 스타일 */
+/* 에러 메시지 스타일 */
 .error-message {
     text-align: center;
     padding: 20px;
-    color: red;
+    font-size: 12px;
+    color: #d9534f;
+}
+
+/* 페이지네이션 컨트롤 컨테이너 */
+#pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    height: 100%;
+    padding: 10px 0;
+}
+
+/* Footer 영역 스타일 */
+.content-footer {
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-top: 1px solid #ccc;
+    background-color: #ffffff;
 }

@@ -1,7 +1,8 @@
 import { auth, db, collection, query, getDocs, doc, getDoc, onSnapshot } from './firebase-config.js';
 
 // 페이지네이션 설정
-const ITEMS_PER_PAGE = 10;
+let ITEMS_PER_PAGE = 10; // 변수로 변경하여 동적 조정 가능하게 함
+const MIN_ITEMS_PER_PAGE = 10; // 최소 항목 수
 let currentPage = 1;
 let totalPages = 1;
 let currentData = [];
@@ -37,17 +38,52 @@ export function initializeDataMenu() {
         });
     });
     
+    // 초기 화면 크기에 맞게 항목 수 계산
+    calculateItemsPerPage();
+    
     // 사용자 인증 상태 확인 후 데이터 로드
     auth.onAuthStateChanged(user => {
         if (user) {
             // 사용자가 로그인된 경우에만 데이터 로드
             loadData();
+            
+            // 창 크기 변경 이벤트 리스너 추가
+            window.addEventListener('resize', handleResize);
         } else {
             console.log('User not authenticated. Data loading deferred.');
             // 로그아웃 시 구독 해제
             unsubscribeCurrentListener();
+            
+            // 창 크기 변경 이벤트 리스너 제거
+            window.removeEventListener('resize', handleResize);
         }
     });
+    
+    // Data 메뉴가 표시될 때 항목 수 재계산을 위한 MutationObserver 설정
+    const dataContent = document.getElementById('data-content');
+    if (dataContent) {
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'style' && 
+                    dataContent.style.display !== 'none' && 
+                    dataContent.style.display !== '') {
+                    // Data 메뉴가 표시될 때 항목 수 재계산
+                    calculateItemsPerPage();
+                    if (currentData.length > 0) {
+                        // 데이터가 이미 로드된 경우 다시 표시
+                        if (currentFilter === 'patients') {
+                            displayPatientData(currentData);
+                        } else {
+                            displayStaffData(currentData);
+                        }
+                        updatePagination(currentData.length);
+                    }
+                }
+            });
+        });
+        
+        observer.observe(dataContent, { attributes: true });
+    }
 }
 
 // 현재 활성화된 리스너 구독 해제
@@ -156,6 +192,7 @@ function loadStaffDataRealtime(hospitalName) {
                     id: doc.id,
                     ...data
                 });
+
             });
             
             // 현재 데이터 저장
@@ -478,5 +515,62 @@ function showErrorMessage() {
         patientTableBody.innerHTML = '<tr><td colspan="8" class="error-message">Error loading data. Please try again.</td></tr>';
     } else {
         staffTableBody.innerHTML = '<tr><td colspan="6" class="error-message">Error loading data. Please try again.</td></tr>';
+    }
+}
+
+// 창 크기 변경 이벤트 핸들러
+let resizeTimeout;
+function handleResize() {
+    // 디바운싱 적용 (성능 최적화)
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+        const oldItemsPerPage = ITEMS_PER_PAGE;
+        calculateItemsPerPage();
+        
+        // 항목 수가 변경된 경우에만 데이터 다시 표시
+        if (oldItemsPerPage !== ITEMS_PER_PAGE && currentData.length > 0) {
+            // 현재 페이지가 새로운 총 페이지 수를 초과하는지 확인
+            const newTotalPages = Math.ceil(currentData.length / ITEMS_PER_PAGE);
+            if (currentPage > newTotalPages) {
+                currentPage = newTotalPages || 1; // 페이지 번호 조정
+            }
+            
+            // 데이터 다시 표시
+            if (currentFilter === 'patients') {
+                displayPatientData(currentData);
+            } else {
+                displayStaffData(currentData);
+            }
+            updatePagination(currentData.length);
+            
+            console.log(`화면 크기 변경으로 데이터 표시 업데이트: 페이지당 ${ITEMS_PER_PAGE}개 항목, 현재 페이지 ${currentPage}/${newTotalPages}`);
+        }
+    }, 200);
+}
+
+// 해상도에 따른 페이지당 항목 수 계산
+function calculateItemsPerPage() {
+    const displayArea = document.getElementById('data-display-area');
+    if (!displayArea) return;
+    
+    // 테이블 컨테이너의 가용 높이 계산
+    const availableHeight = displayArea.clientHeight;
+    
+    // 행 높이 (CSS에서 정의한 40px)
+    const rowHeight = 40;
+    
+    // 헤더 높이 고려 (대략 50px)
+    const headerHeight = 50;
+    
+    // 가용 공간에 표시할 수 있는 행 수 계산
+    const visibleRows = Math.floor((availableHeight - headerHeight) / rowHeight);
+    
+    // 최소 10개 이상 표시
+    const newItemsPerPage = Math.max(visibleRows, MIN_ITEMS_PER_PAGE);
+    
+    // 항목 수가 변경된 경우에만 업데이트
+    if (ITEMS_PER_PAGE !== newItemsPerPage) {
+        console.log(`화면 해상도에 맞게 페이지당 항목 수 조정: ${newItemsPerPage} (가용 높이: ${availableHeight}px)`);
+        ITEMS_PER_PAGE = newItemsPerPage;
     }
 } 
