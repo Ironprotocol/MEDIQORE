@@ -22,7 +22,7 @@
 .prescription-table {
     width: 100%;
     border-collapse: collapse;
-    border: 2px solid #000;
+    border: 2px solid rgb(0, 82, 204);
     margin-bottom: 20px;
 }
 
@@ -33,7 +33,7 @@
     text-align: center;
     padding: 10px;
     background-color: rgb(211, 228, 255);
-    border-bottom: 2px solid #000;
+    border-bottom: 2px solid rgb(0, 82, 204);
 }
 
 /* 처방전 타이틀 컨테이너 - QR 코드와 타이틀 텍스트를 함께 배치 */
@@ -54,7 +54,7 @@
 /* 테이블 헤더 셀 */
 .table-header {
     padding: 8px;
-    border: 1px solid #000;
+    border: 1px solid rgb(0, 82, 204);
     font-weight: bold;
     background-color: rgb(233, 242, 255);
     font-size: 12px;
@@ -64,14 +64,14 @@
 /* 테이블 데이터 셀 */
 .table-data {
     padding: 8px;
-    border: 1px solid #000;
+    border: 1px solid rgb(0, 82, 204);
     font-size: 12px;
 }
 
 /* 테이블 라벨 셀 */
 .table-label {
     padding: 8px;
-    border: 1px solid #000;
+    border: 1px solid rgb(0, 82, 204);
     font-weight: bold;
     font-size: 12px;
     text-align: center;
@@ -81,7 +81,7 @@
 .medicines-table {
     width: 100%;
     border-collapse: collapse;
-    border: 2px solid #000;
+    border: 2px solid rgb(0, 82, 204);
     margin-bottom: 20px;
 }
 
@@ -90,15 +90,15 @@
     text-align: center;
     font-weight: bold;
     padding: 8px;
-    border-bottom: 2px solid #000;
+    border-bottom: 2px solid rgb(0, 82, 204);
     background-color: rgb(211, 228, 255);
-    font-size: 12px;
+    font-size: 14px;
 }
 
 /* 약품 테이블 헤더 */
 .medicines-header {
     padding: 8px;
-    border: 1px solid #000;
+    border: 1px solid rgb(0, 82, 204);
     font-weight: bold;
     background-color: rgb(233, 242, 255);
     font-size: 12px;
@@ -108,7 +108,7 @@
 /* 약품 테이블 데이터 */
 .medicines-data {
     padding: 8px;
-    border: 1px solid #000;
+    border: 1px solid rgb(0, 82, 204);
     font-size: 12px;
 }
 
@@ -116,7 +116,7 @@
 .usage-table {
     width: 100%;
     border-collapse: collapse;
-    border: 2px solid #000;
+    border: 2px solid rgb(0, 82, 204);
 }
 
 /* 하단 고정 Footer */
