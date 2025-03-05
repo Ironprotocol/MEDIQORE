@@ -1,0 +1,55 @@
+/* 데이터 메뉴 스타일 */
+
+/* 테이블 행 스타일 */
+.data-table-row {
+    border-bottom: 1px solid #eee;
+}
+
+/* 테이블 셀 스타일 */
+.data-table-td {
+    padding: 8px 15px;
+    font-size: 12px;
+}
+
+/* 버튼 공통 스타일 */
+.action-btn {
+    padding: 4px 8px;
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+/* View 버튼 스타일 */
+.view-btn, .view-staff-btn {
+    margin-right: 5px;
+}
+
+/* 페이지네이션 버튼 스타일 */
+.pagination-btn {
+    padding: 5px 10px;
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+/* 활성화된 페이지 버튼 스타일 */
+.pagination-btn.active {
+    background: #e0e0e0;
+    border: 1px solid #ccc;
+}
+
+/* 데이터 없음 메시지 스타일 */
+.no-data-message {
+    text-align: center;
+    padding: 20px;
+}
+
+/* 오류 메시지 스타일 */
+.error-message {
+    text-align: center;
+    padding: 20px;
+    color: red;
+}

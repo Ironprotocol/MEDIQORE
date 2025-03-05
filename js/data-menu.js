@@ -189,7 +189,7 @@ function displayPatientData(patients) {
     const paginatedData = patients.slice(startIndex, endIndex);
     
     if (paginatedData.length === 0) {
-        patientTableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">No patient records found</td></tr>';
+        patientTableBody.innerHTML = '<tr><td colspan="8" class="no-data-message">No patient records found</td></tr>';
         return;
     }
     
@@ -215,17 +215,17 @@ function displayPatientData(patients) {
         }
         
         tableHTML += `
-            <tr style="border-bottom: 1px solid #eee;">
-                <td style="padding: 8px 15px; font-size: 12px;">${patient.patientName || 'N/A'}</td>
-                <td style="padding: 8px 15px; font-size: 12px;">${patient.idNumber || 'N/A'}</td>
-                <td style="padding: 8px 15px; font-size: 12px;">${patient.gender || 'N/A'}</td>
-                <td style="padding: 8px 15px; font-size: 12px;">${birthDateStr}</td>
-                <td style="padding: 8px 15px; font-size: 12px;">${patient.phoneNumber || 'N/A'}</td>
-                <td style="padding: 8px 15px; font-size: 12px;">${patient.address || 'N/A'}</td>
-                <td style="padding: 8px 15px; font-size: 12px;">${insuranceStr}</td>
-                <td style="padding: 8px 15px; font-size: 12px;">
-                    <button class="view-btn" data-id="${patient.id}" style="padding: 4px 8px; background: #f0f0f0; border: 1px solid #ddd; border-radius: 3px; cursor: pointer; margin-right: 5px; font-size: 12px;">View</button>
-                    <button class="edit-btn" data-id="${patient.id}" style="padding: 4px 8px; background: #f0f0f0; border: 1px solid #ddd; border-radius: 3px; cursor: pointer; font-size: 12px;">Edit</button>
+            <tr class="data-table-row">
+                <td class="data-table-td">${patient.patientName || 'N/A'}</td>
+                <td class="data-table-td">${patient.idNumber || 'N/A'}</td>
+                <td class="data-table-td">${patient.gender || 'N/A'}</td>
+                <td class="data-table-td">${birthDateStr}</td>
+                <td class="data-table-td">${patient.phoneNumber || 'N/A'}</td>
+                <td class="data-table-td">${patient.address || 'N/A'}</td>
+                <td class="data-table-td">${insuranceStr}</td>
+                <td class="data-table-td">
+                    <button class="view-btn action-btn" data-id="${patient.id}">View</button>
+                    <button class="edit-btn action-btn" data-id="${patient.id}">Edit</button>
                 </td>
             </tr>
         `;
@@ -247,7 +247,7 @@ function displayStaffData(staffMembers) {
     const paginatedData = staffMembers.slice(startIndex, endIndex);
     
     if (paginatedData.length === 0) {
-        staffTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px;">No staff records found</td></tr>';
+        staffTableBody.innerHTML = '<tr><td colspan="6" class="no-data-message">No staff records found</td></tr>';
         return;
     }
     
@@ -256,15 +256,15 @@ function displayStaffData(staffMembers) {
     
     paginatedData.forEach(staff => {
         tableHTML += `
-            <tr style="border-bottom: 1px solid #eee;">
-                <td style="padding: 8px 15px; font-size: 12px;">${staff.name || 'N/A'}</td>
-                <td style="padding: 8px 15px; font-size: 12px;">${staff.role || 'N/A'}</td>
-                <td style="padding: 8px 15px; font-size: 12px;">${staff.id || 'N/A'}</td>
-                <td style="padding: 8px 15px; font-size: 12px;">${staff.phone || 'N/A'}</td>
-                <td style="padding: 8px 15px; font-size: 12px;">${staff.status || 'N/A'}</td>
-                <td style="padding: 8px 15px; font-size: 12px;">
-                    <button class="view-staff-btn" data-id="${staff.id}" style="padding: 4px 8px; background: #f0f0f0; border: 1px solid #ddd; border-radius: 3px; cursor: pointer; margin-right: 5px; font-size: 12px;">View</button>
-                    <button class="edit-staff-btn" data-id="${staff.id}" style="padding: 4px 8px; background: #f0f0f0; border: 1px solid #ddd; border-radius: 3px; cursor: pointer; font-size: 12px;">Edit</button>
+            <tr class="data-table-row">
+                <td class="data-table-td">${staff.name || 'N/A'}</td>
+                <td class="data-table-td">${staff.role || 'N/A'}</td>
+                <td class="data-table-td">${staff.id || 'N/A'}</td>
+                <td class="data-table-td">${staff.phone || 'N/A'}</td>
+                <td class="data-table-td">${staff.status || 'N/A'}</td>
+                <td class="data-table-td">
+                    <button class="view-staff-btn action-btn" data-id="${staff.id}">View</button>
+                    <button class="edit-staff-btn action-btn" data-id="${staff.id}">Edit</button>
                 </td>
             </tr>
         `;
@@ -287,22 +287,18 @@ function updatePagination(totalItems) {
     }
     
     let paginationHTML = `
-        <button id="prev-page" style="padding: 5px 10px; background: #f0f0f0; border: 1px solid #ddd; border-radius: 3px; cursor: pointer;">&lt;</button>
+        <button id="prev-page" class="pagination-btn">&lt;</button>
     `;
     
     for (let i = 1; i <= totalPages; i++) {
         const isActive = i === currentPage;
         paginationHTML += `
-            <button class="page-btn ${isActive ? 'active' : ''}" data-page="${i}" 
-                style="padding: 5px 10px; background: ${isActive ? '#e0e0e0' : '#f0f0f0'}; 
-                border: 1px solid ${isActive ? '#ccc' : '#ddd'}; border-radius: 3px; cursor: pointer;">
-                ${i}
-            </button>
+            <button class="page-btn pagination-btn ${isActive ? 'active' : ''}" data-page="${i}">${i}</button>
         `;
     }
     
     paginationHTML += `
-        <button id="next-page" style="padding: 5px 10px; background: #f0f0f0; border: 1px solid #ddd; border-radius: 3px; cursor: pointer;">&gt;</button>
+        <button id="next-page" class="pagination-btn">&gt;</button>
     `;
     
     paginationControls.innerHTML = paginationHTML;
@@ -332,9 +328,9 @@ function updatePagination(totalItems) {
         }
     });
     
-    document.querySelectorAll('.page-btn').forEach(button => {
-        button.addEventListener('click', () => {
-            currentPage = parseInt(button.dataset.page);
+    document.querySelectorAll('.page-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            currentPage = parseInt(e.target.dataset.page);
             if (currentFilter === 'patients') {
                 displayPatientData(currentData);
             } else {
@@ -479,8 +475,8 @@ function showErrorMessage() {
     const staffTableBody = document.getElementById('staff-data-body');
     
     if (currentFilter === 'patients') {
-        patientTableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px; color: red;">Error loading data. Please try again.</td></tr>';
+        patientTableBody.innerHTML = '<tr><td colspan="8" class="error-message">Error loading data. Please try again.</td></tr>';
     } else {
-        staffTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px; color: red;">Error loading data. Please try again.</td></tr>';
+        staffTableBody.innerHTML = '<tr><td colspan="6" class="error-message">Error loading data. Please try again.</td></tr>';
     }
 } 
