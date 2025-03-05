@@ -3,6 +3,9 @@
 /* 컨텐츠 래퍼 스타일 */
 .data-content-wrapper {
     padding: 20px;
+    padding-bottom: 80px; /* footer 높이보다 약간 더 크게 설정 */
+    height: 100%;
+    overflow-y: auto;
 }
 
 /* 검색 및 필터 영역 스타일 */
@@ -168,8 +171,13 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    border-top: 1px solid #eee;
-    background-color: #f9f9f9;
+    border-top: 1px solid #ccc;
+    background-color: #ffffff;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
 }
 
 /* 페이지네이션 컨트롤 스타일 */
@@ -181,4 +189,11 @@
     width: 100%;
     height: 100%;
     padding: 10px 0;
+}
+
+/* 데이터 메뉴 컨텐츠 영역 스타일 */
+.data-container .content-body {
+    position: relative;
+    height: calc(100% - 60px); /* 헤더 높이를 제외한 높이 */
+    overflow: hidden;
 }
