@@ -114,9 +114,9 @@ async function loadPrescriptionDetails(patientId, container) {
                     <tr>
                         <td colspan="6" class="prescription-title">
                             <div class="prescription-title-container">
-                                <div id="qrcode-left" class="qr-code"></div>
+                                <div id="qrcode-left" class="qr-code" style="display: none;"></div>
                                 <span class="prescription-title-text">PRESCRIPTION</span>
-                                <div id="qrcode-right" class="qr-code"></div>
+                                <div id="qrcode-right" class="qr-code" style="display: none;"></div>
                             </div>
                         </td>
                     </tr>
@@ -308,7 +308,7 @@ async function completePayment(patientId) {
     }
 }
 
-// QR 코드 생성
+// QR 코드 생성 (데이터 형식만 유지, 화면에 표시하지 않음)
 function generateQRCodes(patientId, prescriptionData, hospitalName, doctorName) {
     try {
         // QR 코드에 포함할 데이터 생성 (테스트 버전용 최적화)
@@ -339,6 +339,11 @@ function generateQRCodes(patientId, prescriptionData, hospitalName, doctorName) 
         console.log('QR 코드 데이터 크기:', dataSizeBytes, 'bytes');
         console.log('QR 코드 데이터 내용:', qrString);
         
+        // QR 코드 데이터만 저장하고 화면에 표시하지 않음
+        // 나중에 프린트 시 필요하면 사용할 수 있도록 데이터 형식 유지
+        
+        /* 
+        // 아래 QR 코드 생성 및 표시 코드는 주석 처리
         // 공통 QR 코드 옵션
         const qrOptions = {
             width: 120,
@@ -485,7 +490,8 @@ function generateQRCodes(patientId, prescriptionData, hospitalName, doctorName) 
                 }
             }
         }
+        */
     } catch (error) {
-        console.error('QR 코드 생성 중 예외 발생:', error);
+        console.error('QR 코드 데이터 생성 중 예외 발생:', error);
     }
 } 
