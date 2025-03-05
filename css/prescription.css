@@ -388,7 +388,7 @@
     background-color: #30e026;
 }
 
-.print-btn {
+.print-btn-prescription {
     position: absolute;
     right: 220px;  /* desk-select(100px) + Send 버튼(80px) + 간격(40px) */
     width: 35px;
@@ -400,7 +400,7 @@
     transition: background-image 0.3s ease;
 }
 
-.print-btn:hover {
+.print-btn-prescription:hover {
     background: url('../image/printer_hover.png') no-repeat center;
     background-size: 35px;
 }

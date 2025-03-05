@@ -120,12 +120,55 @@ export function initializePrescription() {
     document.addEventListener('prescriptionHistorySelected', () => {
         // 히스토리 선택 시에도 폼 초기화
         clearPrescriptionForm();
+        
+        // 캔버스 설정 명시적 초기화
+        const canvas = document.querySelector('.tooth-chart-canvas');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            ctx.strokeStyle = '#FF0000';
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+        }
     });
 
     // 프린터 버튼 생성
     const printBtn = document.createElement('button');
-    printBtn.className = 'print-btn';
+    printBtn.className = 'print-btn-prescription';
     document.querySelector('.content-footer-prescription').appendChild(printBtn);
+    
+    // 프린트 버튼 클릭 이벤트 추가
+    printBtn.addEventListener('click', () => {
+        const prescriptionContent = document.querySelector('.prescription-layout');
+        const originalContents = document.body.innerHTML;
+        const printContents = prescriptionContent.innerHTML;
+        
+        // 프린트용 스타일 추가
+        document.body.innerHTML = `
+            <div class="print-container">
+                ${printContents}
+            </div>
+            <style>
+                .print-container {
+                    padding: 20px;
+                }
+                @media print {
+                    body {
+                        padding: 0;
+                        margin: 0;
+                    }
+                    .print-container {
+                        width: 100%;
+                    }
+                }
+            </style>
+        `;
+        
+        window.print();
+        document.body.innerHTML = originalContents;
+        
+        // 이벤트 리스너 재설정
+        initializePrescription();
+    });
 
     // Save 버튼 추가 (프린터 버튼 왼쪽에)
     const saveBtn = document.createElement('button');
@@ -549,6 +592,11 @@ export function initializePrescription() {
             const canvas = document.querySelector('.tooth-chart-canvas');
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 캔버스 설정 명시적 초기화 (색상, 두께)
+            ctx.strokeStyle = '#FF0000';
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
 
             // 모든 입력 요소 활성화
             document.querySelectorAll('.cc-search-input, .medicine-search-input, .symptoms-input, .location-input, .treatment-details-input, .clear-btn').forEach(element => {
@@ -778,6 +826,11 @@ function initializeCanvas() {
     function clearCanvas() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawHistory.length = 0;
+        
+        // 캔버스 설정 명시적 초기화
+        ctx.strokeStyle = '#FF0000';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
         
         // 입력 폼 초기화
         document.querySelector('.symptoms-input').value = '';

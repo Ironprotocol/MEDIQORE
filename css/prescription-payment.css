@@ -132,14 +132,14 @@
 }
 
 /* 프린트 버튼 */
-.print-btn {
+.print-btn-payment {
     width: 35px;
     height: 35px;
     border: none;
     cursor: pointer;
     background: url('../image/printer.png') no-repeat center;
     background-size: 35px;
-    right : 190px;
+    margin-right: 20px;
 }
 
 /* 결제 완료 버튼 */
@@ -188,14 +188,32 @@
 
 /* QR 코드 */
 .qr-code {
-    width: 80px;
-    height: 80px;
-    min-height: 80px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-sizing: border-box;
+    width: 120px !important;
+    height: 120px !important;
+    min-width: 120px !important;
+    min-height: 120px !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
 
+/* QR 코드 내부 SVG 요소 */
+.qr-code svg {
+    width: 120px !important;
+    height: 120px !important;
+    min-width: 120px !important;
+    min-height: 120px !important;
+}
+
+/* QR 코드 내부 Canvas 요소 */
+.qr-code canvas {
+    width: 120px !important;
+    height: 120px !important;
+    min-width: 120px !important;
+    min-height: 120px !important;
 }
 
 .qr-code img {

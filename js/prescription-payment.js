@@ -203,7 +203,7 @@ async function loadPrescriptionDetails(patientId, container) {
             
             <!-- 하단 고정 Footer -->
             <div class="prescription-footer">
-                <button class="print-btn"></button>
+                <button class="print-btn-payment"></button>
                 <button class="payment-complete-btn">
                     Complete Payment
                 </button>
@@ -222,32 +222,18 @@ async function loadPrescriptionDetails(patientId, container) {
         }
         
         // 프린트 버튼 이벤트 리스너 추가
-        const printBtn = container.querySelector('.print-btn');
+        const printBtn = container.querySelector('.print-btn-payment');
         if (printBtn) {
             printBtn.addEventListener('click', () => {
                 const prescriptionContent = container.querySelector('.prescription-payment-details');
                 const originalContents = document.body.innerHTML;
                 const printContents = prescriptionContent.innerHTML;
                 
-                // 프린트용 스타일 추가
+                // 프린트용 컨테이너 생성 (CSS 파일의 스타일 사용)
                 document.body.innerHTML = `
                     <div class="print-container">
                         ${printContents}
                     </div>
-                    <style>
-                        .print-container {
-                            padding: 20px;
-                        }
-                        @media print {
-                            body {
-                                padding: 0;
-                                margin: 0;
-                            }
-                            .print-container {
-                                width: 100%;
-                            }
-                        }
-                    </style>
                 `;
                 
                 window.print();
@@ -259,32 +245,18 @@ async function loadPrescriptionDetails(patientId, container) {
                     newPaymentBtn.addEventListener('click', () => completePayment(patientId));
                 }
                 
-                const newPrintBtn = container.querySelector('.print-btn');
+                const newPrintBtn = container.querySelector('.print-btn-payment');
                 if (newPrintBtn) {
                     newPrintBtn.addEventListener('click', () => {
                         const prescriptionContent = container.querySelector('.prescription-payment-details');
                         const originalContents = document.body.innerHTML;
                         const printContents = prescriptionContent.innerHTML;
                         
-                        // 프린트용 스타일 추가
+                        // 프린트용 컨테이너 생성 (CSS 파일의 스타일 사용)
                         document.body.innerHTML = `
                             <div class="print-container">
                                 ${printContents}
                             </div>
-                            <style>
-                                .print-container {
-                                    padding: 20px;
-                                }
-                                @media print {
-                                    body {
-                                        padding: 0;
-                                        margin: 0;
-                                    }
-                                    .print-container {
-                                        width: 100%;
-                                    }
-                                }
-                            </style>
                         `;
                         
                         window.print();
@@ -339,18 +311,70 @@ async function completePayment(patientId) {
 // QR 코드 생성
 function generateQRCodes(patientId, prescriptionData, hospitalName, doctorName) {
     try {
-        // QR 코드에 포함할 데이터 생성
+        // QR 코드에 포함할 데이터 생성 (테스트 버전용 최적화)
         const qrData = {
-            patientId: patientId,
-            patientName: patientId.split('.')[0],
-            hospitalName: hospitalName,
-            doctorName: doctorName,
-            issueDate: new Date().toISOString(),
-            medicines: prescriptionData.medicines || []
+            v: 1,  // 버전
+            h: {   // 병원 정보
+                n: hospitalName,
+                d: doctorName
+            },
+            p: {   // 환자 정보
+                id: patientId,
+                nm: patientId.split('.')[0]
+            },
+            d: new Date().toISOString().split('T')[0],  // 날짜 (YYYY-MM-DD)
+            m: prescriptionData.medicines ? prescriptionData.medicines.map(med => ({
+                n: med.name,
+                d: med.perDose || '',
+                f: med.perDay || '',
+                t: med.days || ''
+            })) : []
         };
         
         // 데이터를 JSON 문자열로 변환
         const qrString = JSON.stringify(qrData);
+        
+        // 디버깅: QR 코드 데이터 크기 확인
+        const dataSizeBytes = new Blob([qrString]).size;
+        console.log('QR 코드 데이터 크기:', dataSizeBytes, 'bytes');
+        console.log('QR 코드 데이터 내용:', qrString);
+        
+        // 공통 QR 코드 옵션
+        const qrOptions = {
+            width: 120,
+            height: 120,
+            type: "svg",
+            data: qrString,
+            dotsOptions: {
+                color: "#000000",
+                type: "square"
+            },
+            backgroundOptions: {
+                color: "transparent",
+            },
+            cornersSquareOptions: {
+                type: "square"
+            },
+            cornersDotOptions: {
+                type: "square"
+            },
+            qrOptions: {
+                errorCorrectionLevel: "M"
+            }
+        };
+        
+        // 간단한 QR 코드 옵션 (fallback용)
+        const simpleQrOptions = {
+            width: 120,
+            height: 120,
+            data: qrString,
+            backgroundOptions: {
+                color: "transparent",
+            },
+            qrOptions: {
+                errorCorrectionLevel: "L"
+            }
+        };
         
         // 왼쪽 QR 코드 생성
         const qrCodeLeftElement = document.getElementById('qrcode-left');
@@ -359,52 +383,50 @@ function generateQRCodes(patientId, prescriptionData, hospitalName, doctorName) 
             // 기존 QR 코드가 있으면 제거
             qrCodeLeftElement.innerHTML = '';
             
+            // 컨테이너 스타일 설정
+            qrCodeLeftElement.style.width = '120px';
+            qrCodeLeftElement.style.height = '120px';
+            qrCodeLeftElement.style.minWidth = '120px';
+            qrCodeLeftElement.style.minHeight = '120px';
+            
             try {
                 // QR Code Styling 라이브러리를 사용하여 QR 코드 생성
-                const qrCodeLeft = new QRCodeStyling({
-                    width: 80,
-                    height: 80,
-                    type: "svg",
-                    data: qrString,
-                    dotsOptions: {
-                        color: "#000000",
-                        type: "square"
-                    },
-                    backgroundOptions: {
-                        color: "transparent",
-                    },
-                    cornersSquareOptions: {
-                        type: "square"
-                    },
-                    cornersDotOptions: {
-                        type: "square"
-                    },
-                    qrOptions: {
-                        errorCorrectionLevel: "M"
-                    }
-                });
+                const qrCodeLeft = new QRCodeStyling(qrOptions);
                 
                 // QR 코드를 DOM에 추가
                 qrCodeLeft.append(qrCodeLeftElement);
+                
+                // QR 코드 생성 후 SVG 요소에 직접 스타일 적용
+                setTimeout(() => {
+                    const svgElement = qrCodeLeftElement.querySelector('svg');
+                    if (svgElement) {
+                        svgElement.setAttribute('width', '120');
+                        svgElement.setAttribute('height', '120');
+                        svgElement.style.width = '120px';
+                        svgElement.style.height = '120px';
+                    }
+                }, 50);
             } catch (qrError) {
+                console.error('QR 코드 생성 오류 (왼쪽):', qrError);
                 qrCodeLeftElement.innerHTML = '<p style="color:red;">QR Error</p>';
                 
                 // 오류 발생 시 더 간단한 설정으로 다시 시도
                 try {
-                    const simpleQrCodeLeft = new QRCodeStyling({
-                        width: 80,
-                        height: 80,
-                        data: qrString,
-                        backgroundOptions: {
-                            color: "transparent",
-                        },
-                        qrOptions: {
-                            errorCorrectionLevel: "L"
-                        }
-                    });
+                    const simpleQrCodeLeft = new QRCodeStyling(simpleQrOptions);
                     simpleQrCodeLeft.append(qrCodeLeftElement);
+                    
+                    // QR 코드 생성 후 SVG 요소에 직접 스타일 적용
+                    setTimeout(() => {
+                        const svgElement = qrCodeLeftElement.querySelector('svg');
+                        if (svgElement) {
+                            svgElement.setAttribute('width', '120');
+                            svgElement.setAttribute('height', '120');
+                            svgElement.style.width = '120px';
+                            svgElement.style.height = '120px';
+                        }
+                    }, 50);
                 } catch (fallbackError) {
-                    // 오류 처리
+                    console.error('QR 코드 생성 오류 (왼쪽 대체):', fallbackError);
                 }
             }
         }
@@ -416,56 +438,54 @@ function generateQRCodes(patientId, prescriptionData, hospitalName, doctorName) 
             // 기존 QR 코드가 있으면 제거
             qrCodeRightElement.innerHTML = '';
             
+            // 컨테이너 스타일 설정
+            qrCodeRightElement.style.width = '120px';
+            qrCodeRightElement.style.height = '120px';
+            qrCodeRightElement.style.minWidth = '120px';
+            qrCodeRightElement.style.minHeight = '120px';
+            
             try {
                 // QR Code Styling 라이브러리를 사용하여 QR 코드 생성
-                const qrCodeRight = new QRCodeStyling({
-                    width: 80,
-                    height: 80,
-                    type: "svg",
-                    data: qrString,
-                    dotsOptions: {
-                        color: "#000000",
-                        type: "square"
-                    },
-                    backgroundOptions: {
-                        color: "transparent",
-                    },
-                    cornersSquareOptions: {
-                        type: "square"
-                    },
-                    cornersDotOptions: {
-                        type: "square"
-                    },
-                    qrOptions: {
-                        errorCorrectionLevel: "M"
-                    }
-                });
+                const qrCodeRight = new QRCodeStyling(qrOptions);
                 
                 // QR 코드를 DOM에 추가
                 qrCodeRight.append(qrCodeRightElement);
+                
+                // QR 코드 생성 후 SVG 요소에 직접 스타일 적용
+                setTimeout(() => {
+                    const svgElement = qrCodeRightElement.querySelector('svg');
+                    if (svgElement) {
+                        svgElement.setAttribute('width', '120');
+                        svgElement.setAttribute('height', '120');
+                        svgElement.style.width = '120px';
+                        svgElement.style.height = '120px';
+                    }
+                }, 50);
             } catch (qrError) {
+                console.error('QR 코드 생성 오류 (오른쪽):', qrError);
                 qrCodeRightElement.innerHTML = '<p style="color:red;">QR Error</p>';
                 
                 // 오류 발생 시 더 간단한 설정으로 다시 시도
                 try {
-                    const simpleQrCodeRight = new QRCodeStyling({
-                        width: 80,
-                        height: 80,
-                        data: qrString,
-                        backgroundOptions: {
-                            color: "transparent",
-                        },
-                        qrOptions: {
-                            errorCorrectionLevel: "L"
-                        }
-                    });
+                    const simpleQrCodeRight = new QRCodeStyling(simpleQrOptions);
                     simpleQrCodeRight.append(qrCodeRightElement);
+                    
+                    // QR 코드 생성 후 SVG 요소에 직접 스타일 적용
+                    setTimeout(() => {
+                        const svgElement = qrCodeRightElement.querySelector('svg');
+                        if (svgElement) {
+                            svgElement.setAttribute('width', '120');
+                            svgElement.setAttribute('height', '120');
+                            svgElement.style.width = '120px';
+                            svgElement.style.height = '120px';
+                        }
+                    }, 50);
                 } catch (fallbackError) {
-                    // 오류 처리
+                    console.error('QR 코드 생성 오류 (오른쪽 대체):', fallbackError);
                 }
             }
         }
     } catch (error) {
-        // 오류 처리
+        console.error('QR 코드 생성 중 예외 발생:', error);
     }
 } 
