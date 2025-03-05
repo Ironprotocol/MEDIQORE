@@ -163,7 +163,7 @@ async function loadPrescriptionDetails(patientId, container) {
                     <tr>
                         <td class="table-header">Doctor</td>
                         <td class="table-data" colspan="2">${doctorName}</td>
-                        <td class="table-header">Doctor's Signature</td>
+                        <td class="table-header">Signature</td>
                         <td class="table-data" colspan="2" style="height:40px;"></td>
                     </tr>
                 </table>

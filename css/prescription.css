@@ -716,7 +716,7 @@
     height: 33px;
     border: none;
     border-radius: 6px;
-    background-color: #4287f5;
+    background-color: rgb(0, 102, 255);
     color: white;
     font-size: 12px;
     cursor: pointer;
@@ -724,7 +724,7 @@
 }
 
 .save-btn:hover {
-    background-color: #2a6dd9;
+    background-color: rgb(0, 82, 204);
 }
 
 
