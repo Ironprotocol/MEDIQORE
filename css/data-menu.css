@@ -73,7 +73,7 @@
 
 .data-table-header {
     background-color: #D3E4FF;
-    border-bottom: 2px solid #ddd;
+    border-bottom: 1px solid #ddd;
 }
 
 .data-table-th {
@@ -162,7 +162,17 @@
     color: #d9534f;
 }
 
-/* 페이지네이션 컨트롤 컨테이너 */
+/* Footer 영역 스타일 */
+.data-content-footer {
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-top: 1px solid #eee;
+    background-color: #f9f9f9;
+}
+
+/* 페이지네이션 컨트롤 스타일 */
 #pagination-controls {
     display: flex;
     justify-content: center;
@@ -171,14 +181,4 @@
     width: 100%;
     height: 100%;
     padding: 10px 0;
-}
-
-/* Footer 영역 스타일 */
-.content-footer {
-    height: 60px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-top: 1px solid #ccc;
-    background-color: #ffffff;
 }
