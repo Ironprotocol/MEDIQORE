@@ -1,4 +1,40 @@
-import { auth, db, collection, query, where, getDocs, doc, getDoc, setDoc, serverTimestamp, Timestamp } from './firebase-config.js';
+import { auth, db, collection, query, where, getDocs, doc, getDoc, setDoc, serverTimestamp, Timestamp, orderBy } from './firebase-config.js';
+
+// 폼 초기화 함수
+function resetRegistrationForm() {
+    // 기본 필드 초기화
+    document.getElementById('patientName').value = '';
+    document.getElementById('idNumber').value = '';
+    document.getElementById('phoneNumber').value = '';
+    document.getElementById('gender').value = '';
+    
+    // 생년월일 초기화
+    document.getElementById('birthDay').value = '';
+    document.getElementById('birthMonth').value = '';
+    document.getElementById('birthYear').value = '';
+    
+    // 주소 초기화
+    document.getElementById('district').value = '';
+    document.getElementById('city').value = '';
+    document.getElementById('state').value = '';
+    
+    // Primary Complaint 초기화
+    document.getElementById('primaryComplaint').value = '';
+    document.getElementById('otherComplaint').value = '';
+    document.getElementById('otherComplaintContainer').style.display = 'none';
+    
+    // 보험 정보 초기화
+    document.querySelectorAll('input[name="insuranceStatus"]').forEach(radio => radio.checked = false);
+    document.getElementById('insuranceProvider').value = '';
+    document.getElementById('insuranceNumber').value = '';
+    document.querySelector('.insurance-details').style.display = 'none';
+    
+    // 환자 정보 표시 영역 초기화 (방문 기록 포함)
+    const infoBox = document.querySelector('.section-box:last-child');
+    if (infoBox) {
+        infoBox.innerHTML = ''; // 완전히 비우기
+    }
+}
 
 // Primary Complaint change 핸들러
 export function handleComplaintChange() {
@@ -161,6 +197,12 @@ export function initializeRegistrationForm() {
                 checkPatientId();
             }
         });
+    }
+    
+    // Reset 버튼에 이벤트 리스너 추가
+    const resetBtn = document.querySelector('#patient-registration-content .reset-btn');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', resetRegistrationForm);
     }
     
     // 기존 Register 버튼 이벤트 리스너
@@ -362,6 +404,8 @@ async function checkPatientId() {
         // 검색 결과가 없는 경우
         if (querySnapshot.empty) {
             alert('Patient information does not exist.');
+            // 폼과 환자 정보 영역 초기화
+            resetRegistrationForm();
             return;
         }
         
@@ -434,7 +478,28 @@ function displayPatientInfo(patientData) {
                 <div class="info-value">${insuranceInfo}</div>
             </div>
         </div>
+        <div class="visit-history-divider"></div>
+        <div class="visit-history-container">
+            <table class="visit-history-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Doctor</th>
+                        <th>CC</th>
+                        <th>Progress</th>
+                    </tr>
+                </thead>
+                <tbody id="visit-history-body">
+                    <tr>
+                        <td colspan="4" class="no-history-message">Loading visit history...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     `;
+
+    // 환자 방문 기록 가져오기
+    fetchPatientVisitHistory(patientData.idNumber);
 
     // 클릭 이벤트 리스너 추가
     const patientInfoContainer = infoBox.querySelector('.registered-patient-info');
@@ -485,6 +550,84 @@ function displayPatientInfo(patientData) {
         document.getElementById('otherComplaint').value = '';
         document.getElementById('otherComplaintContainer').style.display = 'none';
     });
+}
+
+// 환자 방문 기록 가져오기 함수
+async function fetchPatientVisitHistory(patientId) {
+    try {
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        // 병원명 추출
+        const hospitalName = user.email.split('@')[0].split('.')[0];
+        
+        // 환자의 register.date 컬렉션 참조
+        const registerDateRef = collection(db, 'hospitals', hospitalName, 'patient', patientId, 'register.date');
+        
+        // 등록 날짜 문서 가져오기 (최신순 정렬)
+        const querySnapshot = await getDocs(query(registerDateRef, orderBy('date', 'desc')));
+        
+        const visitHistoryBody = document.getElementById('visit-history-body');
+        
+        // 데이터가 없는 경우
+        if (querySnapshot.empty) {
+            visitHistoryBody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="no-history-message">No visit history found.</td>
+                </tr>
+            `;
+            return;
+        }
+        
+        // 방문 기록 테이블 생성
+        let tableRows = '';
+        
+        querySnapshot.forEach(doc => {
+            const data = doc.data();
+            const docDate = data.date;
+            const doctor = data.doctor || 'N/A';
+            
+            // 날짜 포맷팅
+            let formattedDate = 'N/A';
+            if (docDate) {
+                const date = docDate.toDate ? docDate.toDate() : new Date(docDate);
+                formattedDate = date.toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: 'short', 
+                    year: 'numeric'
+                });
+            }
+            
+            // CC(Chief Complaint) 가져오기
+            let cc = 'N/A';
+            if (data.prescription && data.prescription.cc && data.prescription.cc.length > 0) {
+                cc = data.prescription.cc[0];
+            }
+            
+            // Progress 상태 가져오기
+            const progress = data.progress || 'N/A';
+            
+            tableRows += `
+                <tr>
+                    <td>${formattedDate}</td>
+                    <td>${doctor}</td>
+                    <td>${cc}</td>
+                    <td>${progress}</td>
+                </tr>
+            `;
+        });
+        
+        visitHistoryBody.innerHTML = tableRows;
+        
+    } catch (error) {
+        console.error('Error fetching patient visit history:', error);
+        const visitHistoryBody = document.getElementById('visit-history-body');
+        visitHistoryBody.innerHTML = `
+            <tr>
+                <td colspan="4" class="no-history-message">Error loading visit history.</td>
+            </tr>
+        `;
+    }
 }
 
 // New Patient 버튼 클릭 이벤트 초기화

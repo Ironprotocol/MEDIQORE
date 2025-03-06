@@ -471,3 +471,93 @@
             text-align: left;
             width: 100%;
         }
+
+        /* Patient Registration 헤더 스타일 */
+        .patient-registration-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        /* 헤더 버튼 컨테이너 */
+        .header-buttons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Reset 버튼 스타일 */
+        .reset-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease;
+            position: absolute;
+            top: 10px;
+            right: 30px;
+        }
+
+        .reset-btn:hover {
+            transform: rotate(180deg);
+        }
+
+        .reset-btn img {
+            width: 20px;
+            height: 22px; /* 137:151 비율에 맞춤 (20 * 151/137 = 약 22px) */
+        }
+
+        /* 환자 방문 기록 구분선 */
+        .visit-history-divider {
+            height: 1px;
+            background-color: #ccc;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        /* 환자 방문 기록 컨테이너 */
+        .visit-history-container {
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+
+        /* 방문 기록 테이블 */
+        .visit-history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .visit-history-table th {
+            text-align: left;
+            padding: 5px;
+            font-weight: 500;
+            color: #555;
+            border-bottom: 1px solid #eee;
+        }
+
+        .visit-history-table td {
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .visit-history-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .visit-history-table tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        /* 방문 기록 없음 메시지 */
+        .no-history-message {
+            text-align: center;
+            color: #888;
+            padding: 10px;
+            font-style: italic;
+        }
