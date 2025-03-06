@@ -435,6 +435,56 @@ function displayPatientInfo(patientData) {
             </div>
         </div>
     `;
+
+    // 클릭 이벤트 리스너 추가
+    const patientInfoContainer = infoBox.querySelector('.registered-patient-info');
+    patientInfoContainer.addEventListener('click', () => {
+        // 기본 정보 채우기
+        document.getElementById('patientName').value = patientData.patientName || '';
+        document.getElementById('idNumber').value = patientData.idNumber || '';
+        document.getElementById('phoneNumber').value = patientData.phoneNumber || '';
+        document.getElementById('gender').value = patientData.gender || '';
+
+        // 생년월일 채우기
+        if (patientData.birthDate) {
+            const date = patientData.birthDate.toDate ? patientData.birthDate.toDate() : new Date(patientData.birthDate);
+            document.getElementById('birthDay').value = date.getDate().toString();
+            document.getElementById('birthMonth').value = (date.getMonth() + 1).toString();
+            document.getElementById('birthYear').value = date.getFullYear().toString();
+        }
+
+        // 주소 채우기
+        if (patientData.address) {
+            const [district, city, state] = patientData.address.split(', ');
+            document.getElementById('district').value = district || '';
+            document.getElementById('city').value = city || '';
+            document.getElementById('state').value = state || '';
+        }
+
+        // 보험 정보 채우기
+        const hasInsuranceRadio = document.querySelector('input[name="insuranceStatus"][value="has"]');
+        const noInsuranceRadio = document.querySelector('input[name="insuranceStatus"][value="none"]');
+        const insuranceDetails = document.querySelector('.insurance-details');
+
+        if (patientData.insurance && patientData.insurance.provider && patientData.insurance.cardNumber) {
+            hasInsuranceRadio.checked = true;
+            noInsuranceRadio.checked = false;
+            insuranceDetails.style.display = 'block';
+            document.getElementById('insuranceProvider').value = patientData.insurance.provider;
+            document.getElementById('insuranceNumber').value = patientData.insurance.cardNumber;
+        } else {
+            hasInsuranceRadio.checked = false;
+            noInsuranceRadio.checked = true;
+            insuranceDetails.style.display = 'none';
+            document.getElementById('insuranceProvider').value = '';
+            document.getElementById('insuranceNumber').value = '';
+        }
+
+        // Primary Complaint는 제외 (비워두기)
+        document.getElementById('primaryComplaint').value = '';
+        document.getElementById('otherComplaint').value = '';
+        document.getElementById('otherComplaintContainer').style.display = 'none';
+    });
 }
 
 // New Patient 버튼 클릭 이벤트 초기화

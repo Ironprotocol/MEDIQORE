@@ -430,6 +430,16 @@
             border: 1px solid #ced4da;
             border-radius: 4px;
             background-color: #fff;
+            cursor: pointer;
+            transition: border-color 0.2s ease;
+        }
+
+        .registered-patient-info:hover {
+            border-color: #4a90e2;
+        }
+
+        .registered-patient-info:active {
+            border-color: #357abd;
         }
 
         .info-item {
