@@ -145,6 +145,25 @@ export function initializeInsuranceForm() {
 
 // 환자 등록 이벤트 초기화 함수 수정
 export function initializeRegistrationForm() {
+    // ID Check 버튼 이벤트 리스너 추가
+    const idCheckBtn = document.querySelector('.id-check-btn');
+    const idNumberInput = document.getElementById('idNumber');
+    
+    if (idCheckBtn) {
+        idCheckBtn.addEventListener('click', checkPatientId);
+    }
+    
+    // ID 입력 필드에서 엔터키 입력 시 검색 실행
+    if (idNumberInput) {
+        idNumberInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // 폼 제출 방지
+                checkPatientId();
+            }
+        });
+    }
+    
+    // 기존 Register 버튼 이벤트 리스너
     document.querySelector('.register-btn').addEventListener('click', async () => {
         try {
             const user = auth.currentUser;
@@ -318,6 +337,104 @@ export function initializeRegistrationForm() {
             alert('Failed to register patient: ' + error.message);
         }
     });
+}
+
+// 환자 ID 검색 함수
+async function checkPatientId() {
+    try {
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        const idNumber = document.getElementById('idNumber').value.trim();
+        if (!idNumber) {
+            alert('Please enter an ID Card or Passport number.');
+            return;
+        }
+        
+        // 병원명 추출
+        const hospitalName = user.email.split('@')[0].split('.')[0];
+        
+        // 환자 컬렉션에서 해당 ID를 가진 환자 검색
+        const patientsRef = collection(db, 'hospitals', hospitalName, 'patient');
+        const q = query(patientsRef, where('info.idNumber', '==', idNumber));
+        const querySnapshot = await getDocs(q);
+        
+        // 검색 결과가 없는 경우
+        if (querySnapshot.empty) {
+            alert('Patient information does not exist.');
+            return;
+        }
+        
+        // 검색 결과가 있는 경우 - 첫 번째 문서 사용
+        const patientDoc = querySnapshot.docs[0];
+        const patientData = patientDoc.data().info;
+        
+        // 세 번째 section-box에 환자 정보 표시
+        displayPatientInfo(patientData);
+    } catch (error) {
+        console.error('Error checking patient ID:', error);
+        alert('Failed to check patient ID: ' + error.message);
+    }
+}
+
+// 환자 정보 표시 함수
+function displayPatientInfo(patientData) {
+    const infoBox = document.querySelector('.section-box:last-child');
+    if (!infoBox) return;
+    
+    // 생년월일 포맷팅
+    let birthDate = '';
+    if (patientData.birthDate) {
+        const date = patientData.birthDate.toDate ? patientData.birthDate.toDate() : new Date(patientData.birthDate);
+        birthDate = date.toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
+        });
+    }
+    
+    // 보험 정보 포맷팅
+    let insuranceInfo = '';
+    if (patientData.insurance) {
+        if (patientData.insurance.provider && patientData.insurance.cardNumber) {
+            insuranceInfo = `${patientData.insurance.provider}/${patientData.insurance.cardNumber}`;
+        }
+    }
+    
+    // HTML 생성 - 세로 레이아웃으로 변경
+    infoBox.innerHTML = `
+        <h3>Patient Information</h3>
+        <div class="registered-patient-info">
+            <div class="info-item">
+                <div class="info-label">Name</div>
+                <div class="info-value">${patientData.patientName || ''}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">ID Number</div>
+                <div class="info-value">${patientData.idNumber || ''}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Phone Number</div>
+                <div class="info-value">${patientData.phoneNumber || ''}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Birth Date</div>
+                <div class="info-value">${birthDate}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Gender</div>
+                <div class="info-value">${patientData.gender || ''}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Address</div>
+                <div class="info-value">${patientData.address || ''}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Insurance</div>
+                <div class="info-value">${insuranceInfo}</div>
+            </div>
+        </div>
+    `;
 }
 
 // New Patient 버튼 클릭 이벤트 초기화

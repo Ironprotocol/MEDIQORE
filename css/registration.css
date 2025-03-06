@@ -417,3 +417,47 @@
         .id-check-btn:hover {
             background-color: #357abd;
         }
+
+        /* 환자 정보 표시 스타일 */
+        .registered-patient-info {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: flex-start;
+            text-align: left;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            background-color: #fff;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            width: 100%;
+            align-items: flex-start;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .info-label {
+            font-weight: bold;
+            font-size: 12px;
+            color: #495057;
+            text-align: left;
+        }
+
+        .info-value {
+            font-size: 12px;
+            color: rgb(110, 110, 124);
+            word-break: break-word;
+            text-align: left;
+            width: 100%;
+        }
