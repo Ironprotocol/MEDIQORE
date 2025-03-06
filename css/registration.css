@@ -386,3 +386,34 @@
         .registration-doctor-option span.disabled {
             color: rgb(180, 180, 180);
         }
+
+        /* ID 입력 필드 래퍼 스타일 */
+        .id-input-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .id-input-wrapper input {
+            width: 100%;
+            padding-right: 70px; /* Check 버튼 공간 확보 */
+            box-sizing: border-box;
+        }
+
+        .id-check-btn {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .id-check-btn:hover {
+            background-color: #357abd;
+        }
