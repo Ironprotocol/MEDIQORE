@@ -1,5 +1,6 @@
 import { auth, db, collection, query, getDocs, doc, getDoc, onSnapshot } from './firebase-config.js';
 import { openEditPatientModal } from './patient-edit.js';
+import { openViewPatientModal } from './patient-view.js';
 
 // 페이지네이션 설정
 let ITEMS_PER_PAGE = 10; // 변수로 변경하여 동적 조정 가능하게 함
@@ -458,17 +459,8 @@ function addStaffButtonListeners() {
 // 환자 상세 정보 보기 함수
 async function viewPatientDetails(patientId) {
     try {
-        const hospitalName = auth.currentUser.email.split('@')[0].split('.')[0];
-        const patientRef = doc(db, 'hospitals', hospitalName, 'patient', patientId);
-        const patientDoc = await getDoc(patientRef);
-        
-        if (patientDoc.exists()) {
-            const patientData = patientDoc.data();
-            alert(`Patient Details:\nName: ${patientData.info?.patientName || 'N/A'}\nID: ${patientData.info?.idNumber || 'N/A'}`);
-            // 실제 구현에서는 모달 창이나 상세 페이지로 표시
-        } else {
-            alert('Patient not found');
-        }
+        // 새로운 View 모달 열기
+        await openViewPatientModal(patientId);
     } catch (error) {
         console.error('Error viewing patient details:', error);
         alert('Error loading patient details');

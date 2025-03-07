@@ -365,3 +365,87 @@
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+/* 환자 방문 기록 모달 스타일 */
+#view-patient-modal .modal-content {
+    width: 80%; /* 기존 편집 모달보다 더 넓게 설정 */
+    max-width: 1000px; /* 최대 너비 설정 */
+}
+
+.patient-info-summary {
+    margin-bottom: 15px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    border: 1px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.patient-basic-info {
+    display: flex;
+    gap: 30px;
+}
+
+.visit-history-container {
+    max-height: 60vh;
+    overflow-y: auto;
+    border: 1px solid #e9ecef;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.visit-entry {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e9ecef;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.visit-date {
+    font-weight: bold;
+    color: #4a6da7;
+    margin-bottom: 8px;
+    font-size: 1.1em;
+}
+
+.visit-separator {
+    height: 2px;
+    background-color: #e9ecef;
+    margin: 5px 0;
+}
+
+.visit-details {
+    padding: 5px 0;
+    line-height: 1.6;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* 데이터 간 간격 넓게 설정 */
+}
+
+.visit-details span {
+    margin-right: 25px; /* 데이터 요소 간 간격 넓게 설정 */
+    display: inline-block;
+}
+
+.no-visits-message {
+    padding: 20px;
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.visit-count-badge {
+    background-color: #4a6da7;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.9em;
+    font-weight: 500;
+}
