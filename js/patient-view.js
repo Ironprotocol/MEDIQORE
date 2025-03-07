@@ -115,9 +115,6 @@ function displayPatientInfo(patientInfo) {
             <p><strong>Name:</strong> ${patientInfo.patientName || 'N/A'}</p>
             <p><strong>ID Number:</strong> ${patientInfo.idNumber || 'N/A'}</p>
         </div>
-        <div>
-            <span class="visit-count-badge">${currentPatientId ? '환자 방문 기록' : ''}</span>
-        </div>
     `;
     
     patientBasicInfoDiv.innerHTML = html;
@@ -149,15 +146,15 @@ function displayVisitHistory(visits) {
             ccStr = visit.primaryComplaint;
         }
         
-        // 약물 처방
+        // 약물 처방 - 너무 길어질 수 있으므로 별도 섹션으로 분리
         let medicinesStr = 'None';
-        if (visit.prescription && visit.prescription.medicine && visit.prescription.medicine.length > 0) {
-            medicinesStr = visit.prescription.medicine.map(med => {
-                const dosage = med.dosage || '?';
-                const frequency = med.frequency || '?';
-                const duration = med.duration || '?';
-                return `${med.name}(${dosage},${frequency},${duration})`;
-            }).join(', ');
+        if (visit.prescription && visit.prescription.medicines && visit.prescription.medicines.length > 0) {
+            medicinesStr = visit.prescription.medicines.map(med => {
+                const perDose = med.perDose || '?';
+                const perDay = med.perDay || '?';
+                const days = med.days || '?';
+                return `${med.name} (${perDose} per dose, ${perDay} times/day, for ${days} days)`;
+            }).join('<br>');
         }
         
         // 결제 정보
@@ -170,8 +167,11 @@ function displayVisitHistory(visits) {
                 <div class="visit-details">
                     <span><strong>Doctor:</strong> ${doctor}</span>
                     <span><strong>CC:</strong> ${ccStr}</span>
-                    <span><strong>Medicines:</strong> ${medicinesStr}</span>
                     <span><strong>Payment:</strong> ${payment}</span>
+                </div>
+                <div class="visit-medicines">
+                    <strong>Medicines:</strong><br>
+                    ${medicinesStr}
                 </div>
             </div>
         `;
