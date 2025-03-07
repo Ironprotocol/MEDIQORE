@@ -1,4 +1,5 @@
 import { auth, db, collection, query, getDocs, doc, getDoc, onSnapshot } from './firebase-config.js';
+import { openEditPatientModal } from './patient-edit.js';
 
 // 페이지네이션 설정
 let ITEMS_PER_PAGE = 10; // 변수로 변경하여 동적 조정 가능하게 함
@@ -476,8 +477,8 @@ async function viewPatientDetails(patientId) {
 
 // 환자 정보 편집 함수
 async function editPatientDetails(patientId) {
-    alert(`Edit patient with ID: ${patientId}`);
-    // 실제 구현에서는 편집 폼이나 페이지로 이동
+    // 모달 열기 함수 호출
+    await openEditPatientModal(patientId);
 }
 
 // 스태프 상세 정보 보기 함수
