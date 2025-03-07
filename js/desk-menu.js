@@ -143,6 +143,13 @@ export function initializeMenuEvents() {
                 contentIds.forEach(id => {
                     document.getElementById(id).style.display = 'block';
                 });
+                
+                // Desk 메뉴 클릭 시 환자 선택 상태 초기화
+                clearPatientSelection();
+                
+                // 처방전 노출 상태 초기화를 위한 이벤트 발생
+                document.dispatchEvent(new CustomEvent('patientDeselected'));
+                
                 return;
             } else {
                 const content = document.getElementById(contentIds);

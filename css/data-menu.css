@@ -96,7 +96,7 @@
 #data-display-area {
     margin-top: 10px;
     padding: 0;
-    border: 1px solid #eee;
+    border: 1px solid rgb(0, 82, 204);
     border-radius: 4px;
     min-height: 400px;
     height: calc(100vh - 300px); /* 브라우저 높이에 따라 동적으로 조정 - footer 영역 고려 */
@@ -107,7 +107,7 @@
 
 /* 테이블 행 스타일 */
 .data-table-row {
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #D3E4FF;
     height: 40px; /* 행 높이 고정 */
     transition: background-color 0.2s ease; /* 부드러운 전환 효과 */
 }
