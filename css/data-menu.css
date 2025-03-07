@@ -259,6 +259,18 @@
     color: #555;
 }
 
+/* View 모달 닫기 버튼 스타일 */
+#close-view-modal, .close {
+    color: #aaa;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#close-view-modal:hover, .close:hover {
+    color: #555;
+}
+
 .modal-body {
     padding: 20px;
     max-height: 70vh;
@@ -376,9 +388,9 @@
 .patient-info-summary {
     margin-bottom: 15px;
     padding: 15px;
-    background-color: #f8f9fa;
+    background-color: #eef5ff;
     border-radius: 5px;
-    border: 1px solid #e9ecef;
+    border: 1px solid #D3E4FF;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -389,11 +401,18 @@
     gap: 30px;
 }
 
+/* 환자 기본 정보 텍스트 크기 조정 */
+.patient-basic-info p,
+.patient-basic-info strong {
+    font-size: 14px;
+    margin: 0;
+}
+
 .visit-history-container {
     max-height: 60vh;
     overflow-y: auto;
     overflow-x: hidden; /* 가로 스크롤바 제거 */
-    border: 1px solid #e9ecef;
+    border: 1px solid #ffffff;
     border-radius: 5px;
     padding: 10px;
     width: 100%; /* 너비 명시 */
@@ -403,20 +422,20 @@
 .visit-entry {
     margin-bottom: 15px;
     padding-bottom: 15px;
-    border-bottom: 1px solid #e9ecef;
+    border-bottom: 1px solid #D3E4FF;
     animation: fadeIn 0.3s ease-in-out;
 }
 
 .visit-date {
     font-weight: bold;
-    color: #4a6da7;
+    color: rgb(0, 82, 204) ;
     margin-bottom: 8px;
     font-size: 1.1em;
 }
 
 .visit-separator {
     height: 2px;
-    background-color: #e9ecef;
+    background-color: #D3E4FF;
     margin: 5px 0;
 }
 
@@ -450,20 +469,17 @@
     to { opacity: 1; }
 }
 
-.visit-count-badge {
-    background-color: #4a6da7;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 15px;
-    font-size: 0.9em;
-    font-weight: 500;
-}
 
 .visit-medicines {
     margin-top: 10px;
     padding: 8px;
-    background-color: #f8f9fa;
+    background-color: #eef5ff;
     border-radius: 4px;
     font-size: 0.95em;
     line-height: 1.5;
+}
+
+/* View 모달 헤더 텍스트 크기 조정 */
+#view-patient-modal .modal-header h3 {
+    font-size: 14px;
 }
