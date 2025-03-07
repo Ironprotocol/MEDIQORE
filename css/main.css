@@ -1,0 +1,157 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    background-image: linear-gradient(to bottom, #caebff ,white);
+    overflow-x: hidden;  /* 가로 스크롤 방지 */
+    min-width: 800px;    /* 최소 너비 설정 */
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 상단 메뉴바 스타일 */
+.top-menu {
+    width: 100%;
+    height: 60px;
+    background-color: 87CEFA;
+    border-bottom: 1px solid hsl(0, 0%, 100%);
+    display: flex;
+    justify-content: space-between;  /* 로고와 로그인 섹션 양쪽 정렬 */
+    align-items: center;
+    padding: 0 20px;
+    box-sizing: border-box;  /* padding이 너비에 포함되도록 */
+}
+
+/* 로고 컨테이너 스타일 */
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.logo-image {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+}
+
+.logo-text {
+    font-weight: 700;
+    font-size: 16px;
+    color: rgb(0, 102, 255);
+}
+
+/* 로그인 섹션 스타일 */
+.login-section {
+    position: static;  /* absolute 제거 */
+    display: flex;
+    align-items: center;
+    gap: 10px;  /* 요소들 사이 간격 */
+    margin-right: 20px;  /* 우측 여백 추가 */
+}
+
+/* 로그인 섹션의 input 스타일 수정 */
+.login-section input {
+    margin: 0;
+    padding: 8px;
+    height: 36px;  /* 로그인 버튼과 동일한 높이 */
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+/* 계정 입력 필드만 따로 너비 설정 */
+.login-section input#account {
+    width: 180px;  /* 기존 150px에서 20% 증가 */
+}
+
+/* 비밀번호 입력 필드 */
+.login-section input#password {
+    width: 150px;
+}
+
+.login-section button {
+    margin: 0;
+    padding: 8px 16px;
+    cursor: pointer;
+    height: 36px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+}
+
+.login-section button#login {
+    background-color: rgb(0, 102, 255);
+    color: white;
+    border: none;
+}
+
+/* Footer 스타일 */
+.main-footer {
+    width: 100%;
+    background-color: white;
+    border-top: 1px solid #ccc;
+    padding: 10px 0;
+    margin-top: auto;
+    font-size: 12px;
+}
+
+.footer-content {
+    width: 100%;  /* 반응형으로 변경 */
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    gap: 15px;
+    padding: 0;
+}
+
+.company-info, .contact-info, .legal-info {
+    width: 33.33%;  /* 동일한 너비 배분 */
+    padding: 0;
+    text-align: left;
+}
+
+.main-footer h3 {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+    margin-top: 0;
+}
+
+.main-footer p {
+    font-size: 12px;
+    color: #666;
+    margin: 3px 0;
+    line-height: 1.3;
+}
+
+.main-footer a {
+    color: #0066ff;
+    text-decoration: none;
+}
+
+.main-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Footer 로고 스타일 */
+.footer-logo {
+    width: 60;
+    height: 60px;
+    object-fit: contain;
+    position: absolute;
+    right: 5px;
+    top: 45%;
+    transform: translateY(-50%);
+}
+
+.legal-info {
+    position: relative;
+}
