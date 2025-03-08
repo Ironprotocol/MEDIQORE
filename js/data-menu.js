@@ -1,4 +1,4 @@
-import { auth, db, collection, query, getDocs, doc, getDoc, onSnapshot } from './firebase-config.js';
+import { auth, db, collection, query, getDocs, doc, getDoc, onSnapshot, where } from './firebase-config.js';
 import { openEditPatientModal } from './patient-edit.js';
 import { openViewPatientModal } from './patient-view.js';
 
@@ -9,10 +9,12 @@ let currentPage = 1;
 let totalPages = 1;
 let currentData = [];
 let currentFilter = 'patients';
+let selectedDate = null; // 선택된 날짜 저장용
 
 // 구독 해제 함수 저장
 let unsubscribePatients = null;
 let unsubscribeStaff = null;
+let unsubscribeDaily = null;
 
 // Data 메뉴 초기화 함수
 export function initializeDataMenu() {
@@ -36,8 +38,56 @@ export function initializeDataMenu() {
             // 필터 적용
             currentFilter = button.dataset.type;
             currentPage = 1;
+            
+            // Daily 필터가 아닌 경우 달력 숨기기 및 타이틀 원복
+            if (currentFilter !== 'daily') {
+                hideDateCalendar();
+                // 타이틀 원복
+                const contentTitle = document.querySelector('.content-title');
+                if (contentTitle) {
+                    contentTitle.innerHTML = 'Hospital Data Center';
+                }
+            } else {
+                // Daily 필터인 경우 달력 표시
+                const calendarContainer = document.getElementById('daily-calendar-container');
+                calendarContainer.style.display = 'block';
+                
+                // 달력이 아직 초기화되지 않았거나 날짜가 선택되지 않은 경우 초기화
+                if (!selectedDate) {
+                    initializeCalendar();
+                } else {
+                    // 이미 선택된 날짜가 있는 경우 타이틀에 날짜 표시
+                    const contentTitle = document.querySelector('.content-title');
+                    if (contentTitle) {
+                        contentTitle.innerHTML = `Hospital Data Center <span style="font-size: 0.9em; color: #0052cc; margin-left: 10px;">(${selectedDate})</span>`;
+                    }
+                }
+            }
+            
             loadData();
         });
+    });
+    
+    // 달력 외부 클릭 시 달력 닫기
+    document.addEventListener('click', (event) => {
+        const calendarContainer = document.getElementById('daily-calendar-container');
+        const dailyButton = document.querySelector('.data-filter-btn[data-type="daily"]');
+        
+        // 달력이 표시 중이고, 클릭된 요소가 달력 컨테이너 내부가 아니고, Daily 버튼도 아닌 경우
+        if (calendarContainer && calendarContainer.style.display !== 'none') {
+            // 클릭된 요소가 달력 컨테이너의 자식이 아니고, Daily 버튼의 자식도 아닌 경우
+            if (!calendarContainer.contains(event.target) && 
+                (dailyButton && !dailyButton.contains(event.target))) {
+                // 선택된 날짜가 있고 Daily 필터가 활성화된 상태면 달력만 숨기기
+                if (selectedDate && currentFilter === 'daily') {
+                    calendarContainer.style.display = 'none';
+                } 
+                // 그 외의 경우는 Daily 필터가 아닌 경우이거나 날짜가 선택되지 않은 경우로, 달력 숨기기
+                else if (!selectedDate) {
+                    hideDateCalendar();
+                }
+            }
+        }
     });
     
     // 초기 화면 크기에 맞게 항목 수 계산
@@ -98,6 +148,10 @@ function unsubscribeCurrentListener() {
         unsubscribeStaff();
         unsubscribeStaff = null;
     }
+    if (unsubscribeDaily) {
+        unsubscribeDaily();
+        unsubscribeDaily = null;
+    }
 }
 
 // 데이터 로드 함수
@@ -117,13 +171,32 @@ async function loadData() {
             
             // 환자 데이터 로드 (실시간)
             loadPatientDataRealtime(hospitalName);
-        } else {
+        } else if (currentFilter === 'staff') {
             // 스태프 테이블 표시, 환자 테이블 숨김
             document.getElementById('patient-data-table').style.display = 'none';
             document.getElementById('staff-data-table').style.display = 'table';
             
             // 스태프 데이터 로드 (실시간)
             loadStaffDataRealtime(hospitalName);
+        } else if (currentFilter === 'daily') {
+            // Daily 필터 선택 시, 환자 테이블 표시하고 달력 표시
+            document.getElementById('patient-data-table').style.display = 'table';
+            document.getElementById('staff-data-table').style.display = 'none';
+            
+            // 달력 표시
+            document.getElementById('daily-calendar-container').style.display = 'block';
+            
+            if (selectedDate) {
+                // 선택된 날짜가 있으면 해당 날짜의 환자 데이터 로드
+                loadDailyPatientData(hospitalName, selectedDate);
+            } else {
+                // 선택된 날짜가 없으면 달력 생성
+                initializeCalendar();
+                
+                // 환자 테이블 비우기
+                const patientTableBody = document.getElementById('patient-data-body');
+                patientTableBody.innerHTML = '<tr><td colspan="8" class="no-data-message">Please select a date from the calendar</td></tr>';
+            }
         }
     } catch (error) {
         console.error('Error loading data:', error);
@@ -565,5 +638,281 @@ function calculateItemsPerPage() {
     if (ITEMS_PER_PAGE !== newItemsPerPage) {
         console.log(`화면 해상도에 맞게 페이지당 항목 수 조정: ${newItemsPerPage} (가용 높이: ${availableHeight}px)`);
         ITEMS_PER_PAGE = newItemsPerPage;
+    }
+}
+
+// 달력 초기화 함수
+function initializeCalendar() {
+    const calendarContainer = document.querySelector('.daily-calendar');
+    
+    // 현재 날짜 정보
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+    
+    // 달력 헤더 생성
+    let calendarHTML = `
+        <div class="daily-calendar-header">
+            <div class="daily-calendar-nav">
+                <button id="prev-month">&lt;</button>
+            </div>
+            <div class="daily-calendar-month">${getMonthName(currentMonth)} ${currentYear}</div>
+            <div class="daily-calendar-nav">
+                <button id="next-month">&gt;</button>
+            </div>
+        </div>
+        <div class="daily-calendar-weekdays">
+            <div class="daily-calendar-grid">
+                <div class="daily-calendar-weekday">Sun</div>
+                <div class="daily-calendar-weekday">Mon</div>
+                <div class="daily-calendar-weekday">Tue</div>
+                <div class="daily-calendar-weekday">Wed</div>
+                <div class="daily-calendar-weekday">Thu</div>
+                <div class="daily-calendar-weekday">Fri</div>
+                <div class="daily-calendar-weekday">Sat</div>
+            </div>
+        </div>
+        <div class="daily-calendar-days daily-calendar-grid" id="calendar-days">
+            <!-- 날짜는 renderCalendar 함수에서 동적으로 생성됨 -->
+        </div>
+    `;
+    
+    calendarContainer.innerHTML = calendarHTML;
+    
+    // 날짜 렌더링
+    renderCalendar(currentMonth, currentYear);
+    
+    // 달력 이벤트 리스너 추가
+    document.getElementById('prev-month').addEventListener('click', () => {
+        const monthYear = document.querySelector('.daily-calendar-month').textContent.split(' ');
+        const month = getMonthIndex(monthYear[0]);
+        let year = parseInt(monthYear[1]);
+        
+        if (month === 0) {
+            year--;
+            renderCalendar(11, year);
+        } else {
+            renderCalendar(month - 1, year);
+        }
+    });
+    
+    document.getElementById('next-month').addEventListener('click', () => {
+        const monthYear = document.querySelector('.daily-calendar-month').textContent.split(' ');
+        const month = getMonthIndex(monthYear[0]);
+        let year = parseInt(monthYear[1]);
+        
+        if (month === 11) {
+            year++;
+            renderCalendar(0, year);
+        } else {
+            renderCalendar(month + 1, year);
+        }
+    });
+}
+
+// 달력 월 이름 구하기
+function getMonthName(monthIndex) {
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    return months[monthIndex];
+}
+
+// 달력 월 인덱스 구하기
+function getMonthIndex(monthName) {
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    return months.indexOf(monthName);
+}
+
+// 달력 날짜 렌더링 함수
+function renderCalendar(month, year) {
+    const calendarDays = document.getElementById('calendar-days');
+    const monthYearDisplay = document.querySelector('.daily-calendar-month');
+    
+    // 월/년 표시 업데이트
+    monthYearDisplay.textContent = `${getMonthName(month)} ${year}`;
+    
+    // 현재 월의 첫 날과 마지막 날
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    
+    // 이전 월의 마지막 날
+    const prevMonthLastDay = new Date(year, month, 0).getDate();
+    
+    // 달력 시작일 (첫 번째 줄의 일요일)
+    const startingDayOfWeek = firstDay.getDay(); // 0(일요일)부터 6(토요일)
+    
+    // 현재 날짜
+    const today = new Date();
+    const currentDay = today.getDate();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+    
+    // HTML 생성
+    let daysHTML = '';
+    
+    // 이전 월의 날짜들
+    for (let i = startingDayOfWeek - 1; i >= 0; i--) {
+        const day = prevMonthLastDay - i;
+        daysHTML += `<div class="daily-calendar-day other-month" data-date="${year}-${month === 0 ? 12 : month}-${day}">${day}</div>`;
+    }
+    
+    // 현재 월의 날짜들
+    for (let i = 1; i <= lastDay.getDate(); i++) {
+        // 날짜 포맷 생성 (dd.Mmm.yyyy)
+        const date = new Date(year, month, i);
+        const day = String(date.getDate()).padStart(2, '0');
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const monthStr = monthNames[date.getMonth()];
+        const yearStr = date.getFullYear();
+        const formattedDate = `${day}.${monthStr}.${yearStr}`;
+        
+        const isToday = i === currentDay && month === currentMonth && year === currentYear;
+        const isSelected = selectedDate === formattedDate;
+        
+        daysHTML += `
+            <div class="daily-calendar-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}" 
+                 data-date="${formattedDate}">${i}</div>
+        `;
+    }
+    
+    // 다음 월의 날짜들
+    const daysAfter = 42 - (startingDayOfWeek + lastDay.getDate());
+    for (let i = 1; i <= daysAfter; i++) {
+        daysHTML += `<div class="daily-calendar-day other-month" data-date="${year}-${month === 11 ? 1 : month + 2}-${i}">${i}</div>`;
+    }
+    
+    calendarDays.innerHTML = daysHTML;
+    
+    // 날짜 클릭 이벤트 추가
+    document.querySelectorAll('.daily-calendar-day:not(.other-month)').forEach(dayElement => {
+        dayElement.addEventListener('click', (e) => {
+            // 기존 선택 제거
+            document.querySelectorAll('.daily-calendar-day.selected').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            // 현재 선택 추가
+            e.target.classList.add('selected');
+            
+            // 선택된 날짜 저장
+            selectedDate = e.target.dataset.date;
+            
+            // 병원 이름 가져오기
+            const hospitalName = auth.currentUser.email.split('@')[0].split('.')[0];
+            
+            // 해당 날짜의 환자 데이터 로드
+            loadDailyPatientData(hospitalName, selectedDate);
+            
+            // 달력 닫기
+            document.getElementById('daily-calendar-container').style.display = 'none';
+            
+            console.log(`Selected date: ${selectedDate}`);
+        });
+    });
+}
+
+// 특정 날짜의 환자 데이터 로드 함수
+async function loadDailyPatientData(hospitalName, dateStr) {
+    const patientTableBody = document.getElementById('patient-data-body');
+    patientTableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">Loading patient data for ' + dateStr + '...</td></tr>';
+    
+    // 상단 타이틀에 선택된 날짜 표시
+    const contentTitle = document.querySelector('.content-title');
+    if (contentTitle) {
+        contentTitle.innerHTML = `Hospital Data Center <span style="font-size: 0.9em; color: #0052cc; margin-left: 10px;">(${dateStr})</span>`;
+    }
+    
+    try {
+        // dates 컬렉션 참조 (payment, waiting, reservation, complete 통합)
+        const paymentRef = collection(db, 'hospitals', hospitalName, 'dates', dateStr, 'payment');
+        const waitingRef = collection(db, 'hospitals', hospitalName, 'dates', dateStr, 'waiting');
+        const reservationRef = collection(db, 'hospitals', hospitalName, 'dates', dateStr, 'reservation');
+        const completeRef = collection(db, 'hospitals', hospitalName, 'dates', dateStr, 'complete');
+        
+        // 각 컬렉션에서 데이터 가져오기
+        const [paymentDocs, waitingDocs, reservationDocs, completeDocs] = await Promise.all([
+            getDocs(paymentRef),
+            getDocs(waitingRef),
+            getDocs(reservationRef),
+            getDocs(completeRef)
+        ]);
+        
+        // 환자 ID 목록 생성 (중복 제거)
+        const patientIds = new Set();
+        
+        // 각 컬렉션에서 환자 ID 추출
+        paymentDocs.forEach(doc => {
+            const idParts = doc.id.split('.');
+            if (idParts.length > 0) patientIds.add(idParts[0]);
+        });
+        
+        waitingDocs.forEach(doc => {
+            const idParts = doc.id.split('.');
+            if (idParts.length > 0) patientIds.add(idParts[0]);
+        });
+        
+        reservationDocs.forEach(doc => {
+            const idParts = doc.id.split('.');
+            if (idParts.length > 0) patientIds.add(idParts[0]);
+        });
+        
+        completeDocs.forEach(doc => {
+            const idParts = doc.id.split('.');
+            if (idParts.length > 0) patientIds.add(idParts[0]);
+        });
+        
+        console.log(`Found ${patientIds.size} unique patients for date: ${dateStr}`);
+        
+        if (patientIds.size === 0) {
+            patientTableBody.innerHTML = '<tr><td colspan="8" class="no-data-message">No patient records found for this date</td></tr>';
+            return;
+        }
+        
+        // 환자 상세 정보 가져오기
+        const patientDataPromises = Array.from(patientIds).map(async (patientId) => {
+            try {
+                const patientRef = doc(db, 'hospitals', hospitalName, 'patient', patientId);
+                const patientDoc = await getDoc(patientRef);
+                
+                if (patientDoc.exists() && patientDoc.data().info) {
+                    return {
+                        id: patientDoc.id,
+                        ...patientDoc.data().info
+                    };
+                }
+                return null;
+            } catch (error) {
+                console.error(`Error fetching patient data for ID ${patientId}:`, error);
+                return null;
+            }
+        });
+        
+        // 모든 환자 정보 가져오기 완료 대기
+        let patientsData = await Promise.all(patientDataPromises);
+        
+        // 유효한 환자 데이터만 필터링
+        patientsData = patientsData.filter(patient => patient !== null);
+        
+        // 현재 데이터 저장
+        currentData = patientsData;
+        
+        // 페이지네이션 업데이트
+        updatePagination(patientsData.length);
+        
+        // 현재 페이지 데이터 표시
+        displayPatientData(patientsData);
+        
+        console.log(`Loaded ${patientsData.length} patients for date: ${dateStr}`);
+        
+    } catch (error) {
+        console.error('Error loading daily patient data:', error);
+        patientTableBody.innerHTML = '<tr><td colspan="8" class="error-message">Error loading patient data. Please try again.</td></tr>';
+    }
+}
+
+// 필터 변경 시 달력 컨테이너 숨기기
+function hideDateCalendar() {
+    const calendarContainer = document.getElementById('daily-calendar-container');
+    if (calendarContainer) {
+        calendarContainer.style.display = 'none';
     }
 } 
