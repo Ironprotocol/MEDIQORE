@@ -542,8 +542,24 @@ async function viewPatientDetails(patientId) {
 
 // 환자 정보 편집 함수
 async function editPatientDetails(patientId) {
-    // 모달 열기 함수 호출
-    await openEditPatientModal(patientId);
+    try {
+        // 현재 필터와 선택된 날짜 저장
+        const isDaily = currentFilter === 'daily';
+        const currentDate = selectedDate;
+        
+        // 편집 모달 열기 - 수정된 함수 호출로 콜백 추가
+        await openEditPatientModal(patientId, async () => {
+            // 편집 완료 후 콜백: Daily 필터가 활성화된 경우 데이터 다시 로드
+            if (isDaily && currentDate) {
+                console.log('Patient edited in Daily view, reloading data...');
+                const hospitalName = auth.currentUser.email.split('@')[0].split('.')[0];
+                await loadDailyPatientData(hospitalName, currentDate);
+            }
+        });
+    } catch (error) {
+        console.error('Error editing patient details:', error);
+        alert('Error opening patient edit form');
+    }
 }
 
 // 스태프 상세 정보 보기 함수
@@ -822,6 +838,8 @@ async function loadDailyPatientData(hospitalName, dateStr) {
     }
     
     try {
+        console.log(`Loading daily patient data for hospital: ${hospitalName}, date: ${dateStr}`);
+        
         // dates 컬렉션 참조 (payment, waiting, reservation, complete 통합)
         const paymentRef = collection(db, 'hospitals', hospitalName, 'dates', dateStr, 'payment');
         const waitingRef = collection(db, 'hospitals', hospitalName, 'dates', dateStr, 'waiting');
@@ -836,28 +854,27 @@ async function loadDailyPatientData(hospitalName, dateStr) {
             getDocs(completeRef)
         ]);
         
+        console.log(`Got ${paymentDocs.size} payment, ${waitingDocs.size} waiting, ${reservationDocs.size} reservation, ${completeDocs.size} complete docs`);
+        
         // 환자 ID 목록 생성 (중복 제거)
         const patientIds = new Set();
         
-        // 각 컬렉션에서 환자 ID 추출
+        // 각 컬렉션에서 환자 ID 추출 - 문서 ID 전체를 사용
         paymentDocs.forEach(doc => {
-            const idParts = doc.id.split('.');
-            if (idParts.length > 0) patientIds.add(idParts[0]);
+            patientIds.add(doc.id);
+            console.log(`Added patient ID from payment: ${doc.id}`);
         });
         
         waitingDocs.forEach(doc => {
-            const idParts = doc.id.split('.');
-            if (idParts.length > 0) patientIds.add(idParts[0]);
+            patientIds.add(doc.id);
         });
         
         reservationDocs.forEach(doc => {
-            const idParts = doc.id.split('.');
-            if (idParts.length > 0) patientIds.add(idParts[0]);
+            patientIds.add(doc.id);
         });
         
         completeDocs.forEach(doc => {
-            const idParts = doc.id.split('.');
-            if (idParts.length > 0) patientIds.add(idParts[0]);
+            patientIds.add(doc.id);
         });
         
         console.log(`Found ${patientIds.size} unique patients for date: ${dateStr}`);
@@ -870,14 +887,22 @@ async function loadDailyPatientData(hospitalName, dateStr) {
         // 환자 상세 정보 가져오기
         const patientDataPromises = Array.from(patientIds).map(async (patientId) => {
             try {
+                console.log(`Fetching patient data for ID: ${patientId}`);
                 const patientRef = doc(db, 'hospitals', hospitalName, 'patient', patientId);
                 const patientDoc = await getDoc(patientRef);
                 
-                if (patientDoc.exists() && patientDoc.data().info) {
-                    return {
-                        id: patientDoc.id,
-                        ...patientDoc.data().info
-                    };
+                if (patientDoc.exists()) {
+                    console.log(`Found patient document for ID: ${patientId}`);
+                    if (patientDoc.data().info) {
+                        return {
+                            id: patientDoc.id,
+                            ...patientDoc.data().info
+                        };
+                    } else {
+                        console.warn(`Patient document exists but no info field for ID: ${patientId}`);
+                    }
+                } else {
+                    console.warn(`No patient document found for ID: ${patientId}`);
                 }
                 return null;
             } catch (error) {
@@ -905,7 +930,7 @@ async function loadDailyPatientData(hospitalName, dateStr) {
         
     } catch (error) {
         console.error('Error loading daily patient data:', error);
-        patientTableBody.innerHTML = '<tr><td colspan="8" class="error-message">Error loading patient data. Please try again.</td></tr>';
+        patientTableBody.innerHTML = `<tr><td colspan="8" class="error-message">Error loading patient data: ${error.message}</td></tr>`;
     }
 }
 

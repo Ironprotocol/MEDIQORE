@@ -51,62 +51,69 @@ export function initializePatientEdit() {
         radio.addEventListener('change', toggleInsuranceDetails);
     }
     
-    // 폼 제출 이벤트 리스너
-    editPatientForm.addEventListener('submit', handleFormSubmit);
+    // 폼 입력 필드 유효성 검사 이벤트 리스너
+    patientNameInput.addEventListener('blur', validateName);
+    idNumberInput.addEventListener('blur', validateIdNumber);
     
-    // 실시간 유효성 검사 이벤트 리스너 추가
-    patientNameInput.addEventListener('input', validateName);
-    idNumberInput.addEventListener('input', validateIdNumber);
-    phoneInput.addEventListener('input', validatePhone);
+    // 생년월일 필드 유효성 검사
+    birthDayInput.addEventListener('blur', validateBirthDate);
+    birthMonthInput.addEventListener('blur', validateBirthDate);
+    birthYearInput.addEventListener('blur', validateBirthDate);
     
-    // 생년월일 유효성 검사
-    birthDayInput.addEventListener('input', validateBirthDate);
-    birthMonthInput.addEventListener('input', validateBirthDate);
-    birthYearInput.addEventListener('input', validateBirthDate);
+    // 전화번호 필드 유효성 검사
+    phoneInput.addEventListener('blur', validatePhone);
     
-    // 보험 번호 유효성 검사
-    insuranceNumberInput.addEventListener('input', validateInsurance);
+    // 보험 정보 필드 유효성 검사
+    insuranceNumberInput.addEventListener('blur', validateInsurance);
     
-    console.log('Patient edit functionality initialized');
+    // 폼 제출 이벤트 리스너는 openEditPatientModal에서 동적으로 추가됨
 }
 
 // 환자 정보 수정 모달 열기
-export async function openEditPatientModal(patientId) {
+export async function openEditPatientModal(patientId, onSaveCallback) {
     try {
         currentPatientId = patientId;
         
-        // 로딩 상태 표시
-        editPatientForm.style.display = 'none';
-        const loadingIndicator = document.createElement('div');
-        loadingIndicator.className = 'loading-indicator';
-        loadingIndicator.style.display = 'block';
-        editModal.querySelector('.modal-body').appendChild(loadingIndicator);
+        if (!auth.currentUser) {
+            console.error('User not authenticated');
+            return;
+        }
+        
+        const hospitalName = auth.currentUser.email.split('@')[0].split('.')[0];
+        
+        // 환자 데이터 가져오기
+        const patientRef = doc(db, 'hospitals', hospitalName, 'patient', patientId);
+        const patientDoc = await getDoc(patientRef);
+        
+        if (!patientDoc.exists()) {
+            console.error('Patient not found');
+            alert('Patient data not found');
+            return;
+        }
+        
+        const patientData = patientDoc.data().info;
+        originalPatientData = patientData;
+        
+        // 폼에 데이터 채우기
+        populateForm(patientData);
         
         // 모달 표시
         editModal.style.display = 'block';
         
-        // 환자 데이터 가져오기
-        const hospitalName = auth.currentUser.email.split('@')[0].split('.')[0];
-        const patientRef = doc(db, 'hospitals', hospitalName, 'patient', patientId);
-        const patientDoc = await getDoc(patientRef);
+        // 폼 제출 이벤트 리스너 추가 (이전 리스너 제거 후)
+        editPatientForm.removeEventListener('submit', handleFormSubmit);
         
-        if (patientDoc.exists()) {
-            // 로딩 인디케이터 제거
-            loadingIndicator.remove();
-            editPatientForm.style.display = 'block';
-            
-            // 환자 데이터 저장
-            originalPatientData = patientDoc.data().info || {};
-            
-            // 폼에 데이터 채우기
-            populateForm(originalPatientData);
-        } else {
-            throw new Error('Patient not found');
-        }
+        // 콜백을 포함한 새로운 제출 핸들러 생성
+        const submitHandler = async (event) => {
+            await handleFormSubmit(event, onSaveCallback);
+        };
+        
+        // 새로운 이벤트 리스너 등록
+        editPatientForm.addEventListener('submit', submitHandler);
+        
     } catch (error) {
         console.error('Error opening edit modal:', error);
-        alert('Error loading patient data. Please try again.');
-        closeModal();
+        alert('Error loading patient data');
     }
 }
 
@@ -193,7 +200,7 @@ function toggleInsuranceDetails() {
 }
 
 // 폼 제출 처리
-async function handleFormSubmit(event) {
+async function handleFormSubmit(event, onSaveCallback) {
     event.preventDefault();
     
     // 모든 필드 유효성 검사
@@ -227,6 +234,11 @@ async function handleFormSubmit(event) {
         // 성공 메시지 및 모달 닫기
         alert('Patient information updated successfully.');
         closeModal();
+        
+        // 콜백 함수 호출
+        if (onSaveCallback) {
+            onSaveCallback();
+        }
         
     } catch (error) {
         console.error('Error updating patient:', error);

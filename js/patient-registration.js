@@ -406,8 +406,16 @@ async function checkPatientId() {
         if (querySnapshot.empty) {
             console.log(`No patient found with ID: ${idNumber}`);
             alert('Patient information does not exist.');
-            // 폼과 환자 정보 영역 초기화
-            resetRegistrationForm();
+            
+            // 현재 입력된 ID Number 저장
+            const currentIdNumber = document.getElementById('idNumber').value;
+            
+            // 폼과 환자 정보 영역 초기화 (ID Number 제외)
+            resetRegistrationFormExceptId();
+            
+            // ID Number 다시 설정
+            document.getElementById('idNumber').value = currentIdNumber;
+            
             return;
         }
         
@@ -424,6 +432,41 @@ async function checkPatientId() {
     } catch (error) {
         console.error('Error checking patient ID:', error);
         alert('Failed to check patient ID: ' + error.message);
+    }
+}
+
+// ID Number를 제외한 폼 초기화 함수
+function resetRegistrationFormExceptId() {
+    // 기본 필드 초기화 (ID Number 제외)
+    document.getElementById('patientName').value = '';
+    document.getElementById('phoneNumber').value = '';
+    document.getElementById('gender').value = '';
+    
+    // 생년월일 초기화
+    document.getElementById('birthDay').value = '';
+    document.getElementById('birthMonth').value = '';
+    document.getElementById('birthYear').value = '';
+    
+    // 주소 초기화
+    document.getElementById('district').value = '';
+    document.getElementById('city').value = '';
+    document.getElementById('state').value = '';
+    
+    // Primary Complaint 초기화
+    document.getElementById('primaryComplaint').value = '';
+    document.getElementById('otherComplaint').value = '';
+    document.getElementById('otherComplaintContainer').style.display = 'none';
+    
+    // 보험 정보 초기화
+    document.querySelectorAll('input[name="insuranceStatus"]').forEach(radio => radio.checked = false);
+    document.getElementById('insuranceProvider').value = '';
+    document.getElementById('insuranceNumber').value = '';
+    document.querySelector('.insurance-details').style.display = 'none';
+    
+    // 환자 정보 표시 영역 초기화 (방문 기록 포함)
+    const infoBox = document.querySelector('.section-box:last-child');
+    if (infoBox) {
+        infoBox.innerHTML = ''; // 완전히 비우기
     }
 }
 
