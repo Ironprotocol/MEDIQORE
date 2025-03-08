@@ -521,6 +521,7 @@ export function initializePrescription() {
             const ccItem = document.createElement('div');
             ccItem.className = 'cc-item';
             ccItem.innerHTML = `
+                <img src="image/cc.png" alt="CC">
                 <span class="cc-item-text">${cc}</span>
             `;
             ccContainer.appendChild(ccItem);
@@ -635,6 +636,9 @@ export function initializePrescription() {
                 element.disabled = false;
             });
             canvas.style.pointerEvents = 'auto';
+            
+            // 버튼 상태 업데이트 - Save 버튼 활성화, Send 버튼 비활성화
+            updateButtonStates(false);
 
             // 3. 환자 상태 변경
             const currentDate = new Date().toLocaleDateString('en-GB', {

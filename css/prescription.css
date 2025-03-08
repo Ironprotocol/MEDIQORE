@@ -432,6 +432,27 @@
     top: 90px;  /* CC 검색창 아래 */
     left: 10px;
     width: calc(50% - 20px);  /* CC 검색창과 동일한 너비 */
+    max-height: calc(100% - 100px);  /* 컨테이너 높이 제한 */
+    overflow-y: auto;  /* 세로 스크롤 활성화 */
+}
+
+/* 스크롤바 스타일 (Webkit 기반 브라우저) */
+.cc-items-container::-webkit-scrollbar {
+    width: 6px;  /* 얇은 스크롤바 */
+}
+
+.cc-items-container::-webkit-scrollbar-track {
+    background: #f1f1f1;  /* 스크롤바 트랙 색상 */
+    border-radius: 3px;
+}
+
+.cc-items-container::-webkit-scrollbar-thumb {
+    background: #ccc;  /* 스크롤바 색상 */
+    border-radius: 3px;
+}
+
+.cc-items-container::-webkit-scrollbar-thumb:hover {
+    background: #aaa;  /* 스크롤바 호버 색상 */
 }
 
 .cc-item {
@@ -523,6 +544,27 @@
     top: 90px;
     right: 10px;
     width: calc(50% - 20px);
+    max-height: calc(100% - 100px);  /* 컨테이너 높이 제한 */
+    overflow-y: auto;  /* 세로 스크롤 활성화 */
+}
+
+/* 스크롤바 스타일 (Webkit 기반 브라우저) */
+.medicine-items-container::-webkit-scrollbar {
+    width: 6px;  /* 얇은 스크롤바 */
+}
+
+.medicine-items-container::-webkit-scrollbar-track {
+    background: #f1f1f1;  /* 스크롤바 트랙 색상 */
+    border-radius: 3px;
+}
+
+.medicine-items-container::-webkit-scrollbar-thumb {
+    background: #ccc;  /* 스크롤바 색상 */
+    border-radius: 3px;
+}
+
+.medicine-items-container::-webkit-scrollbar-thumb:hover {
+    background: #aaa;  /* 스크롤바 호버 색상 */
 }
 
 .medicine-item {
@@ -774,6 +816,12 @@
     margin-right: 15px;
     font-size: 12px;
     color: #555;
+}
+
+/* Firefox용 스크롤바 스타일 */
+.cc-items-container, .medicine-items-container {
+    scrollbar-width: thin;
+    scrollbar-color: #ccc #f1f1f1;
 }
 
 
