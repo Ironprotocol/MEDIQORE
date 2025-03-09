@@ -170,36 +170,287 @@ export function initializePrescription() {
     
     // 프린트 버튼 클릭 이벤트 추가
     printBtn.addEventListener('click', () => {
-        const prescriptionContent = document.querySelector('.prescription-layout');
-        const originalContents = document.body.innerHTML;
-        const printContents = prescriptionContent.innerHTML;
-        
-        // 프린트용 스타일 추가
-        document.body.innerHTML = `
-            <div class="print-container">
-                ${printContents}
-            </div>
-            <style>
-                .print-container {
-                    padding: 20px;
-                }
-                @media print {
-                    body {
-                        padding: 0;
-                        margin: 0;
+        try {
+            // 환자 정보 가져오기
+            const patientInfo = document.querySelector('#prescription-content .content-title-prescription').innerHTML;
+            
+            // 의사 정보 및 병원 정보 (현재 로그인한 사용자 기반)
+            const hospitalName = auth.currentUser.email.split('@')[0].split('.')[0];
+            
+            // 캔버스 이미지 가져오기 - 치아 배경과 그림 함께 캡처
+            const canvas = document.querySelector('.tooth-chart-canvas');
+            const toothImg = document.querySelector('.tooth-chart-img');
+            
+            // 새 캔버스 생성하여 치아 이미지와 캔버스 내용 합성
+            const mergedCanvas = document.createElement('canvas');
+            const ctx = mergedCanvas.getContext('2d');
+            
+            // 캔버스 크기 설정
+            mergedCanvas.width = canvas.width;
+            mergedCanvas.height = canvas.height;
+            
+            // 이미지 로딩 및 인쇄 처리 함수
+            const loadImageAndPrint = () => {
+                const img = new Image();
+                img.onload = () => {
+                    // 배경 이미지(치아 차트) 그리기
+                    ctx.drawImage(img, 0, 0, mergedCanvas.width, mergedCanvas.height);
+                    
+                    // 그 위에 캔버스 내용 그리기
+                    ctx.drawImage(canvas, 0, 0);
+                    
+                    // 차트 이미지를 데이터 URL로 변환
+                    const chartImage = mergedCanvas.toDataURL('image/png');
+                    
+                    // 현재 날짜 포맷팅
+                    const today = new Date();
+                    const formattedDate = today.toLocaleDateString('en-GB', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric'
+                    });
+                    
+                    // 현재 증상, 위치, 치료 세부사항 가져오기
+                    const symptoms = document.querySelector('.symptoms-input')?.value || 'N/A';
+                    const location = document.querySelector('.location-input')?.value || 'N/A';
+                    const treatmentDetails = document.querySelector('.treatment-details-input')?.value || 'N/A';
+                    
+                    // CC 항목 가져오기
+                    const ccItems = Array.from(document.querySelectorAll('.cc-item .cc-item-text'))
+                        .map(item => item.textContent)
+                        .join(', ') || 'None';
+                    
+                    // 약물 항목 가져오기
+                    let medicinesHTML = '';
+                    const medicineItems = document.querySelectorAll('.medicine-item');
+                    
+                    if (medicineItems.length > 0) {
+                        medicinesHTML = Array.from(medicineItems).map(item => {
+                            const name = item.querySelector('.medicine-item-text')?.textContent || 'Unknown Medicine';
+                            
+                            // 입력 필드 또는 텍스트 정보에서 안전하게 값 가져오기
+                            let doseInput = 'N/A';
+                            let frequencyInput = 'N/A';
+                            let durationInput = 'N/A';
+                            
+                            // 입력 필드 확인
+                            const doseElement = item.querySelector('.dose-input');
+                            const frequencyElement = item.querySelector('.frequency-input');
+                            const durationElement = item.querySelector('.duration-input');
+                            
+                            // 텍스트 정보 확인 (히스토리에서 로드된 경우)
+                            const textInfoSpans = item.querySelectorAll('.medicine-text-info span');
+                            
+                            if (doseElement && doseElement.value !== undefined) {
+                                doseInput = doseElement.value || 'N/A';
+                            } else if (textInfoSpans && textInfoSpans[0]) {
+                                doseInput = textInfoSpans[0].textContent || 'N/A';
+                            }
+                            
+                            if (frequencyElement && frequencyElement.value !== undefined) {
+                                frequencyInput = frequencyElement.value || 'N/A';
+                            } else if (textInfoSpans && textInfoSpans[1]) {
+                                frequencyInput = textInfoSpans[1].textContent || 'N/A';
+                            }
+                            
+                            if (durationElement && durationElement.value !== undefined) {
+                                durationInput = durationElement.value || 'N/A';
+                            } else if (textInfoSpans && textInfoSpans[2]) {
+                                durationInput = textInfoSpans[2].textContent || 'N/A';
+                            }
+                            
+                            return `
+                                <div class="medicine-item">
+                                    <div>${name}</div>
+                                    <div class="medicine-details">
+                                        Dose: ${doseInput} | Frequency: ${frequencyInput} | Duration: ${durationInput}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    } else {
+                        medicinesHTML = '<div>No medicines prescribed</div>';
                     }
-                    .print-container {
-                        width: 100%;
-                    }
-                }
-            </style>
-        `;
-        
-        window.print();
-        document.body.innerHTML = originalContents;
-        
-        // 이벤트 리스너 재설정
-        initializePrescription();
+                    
+                    // 인쇄를 위한 iframe 생성 (화면에 표시되지 않음)
+                    const printFrame = document.createElement('iframe');
+                    printFrame.style.position = 'fixed';
+                    printFrame.style.left = '-9999px';
+                    printFrame.name = 'printFrame';
+                    document.body.appendChild(printFrame);
+                    
+                    // iframe 내용 작성 (인쇄될 처방전 양식)
+                    printFrame.contentDocument.write(`
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <title>Medical Prescription - ${hospitalName}</title>
+                            <style>
+                                body {
+                                    font-family: Arial, sans-serif;
+                                    padding: 20px;
+                                    margin: 0;
+                                    color: #333;
+                                }
+                                .print-header {
+                                    display: flex;
+                                    justify-content: space-between;
+                                    border-bottom: 2px solid #333;
+                                    padding-bottom: 10px;
+                                    margin-bottom: 20px;
+                                }
+                                .hospital-info {
+                                    font-weight: bold;
+                                    font-size: 18px;
+                                }
+                                .date-info {
+                                    text-align: right;
+                                }
+                                .patient-info {
+                                    margin-bottom: 15px;
+                                    padding: 10px;
+                                    background-color: #f8f8f8;
+                                    border-radius: 5px;
+                                }
+                                /* 성별 이미지 크기 조정 */
+                                .patient-info img, .gender-icon {
+                                    width: 10px;
+                                    height: 14.5px;
+                                    vertical-align: middle;
+                                    margin: 0 5px;
+                                }
+                                .section-title {
+                                    font-weight: bold;
+                                    margin-top: 15px;
+                                    border-bottom: 1px solid #ccc;
+                                    padding-bottom: 5px;
+                                }
+                                .chart-container {
+                                    margin: 15px 0;
+                                    text-align: center;
+                                }
+                                .chart-image {
+                                    max-width: 100%;
+                                    height: auto;
+                                    border: 1px solid #ddd;
+                                }
+                                .detail-section {
+                                    margin: 15px 0;
+                                }
+                                .detail-label {
+                                    font-weight: bold;
+                                    margin-bottom: 5px;
+                                }
+                                .detail-content {
+                                    padding: 5px;
+                                    background-color: #f8f8f8;
+                                    border-radius: 3px;
+                                }
+                                .cc-items {
+                                    margin: 10px 0;
+                                }
+                                .medicine-item {
+                                    margin: 8px 0;
+                                    padding: 8px;
+                                    background-color: #f0f0f0;
+                                    border-radius: 3px;
+                                }
+                                .medicine-details {
+                                    font-size: 0.9em;
+                                    color: #666;
+                                    margin-top: 4px;
+                                }
+                                .footer {
+                                    margin-top: 30px;
+                                    border-top: 1px solid #ccc;
+                                    padding-top: 10px;
+                                    text-align: right;
+                                    font-style: italic;
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="print-container">
+                                <div class="print-header">
+                                    <div class="hospital-info">
+                                        ${hospitalName.toUpperCase()} HOSPITAL
+                                    </div>
+                                    <div class="date-info">
+                                        <div>Date: ${formattedDate}</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="patient-info">
+                                    ${patientInfo}
+                                </div>
+                                
+                                <div class="section-title">Medical Records</div>
+                                <div class="chart-container">
+                                    <img src="${chartImage}" alt="Dental Chart" class="chart-image">
+                                </div>
+                                
+                                <div class="detail-section">
+                                    <div class="detail-label">Symptoms</div>
+                                    <div class="detail-content">${symptoms}</div>
+                                </div>
+                                
+                                <div class="detail-section">
+                                    <div class="detail-label">Location</div>
+                                    <div class="detail-content">${location}</div>
+                                </div>
+                                
+                                <div class="detail-section">
+                                    <div class="detail-label">Treatment Details</div>
+                                    <div class="detail-content">${treatmentDetails}</div>
+                                </div>
+                                
+                                <div class="section-title">Diagnosis & Prescription</div>
+                                
+                                <div class="detail-section">
+                                    <div class="detail-label">Chief Complaints (CC)</div>
+                                    <div class="detail-content">${ccItems}</div>
+                                </div>
+                                
+                                <div class="detail-section">
+                                    <div class="detail-label">Medicines</div>
+                                    <div class="medicines-container">
+                                        ${medicinesHTML}
+                                    </div>
+                                </div>
+                                
+                                <div class="footer">
+                                    <div>Doctor's Signature: ____________________</div>
+                                </div>
+                            </div>
+                        </body>
+                        </html>
+                    `);
+                    
+                    printFrame.contentDocument.close();
+                    
+                    // 잠시 대기 후 인쇄 실행 (내용이 완전히 로드되도록)
+                    setTimeout(() => {
+                        printFrame.contentWindow.focus();
+                        printFrame.contentWindow.print();
+                        
+                        // 인쇄 대화상자가 닫히면 iframe 제거
+                        setTimeout(() => {
+                            document.body.removeChild(printFrame);
+                        }, 100);
+                    }, 500);
+                };
+                
+                // 치아 이미지 로드
+                img.src = toothImg.src;
+            };
+            
+            // 이미지 로딩 및 인쇄 실행
+            loadImageAndPrint();
+            
+        } catch (error) {
+            console.error('Error generating print document:', error);
+            alert('Failed to prepare document for printing. Please try again.');
+        }
     });
 
     // Save 버튼 추가 (프린터 버튼 왼쪽에)
