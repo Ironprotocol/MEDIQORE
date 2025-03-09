@@ -261,16 +261,13 @@ export function initializeCanvas(currentPatientId, currentRegisterDate) {
     controlsDiv.className = 'chart-controls';
     controlsDiv.innerHTML = `
         <button class="undo-btn">Undo</button>
-        <button class="clear-btn">Clear</button>
     `;
     document.querySelector('.prescription-center-top').appendChild(controlsDiv);
 
     // 이벤트 리스너 설정 - 직접 버튼 요소 가져오기
     const undoBtn = controlsDiv.querySelector('.undo-btn');
-    const clearBtn = controlsDiv.querySelector('.clear-btn');
 
     undoBtn.addEventListener('click', undo);
-    clearBtn.addEventListener('click', clearCanvas);
     
     // 이벤트 리스너 등록 전에 기존 리스너 제거
     function removeOldListeners() {
@@ -575,7 +572,6 @@ export function createForms() {
     controlsDiv.className = 'chart-controls';
     controlsDiv.innerHTML = `
         <button class="undo-btn">Undo</button>
-        <button class="clear-btn">Clear</button>
     `;
     document.querySelector('.prescription-center-top').appendChild(controlsDiv);
 }

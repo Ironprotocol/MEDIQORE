@@ -157,9 +157,6 @@ export function initializePrescription() {
             
             // Canvas 비활성화
             document.querySelector('.tooth-chart-canvas').style.pointerEvents = 'none';
-            
-            // Clear 버튼 비활성화
-            document.querySelector('.clear-btn').disabled = true;
         });
         
         // 초기 상태는 저장되지 않은 상태로 설정
@@ -679,7 +676,7 @@ export function initializePrescription() {
         }
 
         // 모든 입력 필드와 버튼 비활성화
-        document.querySelectorAll('.cc-search-input, .medicine-search-input, .symptoms-input, .location-input, .treatment-details-input, .clear-btn').forEach(element => {
+        document.querySelectorAll('.cc-search-input, .medicine-search-input, .symptoms-input, .location-input, .treatment-details-input').forEach(element => {
             element.disabled = true;
         });
 
@@ -739,7 +736,7 @@ export function initializePrescription() {
             }
 
             // 모든 입력 요소 활성화
-            document.querySelectorAll('.cc-search-input, .medicine-search-input, .symptoms-input, .location-input, .treatment-details-input, .clear-btn').forEach(element => {
+            document.querySelectorAll('.cc-search-input, .medicine-search-input, .symptoms-input, .location-input, .treatment-details-input').forEach(element => {
                 element.disabled = false;
             });
             canvas.style.pointerEvents = 'auto';
