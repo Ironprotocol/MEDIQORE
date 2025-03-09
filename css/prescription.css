@@ -698,6 +698,29 @@
     background-color: rgb(0, 82, 204);
 }
 
+/* Delete 버튼 스타일 */
+.delete-btn {
+    position: absolute;
+    right: 365px;
+    width: 80px;
+    height: 33px;
+    border: none;
+    border-radius: 6px;
+    background-color: #ff3333;
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.delete-btn:hover {
+    background-color: #cc0000;
+}
+
+.delete-btn.disabled {
+    background-color: #ffcccc;
+    cursor: not-allowed;
+}
 
 /* Send 버튼 스타일 수정 */
 .send-btn {

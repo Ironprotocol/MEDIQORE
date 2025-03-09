@@ -1,4 +1,4 @@
-import { auth, db, doc, getDoc, setDoc, collection, getDocs, serverTimestamp, updateDoc, deleteDoc } from './firebase-config.js';
+import { auth, db, doc, getDoc, setDoc, collection, getDocs, serverTimestamp, updateDoc, deleteDoc, deleteField, EmailAuthProvider, reauthenticateWithCredential } from './firebase-config.js';
 import { initializePrescriptionHistory } from './prescriptHistory.js';
 import { initializeCanvas, clearCanvas } from './prescription_canvas.js';
 import { printPrescription } from './prescription_print.js';
@@ -184,11 +184,19 @@ export function initializePrescription() {
         });
     });
 
+    // Delete 버튼 추가 (Save 버튼 왼쪽에)
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'delete-btn';
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.disabled = true;
+    deleteBtn.classList.add('disabled');
+    
     // Save 버튼 추가 (프린터 버튼 왼쪽에)
     const saveBtn = document.createElement('button');
     saveBtn.className = 'save-btn';
     saveBtn.textContent = 'Save';
     document.querySelector('.content-footer-prescription').insertBefore(saveBtn, printBtn);
+    document.querySelector('.content-footer-prescription').insertBefore(deleteBtn, saveBtn);
 
     // 수납실 선택 드롭다운 추가
     const deskSelect = document.createElement('select');
@@ -479,6 +487,130 @@ export function initializePrescription() {
         } catch (error) {
             console.error('Error sending patient to desk:', error);
             alert(`Failed to send patient: ${error.message}`);
+        }
+    });
+
+    // Delete 버튼 클릭 이벤트 추가
+    deleteBtn.addEventListener('click', async () => {
+        try {
+            // 버튼이 비활성화 상태면 무시
+            if (deleteBtn.disabled) {
+                return;
+            }
+
+            // 환자 이름 가져오기
+            const patientNameElement = document.querySelector('.patient-name');
+            const patientName = patientNameElement ? patientNameElement.textContent : 'this patient';
+
+            // 삭제 확인
+            if (!confirm(`Are you sure you want to delete the prescription for ${patientName}?`)) {
+                return;
+            }
+
+            // 비밀번호 확인
+            const password = prompt('Please enter your password to confirm deletion:');
+            if (!password) {
+                return;
+            }
+
+            // 현재 사용자 재인증
+            const credential = EmailAuthProvider.credential(
+                auth.currentUser.email,
+                password
+            );
+
+            try {
+                // 재인증 시도
+                await reauthenticateWithCredential(auth.currentUser, credential);
+            } catch (authError) {
+                console.error('Authentication failed:', authError);
+                alert('Authentication failed. Incorrect password.');
+                return;
+            }
+
+            if (!currentPatientId || !currentRegisterDate) {
+                throw new Error('Patient information not found');
+            }
+
+            const [hospitalName] = auth.currentUser.email.split('@')[0].split('.');
+
+            // 처방전 데이터 삭제
+            const prescriptionRef = doc(db, 'hospitals', hospitalName, 'patient', currentPatientId, 'register.date', currentRegisterDate);
+            
+            await updateDoc(prescriptionRef, {
+                prescription: deleteField(),
+                chartImage: deleteField(),
+                progress: 'active'  // 상태를 active로 되돌림
+            });
+
+            // 상태 업데이트 (날짜 컬렉션)
+            const today = new Date();
+            const currentDate = today.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            }).replace(/ /g, '.');
+
+            // payment 컬렉션에서 환자 찾기 및 active로 이동
+            const paymentDocRef = doc(db, 'hospitals', hospitalName, 'dates', currentDate, 'payment', currentPatientId);
+            const paymentDocSnap = await getDoc(paymentDocRef);
+            
+            if (paymentDocSnap.exists()) {
+                const patientData = paymentDocSnap.data();
+                // payment 문서 삭제
+                await deleteDoc(paymentDocRef);
+                // active 컬렉션으로 이동
+                await setDoc(doc(db, 'hospitals', hospitalName, 'dates', currentDate, 'active', currentPatientId), {
+                    ...patientData,
+                    progress: 'active'
+                });
+            }
+
+            // treatment.room의 patients 배열 업데이트
+            const roomsRef = collection(db, 'hospitals', hospitalName, 'treatment.room');
+            const roomsSnapshot = await getDocs(roomsRef);
+            
+            for (const roomDoc of roomsSnapshot.docs) {
+                const roomData = roomDoc.data();
+                if (roomData.patients) {
+                    const updatedPatients = roomData.patients.map(patient => {
+                        if (patient.id === currentPatientId) {
+                            return { ...patient, progress: 'active' };
+                        }
+                        return patient;
+                    });
+
+                    if (JSON.stringify(roomData.patients) !== JSON.stringify(updatedPatients)) {
+                        await updateDoc(roomDoc.ref, { patients: updatedPatients });
+                    }
+                }
+            }
+
+            // 폼 초기화
+            document.querySelector('.symptoms-input').value = '';
+            document.querySelector('.location-input').value = '';
+            document.querySelector('.treatment-details-input').value = '';
+            document.querySelectorAll('.cc-item').forEach(item => item.remove());
+            document.querySelectorAll('.medicine-item').forEach(item => item.remove());
+            
+            // Canvas 초기화
+            const canvas = document.querySelector('.tooth-chart-canvas');
+            if (canvas) {
+                clearCanvas(canvas);
+                initializeCanvas(currentPatientId, currentRegisterDate);
+            }
+
+            // 버튼 상태 업데이트
+            updateButtonStates(false);
+            
+            // History UI 업데이트
+            await initializePrescriptionHistory(currentPatientId);
+            
+            alert('Prescription deleted successfully!');
+            
+        } catch (error) {
+            console.error('Failed to delete prescription:', error);
+            alert(`Failed to delete prescription: ${error.message}`);
         }
     });
 
@@ -1000,6 +1132,7 @@ function setupKeyboardNavigation(searchInput, autocompleteContainer, addItemFunc
 function updateButtonStates(isSaved) {
     const saveBtn = document.querySelector('.save-btn');
     const sendBtn = document.querySelector('.send-btn');
+    const deleteBtn = document.querySelector('.delete-btn');
     
     if (isSaved) {
         // 저장된 처방전인 경우
@@ -1008,6 +1141,9 @@ function updateButtonStates(isSaved) {
         
         sendBtn.disabled = false;
         sendBtn.classList.remove('disabled');
+        
+        deleteBtn.disabled = false;
+        deleteBtn.classList.remove('disabled');
     } else {
         // 저장되지 않은 처방전인 경우
         saveBtn.disabled = false;
@@ -1015,5 +1151,8 @@ function updateButtonStates(isSaved) {
         
         sendBtn.disabled = true;
         sendBtn.classList.add('disabled');
+        
+        deleteBtn.disabled = true;
+        deleteBtn.classList.add('disabled');
     }
 }

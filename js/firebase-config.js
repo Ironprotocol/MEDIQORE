@@ -1,6 +1,6 @@
       // Firebase SDK 임포트
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
-      import { getAuth } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
+      import { getAuth, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
       import { 
           getFirestore, 
           doc, 
@@ -15,7 +15,8 @@
           Timestamp,
           onSnapshot,
           orderBy,
-          deleteDoc
+          deleteDoc,
+          deleteField
       } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
                                                                                                                                                                                                     
       // Firebase 초기화
@@ -49,5 +50,8 @@
           Timestamp,
           onSnapshot,
           orderBy,
-          deleteDoc
+          deleteDoc,
+          EmailAuthProvider,
+          reauthenticateWithCredential,
+          deleteField
       };
