@@ -574,6 +574,9 @@ export function initializePrescription() {
                 document.dispatchEvent(canvasEvent);
             }
         }
+        
+        // 버튼 상태 업데이트 - 이미 저장된 처방전이므로 Save 버튼 비활성화, Send 버튼 활성화
+        updateButtonStates(true);
     });
 
     // New Chart 버튼 클릭 시 초기화할 때는 다시 활성화
