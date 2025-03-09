@@ -2,10 +2,71 @@
 export function printPrescription() {
     try {
         // 환자 정보 가져오기
-        const patientInfo = document.querySelector('#prescription-content .content-title-prescription').innerHTML;
+        const patientInfoElement = document.querySelector('#prescription-content .content-title-prescription');
+        
+        // 환자 이름 추출 (첫 번째 span 요소)
+        const nameElement = patientInfoElement.querySelector('span[style*="font-weight: bold"]');
+        const patientName = nameElement ? nameElement.textContent.trim() : 'N/A';
+        
+        // 성별 추출 (gender-icon 클래스의 이미지 src에서)
+        const genderIcon = patientInfoElement.querySelector('.gender-icon');
+        let gender = 'N/A';
+        if (genderIcon) {
+            // 이미지 src에서 파일명만 추출
+            const srcParts = genderIcon.src.split('/');
+            const filename = srcParts[srcParts.length - 1].toLowerCase();
+            
+            if (filename.includes('male')) {
+                // 인쇄 시 상대 경로 문제를 피하기 위해 base64 인코딩된 이미지 사용
+                gender = '<span style="color: blue;">♂ Male</span>';
+            } else if (filename.includes('female')) {
+                gender = '<span style="color: pink;">♀ Female</span>';
+            }
+        }
+        
+        // 나이 추출 (두 번째 span 요소)
+        const ageElement = patientInfoElement.querySelector('span[style*="margin-right: 5px"]');
+        let age = 'N/A';
+        if (ageElement) {
+            // "17y"와 같은 형식에서 숫자만 추출
+            const ageMatch = ageElement.textContent.match(/(\d+)y/);
+            if (ageMatch && ageMatch[1]) {
+                age = ageMatch[1];
+            } else {
+                age = ageElement.textContent.trim();
+            }
+        }
+        
+        // 생년월일 추출 (세 번째 span 요소)
+        const birthDateElement = patientInfoElement.querySelector('span[style*="color: #666"]');
+        let birthdate = 'N/A';
+        if (birthDateElement) {
+            // 괄호 제거하고 추출
+            const birthdateMatch = birthDateElement.textContent.match(/\((.*?)\)/);
+            if (birthdateMatch && birthdateMatch[1]) {
+                birthdate = birthdateMatch[1].trim();
+            }
+        }
         
         // 의사 정보 및 병원 정보 (현재 로그인한 사용자 기반)
         const hospitalName = auth.currentUser.email.split('@')[0].split('.')[0];
+        
+        // 현재 날짜 및 시간 포맷팅 (인쇄 일자용)
+        const now = new Date();
+        const printDate = now.toLocaleDateString('en-US', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+        
+        const printTime = now.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+        
+        // 처방전 작성 일자 (현재 날짜 사용)
+        const prescriptionDate = printDate;
         
         // 캔버스 이미지 가져오기 - 치아 배경과 그림 함께 캡처
         const canvas = document.querySelector('.tooth-chart-canvas');
@@ -77,14 +138,6 @@ export function printPrescription() {
             `;
         }
         
-        // 현재 날짜 포맷팅
-        const today = new Date();
-        const formattedDate = today.toLocaleDateString('en-GB', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric'
-        });
-        
         // 캔버스 이미지 데이터 URL 가져오기 (prescription_canvas.js의 함수 사용)
         const chartImagePromise = new Promise((resolve) => {
             // 이벤트를 생성하여 canvas 모듈에게 이미지 데이터 요청
@@ -112,89 +165,215 @@ export function printPrescription() {
                 <head>
                     <title>Prescription</title>
                     <style>
-                        body { font-family: Arial, sans-serif; margin: 20px; }
-                        .prescription-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
-                        .patient-info { margin-bottom: 15px; }
-                        .chart-image { 
-                            width: 400px; 
-                            height: 400px; 
-                            object-fit: contain; 
-                            margin: 10px 0; 
-                            display: block;
+                        body { 
+                            font-family: Arial, sans-serif; 
+                            margin: 20px;
+                            font-size: 12px;
                         }
-                        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                        th { background-color: #f2f2f2; }
-                        .section { margin-bottom: 20px; }
-                        .section-title { font-weight: bold; margin-bottom: 5px; }
-                        /* 성별 이미지 크기 조정 */
-                        .patient-info img, .gender-icon {
-                            width: 10px;
-                            height: 14.5px;
+                        /* 인쇄 시 배경색이 표시되도록 설정 */
+                        @media print {
+                            * {
+                                -webkit-print-color-adjust: exact !important;
+                                print-color-adjust: exact !important;
+                                color-adjust: exact !important;
+                            }
+                        }
+                        .hospital-name {
+                            font-size: 14px;
+                            margin-bottom: 5px;
+                            float: left;
+                        }
+                        .prescription-date {
+                            font-size: 12px;
+                            float: right;
+                            text-align: right;
+                            margin-bottom: 5px;
+                        }
+                        .clearfix::after {
+                            content: "";
+                            clear: both;
+                            display: table;
+                        }
+                        .chart-title {
+                            font-size: 20px;
+                            font-weight: bold;
+                            text-align: center;
+                            margin: 10px 0 15px 0;
+                            clear: both;
+                        }
+                        table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin-bottom: 15px;
+                            table-layout: fixed;
+                        }
+                        th, td {
+                            border: 1px solid #000;
+                            padding: 8px;
+                            text-align: left;
+                            vertical-align: middle;
+                        }
+                        th {
+                            background-color: rgb(217, 217, 217) !important;
+                            font-weight: bold;
+                            color: black !important;
+                        }
+                        .chart-image-cell {
+                            text-align: center;
+                            vertical-align: middle;
+                            padding: 0;
+                            position: relative;
+                            border: 1px solid #000;
+                        }
+                        .chart-image { 
+                            max-width: 95%; 
+                            max-height: 480px; 
+                            object-fit: contain; 
+                            margin: 0 auto;
+                            display: block;
+                            position: relative;
+                            top: 10px;
+                        }
+                        .inner-table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin: 0;
+                        }
+                        .inner-table th, .inner-table td {
+                            border: 1px solid #000;
+                            padding: 8px;
+                        }
+                        .inner-table th {
+                            background-color: #f2f2f2;
+                            font-weight: bold;
+                        }
+                        .section-title {
+                            font-weight: bold;
+                            width: 150px;
+                            vertical-align: middle;
+                            background-color: rgb(217, 217, 217) !important;
+                            color: black !important;
+                        }
+                        .treatment-details-title {
+                            font-weight: bold;
+                            background-color: rgb(217, 217, 217) !important;
+                            text-align: center;
+                            color: black !important;
+                        }
+                        .signature-cell {
+                            text-align: right;
+                            border: none;
+                            padding-top: 30px;
+                        }
+                        .signature-line {
+                            display: inline-block;
+                            width: 200px;
+                            border-bottom: 1px solid #000;
+                            text-align: center;
+                            padding-top: 20px;
+                        }
+                        .medicine-table {
+                            margin-top: 15px;
+                        }
+                        .medicine-title {
+                            font-weight: bold;
+                            margin: 15px 0 5px 0;
+                            text-align: center;
+                            font-size: 14px;
+                        }
+                        /* 성별 이미지 크기 정확히 설정 */
+                        .gender-icon, img.gender-icon {
+                            width: 10px !important;
+                            height: 14.5px !important;
                             vertical-align: middle;
                             margin: 0 5px;
+                            object-fit: contain;
+                        }
+                        .print-info {
+                            text-align: right;
+                            font-size: 10px;
+                            color: #666;
+                            margin-top: 20px;
                         }
                     </style>
                 </head>
                 <body>
-                    <div class="prescription-header">
-                        <div>
-                            <h2>${hospitalName.toUpperCase()} Hospital</h2>
-                            <p>Prescription</p>
-                        </div>
-                        <div>
-                            <p>Date: ${formattedDate}</p>
-                        </div>
+                    <div class="clearfix">
+                        <div class="hospital-name">${hospitalName.toUpperCase()} Hospital</div>
+                        <div class="prescription-date">Date: ${prescriptionDate}</div>
+                    </div>
+                    <div class="chart-title">Treatment Chart</div>
+                    
+                    <table>
+                        <tr>
+                            <th width="25%" style="background-color: rgb(217, 217, 217) !important; color: black !important;">Name</th>
+                            <th width="25%" style="background-color: rgb(217, 217, 217) !important; color: black !important;">Gender</th>
+                            <th width="25%" style="background-color: rgb(217, 217, 217) !important; color: black !important;">Years</th>
+                            <th width="25%" style="background-color: rgb(217, 217, 217) !important; color: black !important;">Birthdate</th>
+                        </tr>
+                        <tr>
+                            <td>${patientName}</td>
+                            <td>${gender}</td>
+                            <td>${age}</td>
+                            <td>${birthdate}</td>
+                        </tr>
+                    </table>
+                    
+                    <table style="height: 500px;">
+                        <tr style="height: 40px;">
+                            <th width="30%" style="background-color: rgb(217, 217, 217) !important; color: black !important;">CC</th>
+                            <td width="70%" rowspan="6" class="chart-image-cell">
+                                ${chartImage ? `<img src="${chartImage}" class="chart-image" alt="Dental Chart">` : '<p>No chart available</p>'}
+                            </td>
+                        </tr>
+                        <tr style="height: 100px;">
+                            <td style="vertical-align: top;">${ccItems}</td>
+                        </tr>
+                        <tr style="height: 40px;">
+                            <th style="background-color: rgb(217, 217, 217) !important; color: black !important;">Location</th>
+                        </tr>
+                        <tr style="height: 100px;">
+                            <td style="vertical-align: top;">${location}</td>
+                        </tr>
+                        <tr style="height: 40px;">
+                            <th style="background-color: rgb(217, 217, 217) !important; color: black !important;">Symptoms</th>
+                        </tr>
+                        <tr style="height: 180px;">
+                            <td style="vertical-align: top;">${symptoms}</td>
+                        </tr>
+                    </table>
+                    
+                    <table>
+                        <tr>
+                            <th class="treatment-details-title" style="background-color: rgb(217, 217, 217) !important; color: black !important;">Treatment Details</th>
+                        </tr>
+                        <tr>
+                            <td>${treatmentDetails}</td>
+                        </tr>
+                    </table>
+                    
+                    <div class="medicine-title">Prescribed Medicines</div>
+                    <table class="medicine-table">
+                        <thead>
+                            <tr>
+                                <th>Medicine</th>
+                                <th>Dose</th>
+                                <th>Frequency</th>
+                                <th>Duration</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${medicinesHTML}
+                        </tbody>
+                    </table>
+                    
+                    <div class="signature-cell">
+                        <div>Doctor's Signature</div>
+                        <div class="signature-line"></div>
                     </div>
                     
-                    <div class="patient-info">
-                        <p><strong>Patient:</strong> ${patientInfo}</p>
-                    </div>
-                    
-                    <div class="section">
-                        <div class="section-title">Chief Complaints:</div>
-                        <p>${ccItems}</p>
-                    </div>
-                    
-                    <div class="section">
-                        <div class="section-title">Symptoms:</div>
-                        <p>${symptoms}</p>
-                    </div>
-                    
-                    <div class="section">
-                        <div class="section-title">Location:</div>
-                        <p>${location}</p>
-                    </div>
-                    
-                    <div class="section">
-                        <div class="section-title">Dental Chart:</div>
-                        ${chartImage ? `<img src="${chartImage}" class="chart-image" alt="Dental Chart">` : '<p>No chart available</p>'}
-                    </div>
-                    
-                    <div class="section">
-                        <div class="section-title">Treatment Details:</div>
-                        <p>${treatmentDetails}</p>
-                    </div>
-                    
-                    <div class="section">
-                        <div class="section-title">Prescribed Medicines:</div>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Medicine</th>
-                                    <th>Dose</th>
-                                    <th>Frequency</th>
-                                    <th>Duration</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${medicinesHTML}
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div style="margin-top: 50px; text-align: right;">
-                        <p>Doctor's Signature: ____________________</p>
+                    <div class="print-info">
+                        Printed on: ${printDate} at ${printTime}
                     </div>
                 </body>
                 </html>
@@ -225,3 +404,4 @@ export function printPrescription() {
 
 // Firebase 모듈 가져오기
 import { auth } from './firebase-config.js';
+
