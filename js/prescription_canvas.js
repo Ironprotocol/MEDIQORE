@@ -156,18 +156,22 @@ document.addEventListener('getChartImageForPrint', function(e) {
     const mergedCanvas = document.createElement('canvas');
     const ctx = mergedCanvas.getContext('2d');
     
+    // 인쇄용 고정 크기 설정 (화면 크기와 무관하게 일정한 크기로 출력)
+    const fixedWidth = 500;  // 고정 너비
+    const fixedHeight = 500; // 고정 높이
+    
     // 캔버스 크기 설정
-    mergedCanvas.width = canvas.width;
-    mergedCanvas.height = canvas.height;
+    mergedCanvas.width = fixedWidth;
+    mergedCanvas.height = fixedHeight;
     
     // 이미지 로딩 및 처리
     const img = new Image();
     img.onload = function() {
         // 배경 이미지(치아 차트) 그리기
-        ctx.drawImage(img, 0, 0, mergedCanvas.width, mergedCanvas.height);
+        ctx.drawImage(img, 0, 0, fixedWidth, fixedHeight);
         
-        // 그 위에 캔버스 내용 그리기
-        ctx.drawImage(canvas, 0, 0);
+        // 현재 캔버스의 내용을 가져와서 고정 크기로 그리기
+        ctx.drawImage(canvas, 0, 0, canvas.width, canvas.height, 0, 0, fixedWidth, fixedHeight);
         
         // 차트 이미지를 데이터 URL로 변환
         const chartImage = mergedCanvas.toDataURL('image/png');

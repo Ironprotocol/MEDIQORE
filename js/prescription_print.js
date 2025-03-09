@@ -115,7 +115,13 @@ export function printPrescription() {
                         body { font-family: Arial, sans-serif; margin: 20px; }
                         .prescription-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
                         .patient-info { margin-bottom: 15px; }
-                        .chart-image { max-width: 100%; height: auto; margin: 10px 0; }
+                        .chart-image { 
+                            width: 400px; 
+                            height: 400px; 
+                            object-fit: contain; 
+                            margin: 10px 0; 
+                            display: block;
+                        }
                         table { width: 100%; border-collapse: collapse; margin: 15px 0; }
                         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
                         th { background-color: #f2f2f2; }
