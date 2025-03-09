@@ -1,5 +1,6 @@
 import { auth, db, doc, getDoc, setDoc, collection, getDocs, serverTimestamp, updateDoc, deleteDoc } from './firebase-config.js';
 import { initializePrescriptionHistory } from './prescriptHistory.js';
+import { initializeCanvas, clearCanvas } from './prescription_canvas.js';
 
 // Prescription 컨테이너 초기화
 export function initializePrescription() {
@@ -12,12 +13,8 @@ export function initializePrescription() {
     let currentPatientId = null;
     let currentRegisterDate = null;
     
-    // 이미지 캐시 관리를 위한 전역 변수 초기화
-    if (!window.canvasCache) window.canvasCache = {};
+    // 이미지 캐시 변수는 prescription_canvas.js에서 관리함
     
-    // 각 registerDate별 캔버스 이미지를 저장할 공간
-    if (!window.currentCanvasImageCache) window.currentCanvasImageCache = {};
-
     // Close 버튼 추가
     const closeButton = document.createElement('button');
     closeButton.className = 'close-button';
@@ -51,26 +48,20 @@ export function initializePrescription() {
             element.value = '';
         });
         
-        // Canvas 초기화 - 이 부분이 주요 문제였음
+        // Canvas 초기화 - prescription_canvas.js의 함수 사용
         try {
-            // 캔버스가 존재하고 접근 가능한지 확인
+            // 캔버스가 존재하는지 확인
             const canvas = document.querySelector('.tooth-chart-canvas');
             if (canvas) {
-                const ctx = canvas.getContext('2d');
-                if (ctx) {
-                    // canvas를 clear한 후
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    
-                    // currentPatientId와 currentRegisterDate 값이 있는 경우에만 캔버스 초기화
-                    if (typeof currentPatientId !== 'undefined' && typeof currentRegisterDate !== 'undefined') {
-                        console.log('clearPrescriptionForm: 캔버스 초기화', currentPatientId, currentRegisterDate);
-                        // requestAnimationFrame을 사용하여 DOM 업데이트 후 실행
-                        requestAnimationFrame(() => {
-                            initializeCanvas(currentPatientId, currentRegisterDate);
-                        });
-                    } else {
-                        console.warn('clearPrescriptionForm: 환자 ID 또는 등록 날짜가 없어 캔버스 초기화를 건너뜁니다');
-                    }
+                // currentPatientId와 currentRegisterDate 값이 있는 경우에만 캔버스 초기화
+                if (typeof currentPatientId !== 'undefined' && typeof currentRegisterDate !== 'undefined') {
+                    // prescription_canvas.js의 함수 호출
+                    clearCanvas(canvas);
+                    requestAnimationFrame(() => {
+                        initializeCanvas(currentPatientId, currentRegisterDate);
+                    });
+                } else {
+                    console.warn('clearPrescriptionForm: 환자 ID 또는 등록 날짜가 없어 캔버스 초기화를 건너뜁니다');
                 }
             }
         } catch (error) {
@@ -145,45 +136,10 @@ export function initializePrescription() {
         // 현재 room 이름 업데이트
         updateCurrentRoomName();
 
-        // 환자가 변경되면 모든 캔버스 관련 전역 변수 초기화
-        window.currentCanvasImage = null;
-        window.currentCanvasImageCache = {};
-        
-        // 리사이즈 이벤트 리스너 제거
-        if (window.chartResizeListener) {
-            window.removeEventListener('resize', window.chartResizeListener);
-            window.chartResizeListener = null;
-        }
-        
-        if (window.canvasResizeHandler) {
-            window.removeEventListener('resize', window.canvasResizeHandler);
-            window.canvasResizeHandler = null;
-        }
-        
-        // 모든 입력 필드와 캔버스 내용 초기화
+        // 모든 입력 필드 초기화
         document.querySelectorAll('.cc-search-input, .medicine-search-input, .symptoms-input, .location-input, .treatment-details-input').forEach(element => {
             element.value = '';
         });
-        
-        const canvas = document.querySelector('.tooth-chart-canvas');
-        if (canvas) {
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // 이벤트 리스너 제거
-            if (window.canvasMouseDownHandler) {
-                canvas.removeEventListener('mousedown', window.canvasMouseDownHandler);
-            }
-            if (window.canvasMouseUpHandler) {
-                canvas.removeEventListener('mouseup', window.canvasMouseUpHandler);
-            }
-            if (window.canvasMouseLeaveHandler) {
-                canvas.removeEventListener('mouseleave', window.canvasMouseLeaveHandler);
-            }
-            if (window.canvasMouseMoveHandler) {
-                canvas.removeEventListener('mousemove', window.canvasMouseMoveHandler);
-            }
-        }
         
         // 환자가 변경되었을 때 현재 처방전 내용 초기화
         clearPrescriptionForm();
@@ -212,15 +168,6 @@ export function initializePrescription() {
     // 처방전 히스토리 선택 이벤트 처리 - 폼 초기화 기능만 포함
     document.addEventListener('prescriptionHistorySelected', function historySelectionBasic(e) {
         // 폼 초기화만 처리 (clearPrescriptionForm 호출하지 않음 - 중복 호출 방지)
-        
-        // 캔버스 설정 명시적 초기화
-        const canvas = document.querySelector('.tooth-chart-canvas');
-        if (canvas) {
-            const ctx = canvas.getContext('2d');
-            ctx.strokeStyle = '#FF0000';
-            ctx.lineWidth = 2;
-            ctx.lineCap = 'round';
-        }
     });
 
     // 프린터 버튼 생성
@@ -241,275 +188,193 @@ export function initializePrescription() {
             const canvas = document.querySelector('.tooth-chart-canvas');
             const toothImg = document.querySelector('.tooth-chart-img');
             
-            // 새 캔버스 생성하여 치아 이미지와 캔버스 내용 합성
-            const mergedCanvas = document.createElement('canvas');
-            const ctx = mergedCanvas.getContext('2d');
+            // 현재 증상, 위치, 치료 세부사항 가져오기
+            const symptoms = document.querySelector('.symptoms-input')?.value || 'N/A';
+            const location = document.querySelector('.location-input')?.value || 'N/A';
+            const treatmentDetails = document.querySelector('.treatment-details-input')?.value || 'N/A';
             
-            // 캔버스 크기 설정
-            mergedCanvas.width = canvas.width;
-            mergedCanvas.height = canvas.height;
+            // CC 항목 가져오기
+            const ccItems = Array.from(document.querySelectorAll('.cc-item .cc-item-text'))
+                .map(item => item.textContent)
+                .join(', ') || 'None';
             
-            // 이미지 로딩 및 인쇄 처리 함수
-            const loadImageAndPrint = () => {
-                const img = new Image();
-                img.onload = () => {
-                    // 배경 이미지(치아 차트) 그리기
-                    ctx.drawImage(img, 0, 0, mergedCanvas.width, mergedCanvas.height);
+            // 약물 항목 가져오기
+            let medicinesHTML = '';
+            const medicineItems = document.querySelectorAll('.medicine-item');
+            
+            if (medicineItems.length > 0) {
+                medicinesHTML = Array.from(medicineItems).map(item => {
+                    const name = item.querySelector('.medicine-item-text')?.textContent || 'Unknown Medicine';
                     
-                    // 그 위에 캔버스 내용 그리기
-                    ctx.drawImage(canvas, 0, 0);
+                    // 입력 필드 또는 텍스트 정보에서 안전하게 값 가져오기
+                    let doseInput = 'N/A';
+                    let frequencyInput = 'N/A';
+                    let durationInput = 'N/A';
                     
-                    // 차트 이미지를 데이터 URL로 변환
-                    const chartImage = mergedCanvas.toDataURL('image/png');
+                    // 입력 필드 확인
+                    const doseElement = item.querySelector('.dose-input');
+                    const frequencyElement = item.querySelector('.frequency-input');
+                    const durationElement = item.querySelector('.duration-input');
                     
-                    // 현재 날짜 포맷팅
-                    const today = new Date();
-                    const formattedDate = today.toLocaleDateString('en-GB', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric'
-                    });
+                    // 텍스트 정보 확인 (히스토리에서 로드된 경우)
+                    const textInfoSpans = item.querySelectorAll('.medicine-text-info span');
                     
-                    // 현재 증상, 위치, 치료 세부사항 가져오기
-                    const symptoms = document.querySelector('.symptoms-input')?.value || 'N/A';
-                    const location = document.querySelector('.location-input')?.value || 'N/A';
-                    const treatmentDetails = document.querySelector('.treatment-details-input')?.value || 'N/A';
-                    
-                    // CC 항목 가져오기
-                    const ccItems = Array.from(document.querySelectorAll('.cc-item .cc-item-text'))
-                        .map(item => item.textContent)
-                        .join(', ') || 'None';
-                    
-                    // 약물 항목 가져오기
-                    let medicinesHTML = '';
-                    const medicineItems = document.querySelectorAll('.medicine-item');
-                    
-                    if (medicineItems.length > 0) {
-                        medicinesHTML = Array.from(medicineItems).map(item => {
-                            const name = item.querySelector('.medicine-item-text')?.textContent || 'Unknown Medicine';
-                            
-                            // 입력 필드 또는 텍스트 정보에서 안전하게 값 가져오기
-                            let doseInput = 'N/A';
-                            let frequencyInput = 'N/A';
-                            let durationInput = 'N/A';
-                            
-                            // 입력 필드 확인
-                            const doseElement = item.querySelector('.dose-input');
-                            const frequencyElement = item.querySelector('.frequency-input');
-                            const durationElement = item.querySelector('.duration-input');
-                            
-                            // 텍스트 정보 확인 (히스토리에서 로드된 경우)
-                            const textInfoSpans = item.querySelectorAll('.medicine-text-info span');
-                            
-                            if (doseElement && doseElement.value !== undefined) {
-                                doseInput = doseElement.value || 'N/A';
-                            } else if (textInfoSpans && textInfoSpans[0]) {
-                                doseInput = textInfoSpans[0].textContent || 'N/A';
-                            }
-                            
-                            if (frequencyElement && frequencyElement.value !== undefined) {
-                                frequencyInput = frequencyElement.value || 'N/A';
-                            } else if (textInfoSpans && textInfoSpans[1]) {
-                                frequencyInput = textInfoSpans[1].textContent || 'N/A';
-                            }
-                            
-                            if (durationElement && durationElement.value !== undefined) {
-                                durationInput = durationElement.value || 'N/A';
-                            } else if (textInfoSpans && textInfoSpans[2]) {
-                                durationInput = textInfoSpans[2].textContent || 'N/A';
-                            }
-                            
-                            return `
-                                <div class="medicine-item">
-                                    <div>${name}</div>
-                                    <div class="medicine-details">
-                                        Dose: ${doseInput} | Frequency: ${frequencyInput} | Duration: ${durationInput}
-                                    </div>
-                                </div>
-                            `;
-                        }).join('');
-                    } else {
-                        medicinesHTML = '<div>No medicines prescribed</div>';
+                    if (doseElement && doseElement.value !== undefined) {
+                        doseInput = doseElement.value || 'N/A';
+                    } else if (textInfoSpans && textInfoSpans[0]) {
+                        doseInput = textInfoSpans[0].textContent || 'N/A';
                     }
                     
-                    // 인쇄를 위한 iframe 생성 (화면에 표시되지 않음)
-                    const printFrame = document.createElement('iframe');
-                    printFrame.style.position = 'fixed';
-                    printFrame.style.left = '-9999px';
-                    printFrame.name = 'printFrame';
-                    document.body.appendChild(printFrame);
+                    if (frequencyElement && frequencyElement.value !== undefined) {
+                        frequencyInput = frequencyElement.value || 'N/A';
+                    } else if (textInfoSpans && textInfoSpans[1]) {
+                        frequencyInput = textInfoSpans[1].textContent || 'N/A';
+                    }
                     
-                    // iframe 내용 작성 (인쇄될 처방전 양식)
-                    printFrame.contentDocument.write(`
-                        <!DOCTYPE html>
-                        <html>
-                        <head>
-                            <title>Medical Prescription - ${hospitalName}</title>
-                            <style>
-                                body {
-                                    font-family: Arial, sans-serif;
-                                    padding: 20px;
-                                    margin: 0;
-                                    color: #333;
-                                }
-                                .print-header {
-                                    display: flex;
-                                    justify-content: space-between;
-                                    border-bottom: 2px solid #333;
-                                    padding-bottom: 10px;
-                                    margin-bottom: 20px;
-                                }
-                                .hospital-info {
-                                    font-weight: bold;
-                                    font-size: 18px;
-                                }
-                                .date-info {
-                                    text-align: right;
-                                }
-                                .patient-info {
-                                    margin-bottom: 15px;
-                                    padding: 10px;
-                                    background-color: #f8f8f8;
-                                    border-radius: 5px;
-                                }
-                                /* 성별 이미지 크기 조정 */
-                                .patient-info img, .gender-icon {
-                                    width: 10px;
-                                    height: 14.5px;
-                                    vertical-align: middle;
-                                    margin: 0 5px;
-                                }
-                                .section-title {
-                                    font-weight: bold;
-                                    margin-top: 15px;
-                                    border-bottom: 1px solid #ccc;
-                                    padding-bottom: 5px;
-                                }
-                                .chart-container {
-                                    margin: 15px 0;
-                                    text-align: center;
-                                }
-                                .chart-image {
-                                    max-width: 100%;
-                                    height: auto;
-                                    border: 1px solid #ddd;
-                                }
-                                .detail-section {
-                                    margin: 15px 0;
-                                }
-                                .detail-label {
-                                    font-weight: bold;
-                                    margin-bottom: 5px;
-                                }
-                                .detail-content {
-                                    padding: 5px;
-                                    background-color: #f8f8f8;
-                                    border-radius: 3px;
-                                }
-                                .cc-items {
-                                    margin: 10px 0;
-                                }
-                                .medicine-item {
-                                    margin: 8px 0;
-                                    padding: 8px;
-                                    background-color: #f0f0f0;
-                                    border-radius: 3px;
-                                }
-                                .medicine-details {
-                                    font-size: 0.9em;
-                                    color: #666;
-                                    margin-top: 4px;
-                                }
-                                .footer {
-                                    margin-top: 30px;
-                                    border-top: 1px solid #ccc;
-                                    padding-top: 10px;
-                                    text-align: right;
-                                    font-style: italic;
-                                }
-                            </style>
-                        </head>
-                        <body>
-                            <div class="print-container">
-                                <div class="print-header">
-                                    <div class="hospital-info">
-                                        ${hospitalName.toUpperCase()} HOSPITAL
-                                    </div>
-                                    <div class="date-info">
-                                        <div>Date: ${formattedDate}</div>
-                                    </div>
-                                </div>
-                                
-                                <div class="patient-info">
-                                    ${patientInfo}
-                                </div>
-                                
-                                <div class="section-title">Medical Records</div>
-                                <div class="chart-container">
-                                    <img src="${chartImage}" alt="Dental Chart" class="chart-image">
-                                </div>
-                                
-                                <div class="detail-section">
-                                    <div class="detail-label">Symptoms</div>
-                                    <div class="detail-content">${symptoms}</div>
-                                </div>
-                                
-                                <div class="detail-section">
-                                    <div class="detail-label">Location</div>
-                                    <div class="detail-content">${location}</div>
-                                </div>
-                                
-                                <div class="detail-section">
-                                    <div class="detail-label">Treatment Details</div>
-                                    <div class="detail-content">${treatmentDetails}</div>
-                                </div>
-                                
-                                <div class="section-title">Diagnosis & Prescription</div>
-                                
-                                <div class="detail-section">
-                                    <div class="detail-label">Chief Complaints (CC)</div>
-                                    <div class="detail-content">${ccItems}</div>
-                                </div>
-                                
-                                <div class="detail-section">
-                                    <div class="detail-label">Medicines</div>
-                                    <div class="medicines-container">
-                                        ${medicinesHTML}
-                                    </div>
-                                </div>
-                                
-                                <div class="footer">
-                                    <div>Doctor's Signature: ____________________</div>
-                                </div>
-                            </div>
-                        </body>
-                        </html>
-                    `);
+                    if (durationElement && durationElement.value !== undefined) {
+                        durationInput = durationElement.value || 'N/A';
+                    } else if (textInfoSpans && textInfoSpans[2]) {
+                        durationInput = textInfoSpans[2].textContent || 'N/A';
+                    }
                     
-                    printFrame.contentDocument.close();
-                    
-                    // 잠시 대기 후 인쇄 실행 (내용이 완전히 로드되도록)
-                    setTimeout(() => {
-                        printFrame.contentWindow.focus();
-                        printFrame.contentWindow.print();
-                        
-                        // 인쇄 대화상자가 닫히면 iframe 제거
-                        setTimeout(() => {
-                            document.body.removeChild(printFrame);
-                        }, 100);
-                    }, 500);
-                };
+                    return `
+                        <tr>
+                            <td>${name}</td>
+                            <td>${doseInput}</td>
+                            <td>${frequencyInput}</td>
+                            <td>${durationInput}</td>
+                        </tr>
+                    `;
+                }).join('');
+            } else {
+                medicinesHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align: center;">No medicines prescribed</td>
+                    </tr>
+                `;
+            }
+            
+            // 현재 날짜 포맷팅
+            const today = new Date();
+            const formattedDate = today.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            });
+            
+            // 캔버스 이미지 데이터 URL 가져오기 (prescription_canvas.js의 함수 사용)
+            const chartImagePromise = new Promise((resolve) => {
+                // 이벤트를 생성하여 canvas 모듈에게 이미지 데이터 요청
+                const canvasEvent = new CustomEvent('getChartImageForPrint', {
+                    detail: {
+                        callback: (imageData) => resolve(imageData)
+                    }
+                });
+                document.dispatchEvent(canvasEvent);
+            });
+            
+            // 이미지 데이터를 받아온 후 프린트 창 열기
+            chartImagePromise.then((chartImage) => {
+                // 프린트 창 HTML 구성
+                const printWindow = window.open('', '_blank');
                 
-                // 치아 이미지 로드
-                img.src = toothImg.src;
-            };
-            
-            // 이미지 로딩 및 인쇄 실행
-            loadImageAndPrint();
-            
+                if (!printWindow) {
+                    alert('팝업 차단이 활성화되어 있습니다. 프린트를 위해 팝업을 허용해주세요.');
+                    return;
+                }
+                
+                // 프린트 창 HTML 구성
+                printWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Prescription</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 20px; }
+                            .prescription-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+                            .patient-info { margin-bottom: 15px; }
+                            .chart-image { max-width: 100%; height: auto; margin: 10px 0; }
+                            table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+                            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                            th { background-color: #f2f2f2; }
+                            .section { margin-bottom: 20px; }
+                            .section-title { font-weight: bold; margin-bottom: 5px; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="prescription-header">
+                            <div>
+                                <h2>${hospitalName.toUpperCase()} Hospital</h2>
+                                <p>Prescription</p>
+                            </div>
+                            <div>
+                                <p>Date: ${formattedDate}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="patient-info">
+                            <p><strong>Patient:</strong> ${patientInfo}</p>
+                        </div>
+                        
+                        <div class="section">
+                            <div class="section-title">Chief Complaints:</div>
+                            <p>${ccItems}</p>
+                        </div>
+                        
+                        <div class="section">
+                            <div class="section-title">Symptoms:</div>
+                            <p>${symptoms}</p>
+                        </div>
+                        
+                        <div class="section">
+                            <div class="section-title">Location:</div>
+                            <p>${location}</p>
+                        </div>
+                        
+                        <div class="section">
+                            <div class="section-title">Dental Chart:</div>
+                            ${chartImage ? `<img src="${chartImage}" class="chart-image" alt="Dental Chart">` : '<p>No chart available</p>'}
+                        </div>
+                        
+                        <div class="section">
+                            <div class="section-title">Treatment Details:</div>
+                            <p>${treatmentDetails}</p>
+                        </div>
+                        
+                        <div class="section">
+                            <div class="section-title">Prescribed Medicines:</div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Medicine</th>
+                                        <th>Dose</th>
+                                        <th>Frequency</th>
+                                        <th>Duration</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${medicinesHTML}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div style="margin-top: 50px; text-align: right;">
+                            <p>Doctor's Signature: ____________________</p>
+                        </div>
+                    </body>
+                    </html>
+                `);
+                
+                // 프린트 창 로드 완료 후 인쇄 다이얼로그 표시
+                printWindow.document.close();
+                printWindow.onload = function() {
+                    printWindow.print();
+                    // printWindow.close();
+                };
+            });
         } catch (error) {
-            console.error('Error generating print document:', error);
-            alert('Failed to prepare document for printing. Please try again.');
+            console.error('프린트 중 오류:', error);
+            alert('프린트 준비 중 오류가 발생했습니다.');
         }
     });
 
@@ -595,9 +460,23 @@ export function initializePrescription() {
                 days: item.querySelector('.duration-input').value || 'Duration (days)'
             }));
 
-            // Canvas 이미지 데이터 가져오기
-            const canvas = document.querySelector('.tooth-chart-canvas');
-            const chartImage = canvas.toDataURL('image/png');
+            // Canvas 이미지 데이터 가져오기 (prescription_canvas.js의 함수 사용)
+            const chartImagePromise = new Promise((resolve) => {
+                // 이벤트를 생성하여 canvas 모듈에게 이미지 데이터 요청
+                const canvasEvent = new CustomEvent('getChartImageForPrint', {
+                    detail: {
+                        callback: (imageData) => resolve(imageData)
+                    }
+                });
+                document.dispatchEvent(canvasEvent);
+            });
+            
+            // 이미지 데이터를 받아온 후 처리 계속
+            const chartImage = await chartImagePromise;
+            
+            if (!chartImage) {
+                throw new Error('Failed to get chart image');
+            }
 
             // 1. register.date 문서의 progress 업데이트
             await updateDoc(doc(db, 'hospitals', hospitalName, 'patient', currentPatientId, 'register.date', currentRegisterDate), {
@@ -691,9 +570,12 @@ export function initializePrescription() {
             document.querySelectorAll('.cc-item').forEach(item => item.remove());
             document.querySelectorAll('.medicine-item').forEach(item => item.remove());
             
-            // Canvas 초기화
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Canvas 초기화 - prescription_canvas.js의 함수 사용
+            const canvas = document.querySelector('.tooth-chart-canvas');
+            if (canvas) {
+                clearCanvas(canvas);
+                initializeCanvas(currentPatientId, currentRegisterDate);
+            }
 
         } catch (error) {
             console.error('Failed to save prescription:', error);
@@ -818,7 +700,7 @@ export function initializePrescription() {
 
     // 히스토리 선택 시 데이터 로드 및 표시를 위한 상세 이벤트 리스너
     document.addEventListener('prescriptionHistorySelected', function historySelectionDetailed(e) {
-        const { prescriptionData, registerDate, doctor, chartImage } = e.detail;
+        const { prescriptionData, registerDate, doctor, chartImage, patientId } = e.detail;
         
         // 기본 입력 필드 데이터 표시
         document.querySelector('.symptoms-input').value = prescriptionData.symptoms || '';
@@ -858,132 +740,6 @@ export function initializePrescription() {
             });
         }
 
-        // 치아 차트 데이터 표시
-        const canvas = document.querySelector('.tooth-chart-canvas');
-        if (!canvas) return;
-        
-        const ctx = canvas.getContext('2d');
-        
-        // 기존의 모든 리사이즈 이벤트 리스너 제거
-        if (window.chartResizeListener) {
-            window.removeEventListener('resize', window.chartResizeListener);
-            window.chartResizeListener = null;
-        }
-        
-        // 기존 마우스 이벤트 리스너 제거
-        if (window.canvasMouseDownHandler) {
-            canvas.removeEventListener('mousedown', window.canvasMouseDownHandler);
-        }
-        if (window.canvasMouseUpHandler) {
-            canvas.removeEventListener('mouseup', window.canvasMouseUpHandler);
-        }
-        if (window.canvasMouseLeaveHandler) {
-            canvas.removeEventListener('mouseleave', window.canvasMouseLeaveHandler);
-        }
-        if (window.canvasMouseMoveHandler) {
-            canvas.removeEventListener('mousemove', window.canvasMouseMoveHandler);
-        }
-        
-        // 컨텍스트 초기화
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // 현재 환자와 registerDate로 고유 캐시 키 생성
-        const cacheKey = `${currentPatientId}_${registerDate}`;
-        
-        // 이미지가 있으면 캔버스에 로드
-        if (chartImage) {
-            // 이전에 저장된 이미지가 있으면 제거
-            window.currentCanvasImageCache[cacheKey] = null;
-            
-            const img = new Image();
-            
-            img.onload = function() {
-                // 원본 이미지 크기 저장 (비율 유지를 위해)
-                const originalSize = {
-                    width: img.width,
-                    height: img.height
-                };
-                
-                // 현재 선택된 환자 ID와 차트 이미지를 캐시에 저장
-                // registerDate도 같이 저장하여 동일 환자의 다른 처방전 구분
-                window.currentCanvasImage = {
-                    patientId: currentPatientId,
-                    registerDate: registerDate,
-                    image: chartImage,
-                    originalSize: originalSize
-                };
-                
-                // 캐시에도 저장
-                window.currentCanvasImageCache[cacheKey] = window.currentCanvasImage;
-                
-                // 이미지가 로드된 후 캔버스 크기 조정
-                if (canvas.offsetWidth > 0 && canvas.offsetHeight > 0) {
-                    const canvasWidth = canvas.offsetWidth;
-                    const canvasHeight = canvas.offsetHeight;
-                    
-                    canvas.width = canvasWidth;
-                    canvas.height = canvasHeight;
-                    
-                    // 이미지를 캔버스 크기에 맞게 그리기
-                    try {
-                        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-                        ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
-                    } catch (e) {
-                        console.error('이미지 로드 후 드로잉 오류:', e);
-                    }
-                }
-            };
-            
-            img.onerror = function() {
-                console.error('차트 이미지 로드 실패:', chartImage.substring(0, 50) + '...');
-            };
-            
-            // 이미지 로드 시작
-            img.src = chartImage;
-            
-            // 리사이즈 핸들러 함수 정의 - 환자와 등록 날짜 확인 로직 추가
-            const resizeHandler = function() {
-                // 현재 표시된 환자와 등록 날짜 확인
-                if (!canvas) return;
-                
-                // 캐시 키에 해당하는 이미지가 있는지 확인
-                const cachedImage = window.currentCanvasImageCache[cacheKey];
-                
-                // 캐시된 이미지가 없거나 다른 환자/등록일자의 이미지면 리사이징 안함
-                if (!cachedImage || 
-                    cachedImage.patientId !== currentPatientId || 
-                    cachedImage.registerDate !== registerDate) {
-                    return;
-                }
-                
-                // 새 이미지 객체 생성 (캐싱 문제 방지)
-                const newImg = new Image();
-                newImg.onload = function() {
-                    if (canvas.offsetWidth > 0 && canvas.offsetHeight > 0) {
-                        const canvasWidth = canvas.offsetWidth;
-                        const canvasHeight = canvas.offsetHeight;
-                        
-                        canvas.width = canvasWidth;
-                        canvas.height = canvasHeight;
-                        
-                        try {
-                            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-                            ctx.drawImage(newImg, 0, 0, canvasWidth, canvasHeight);
-                        } catch (e) {
-                            console.error('리사이즈 중 캔버스 그리기 오류:', e);
-                        }
-                    }
-                };
-                
-                // 캐시된 이미지 사용
-                newImg.src = cachedImage.image;
-            };
-            
-            // 리사이즈 이벤트 리스너 등록
-            window.chartResizeListener = resizeHandler;
-            window.addEventListener('resize', window.chartResizeListener);
-        }
-
         // 모든 입력 필드와 버튼 비활성화
         document.querySelectorAll('.cc-search-input, .medicine-search-input, .symptoms-input, .location-input, .treatment-details-input, .clear-btn').forEach(element => {
             element.disabled = true;
@@ -995,12 +751,23 @@ export function initializePrescription() {
         });
 
         // Canvas 비활성화
+        const canvas = document.querySelector('.tooth-chart-canvas');
         if (canvas) {
             canvas.style.pointerEvents = 'none';
+            
+            // 차트 이미지가 있으면 prescription_canvas.js의 함수를 사용하여 표시
+            if (chartImage) {
+                // 이벤트를 생성하여 canvas 모듈에게 차트 이미지 로드 요청
+                const canvasEvent = new CustomEvent('loadChartImage', {
+                    detail: {
+                        patientId: patientId || currentPatientId,
+                        registerDate: registerDate,
+                        chartImage: chartImage
+                    }
+                });
+                document.dispatchEvent(canvasEvent);
+            }
         }
-
-        // 히스토리에서 선택한 경우 저장된 상태로 설정
-        updateButtonStates(true);
     });
 
     // New Chart 버튼 클릭 시 초기화할 때는 다시 활성화
@@ -1023,15 +790,12 @@ export function initializePrescription() {
             document.querySelector('.location-input').value = '';
             document.querySelector('.treatment-details-input').value = '';
             
-            // Canvas 초기화
+            // Canvas 초기화 - prescription_canvas.js의 함수 사용
             const canvas = document.querySelector('.tooth-chart-canvas');
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // 캔버스 설정 명시적 초기화 (색상, 두께)
-            ctx.strokeStyle = '#FF0000';
-            ctx.lineWidth = 2;
-            ctx.lineCap = 'round';
+            if (canvas) {
+                clearCanvas(canvas);
+                initializeCanvas(currentPatientId, currentRegisterDate);
+            }
 
             // 모든 입력 요소 활성화
             document.querySelectorAll('.cc-search-input, .medicine-search-input, .symptoms-input, .location-input, .treatment-details-input, .clear-btn').forEach(element => {
@@ -1131,389 +895,6 @@ async function updateCurrentRoomName() {
             currentRoomName.textContent = roomDoc.id;
         }
     });
-}
-
-// Canvas 관련 기능 초기화
-function initializeCanvas(patientId, registerDate) {
-    console.log('Canvas 초기화 - 환자 ID:', patientId, '등록 날짜:', registerDate);
-    
-    const canvas = document.querySelector('.tooth-chart-canvas');
-    if (!canvas) {
-        console.error('캔버스 요소를 찾을 수 없습니다');
-        return;
-    }
-    
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    let isDrawing = false;
-    let lastX = 0;
-    let lastY = 0;
-    const drawHistory = [];
-
-    // 현재 환자 정보 저장
-    window.currentCanvasPatient = {
-        patientId: patientId || 'unknown',
-        registerDate: registerDate || 'unknown'
-    };
-    
-    // 캐시 키 생성
-    const cacheKey = `${patientId}_${registerDate}`;
-    
-    // 이전 캐시된 이미지 모두 제거 (다른 환자의 이미지)
-    if (window.currentCanvasImageCache && window.currentCanvasImageCache[cacheKey]) {
-        // 현재 환자/등록일자의 이미지만 유지, 나머지는 초기화
-        const currentCache = window.currentCanvasImageCache[cacheKey];
-        window.currentCanvasImageCache = {};
-        window.currentCanvasImageCache[cacheKey] = currentCache;
-    } else {
-        // 캐시가 없으면 초기화
-        window.currentCanvasImageCache = {};
-    }
-    
-    // 폼이 없을 때만 생성
-    if (!document.querySelector('.symptoms-form')) {
-        createForms();
-    }
-
-    // Canvas 초기화
-    function clearCanvas() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawHistory.length = 0;
-        
-        // 캐시된 이미지 삭제
-        window.currentCanvasImageCache[cacheKey] = null;
-        window.currentCanvasImage = null;
-        
-        // 캔버스 설정 명시적 초기화
-        ctx.strokeStyle = '#FF0000';
-        ctx.lineWidth = 2;
-        ctx.lineCap = 'round';
-        
-        // 입력 폼 초기화
-        document.querySelector('.symptoms-input').value = '';
-        document.querySelector('.location-input').value = '';
-        document.querySelector('.treatment-details-input').value = '';
-    }
-    
-    // Canvas 초기화 실행
-    clearCanvas();
-    
-    // 기존 컨트롤 버튼들 제거
-    const existingControls = document.querySelector('.chart-controls');
-    if (existingControls) {
-        existingControls.remove();
-    }
-
-    // 컨트롤 버튼 추가
-    const controlsDiv = document.createElement('div');
-    controlsDiv.className = 'chart-controls';
-    controlsDiv.innerHTML = `
-        <button class="undo-btn">Undo</button>
-        <button class="clear-btn">Clear</button>
-    `;
-    document.querySelector('.prescription-center-top').appendChild(controlsDiv);
-
-    // 이벤트 리스너 설정 - 직접 버튼 요소 가져오기
-    const undoBtn = controlsDiv.querySelector('.undo-btn');
-    const clearBtn = controlsDiv.querySelector('.clear-btn');
-
-    undoBtn.addEventListener('click', undo);
-    clearBtn.addEventListener('click', clearCanvas);
-    
-    // 이벤트 리스너 등록 전에 기존 리스너 제거
-    function removeOldListeners() {
-        if (window.canvasMouseDownHandler) {
-            canvas.removeEventListener('mousedown', window.canvasMouseDownHandler);
-        }
-        if (window.canvasMouseUpHandler) {
-            canvas.removeEventListener('mouseup', window.canvasMouseUpHandler);
-        }
-        if (window.canvasMouseLeaveHandler) {
-            canvas.removeEventListener('mouseleave', window.canvasMouseLeaveHandler);
-        }
-        if (window.canvasMouseMoveHandler) {
-            canvas.removeEventListener('mousemove', window.canvasMouseMoveHandler);
-        }
-    }
-    removeOldListeners();
-
-    // Canvas 크기 조정 함수
-    function resizeCanvas() {
-        const img = document.querySelector('.tooth-chart-img');
-        if (!img) {
-            console.error('치아 차트 이미지를 찾을 수 없습니다');
-            return;
-        }
-        
-        const rect = img.getBoundingClientRect();
-        if (rect.width <= 0 || rect.height <= 0) {
-            console.warn('치아 차트 이미지의 크기가 유효하지 않습니다', rect);
-            return;
-        }
-        
-        // 현재 환자와 registerDate로 고유 캐시 키 생성
-        const cacheKey = `${patientId}_${registerDate}`;
-        
-        // 캔버스 내용을 임시로 dataURL로 저장
-        let tempDataURL = null;
-        try {
-            if (canvas.width > 0 && canvas.height > 0) {
-                tempDataURL = canvas.toDataURL('image/png');
-            }
-        } catch (e) {
-            console.error('캔버스 내용 저장 오류:', e);
-        }
-        
-        // Canvas 크기 조정
-        const oldWidth = canvas.width;
-        const oldHeight = canvas.height;
-        canvas.style.width = `${rect.width}px`;
-        canvas.style.height = `${rect.height}px`;
-        canvas.width = rect.width;
-        canvas.height = rect.height;
-        
-        // 컨텍스트 설정
-        ctx.strokeStyle = '#FF0000';
-        ctx.lineWidth = 2;
-        ctx.lineCap = 'round';
-        
-        // 리사이징 로직 개선
-        // 1. 캐시에 저장된 이미지가 있는지 확인
-        if (window.currentCanvasImageCache && window.currentCanvasImageCache[cacheKey]) {
-            const cachedImage = window.currentCanvasImageCache[cacheKey];
-            
-            // 현재 환자/등록일자와 일치하는지 확인
-            if (cachedImage && 
-                cachedImage.patientId === patientId && 
-                cachedImage.registerDate === registerDate) {
-                
-                const img = new Image();
-                img.onload = () => {
-                    try {
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    } catch (e) {
-                        console.error('캐시 이미지 그리기 오류:', e);
-                    }
-                };
-                img.src = cachedImage.image;
-                return; // 캐시된 이미지 그리기 성공하면 종료
-            }
-        }
-        
-        // 2. 임시 저장한 캔버스 내용이 있으면 복원
-        if (tempDataURL) {
-            const img = new Image();
-            img.onload = () => {
-                try {
-                    // 원본 비율 유지하면서 그리기
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    
-                    // 현재 환자/등록일자로 캐시 업데이트
-                    window.currentCanvasImageCache[cacheKey] = {
-                        patientId: patientId,
-                        registerDate: registerDate,
-                        image: tempDataURL,
-                        originalSize: {
-                            width: oldWidth,
-                            height: oldHeight
-                        }
-                    };
-                } catch (e) {
-                    console.error('임시 이미지 복원 오류:', e);
-                }
-            };
-            img.src = tempDataURL;
-        }
-    }
-    
-    // 기존 리사이즈 리스너 제거 후 새로 등록
-    if (window.canvasResizeHandler) {
-        window.removeEventListener('resize', window.canvasResizeHandler);
-    }
-    window.canvasResizeHandler = resizeCanvas;
-    window.addEventListener('resize', window.canvasResizeHandler);
-
-    // 마우스 이벤트 핸들러
-    function getMousePos(e) {
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        return {
-            x: (e.clientX - rect.left) * scaleX,
-            y: (e.clientY - rect.top) * scaleY
-        };
-    }
-
-    function startDrawing(e) {
-        isDrawing = true;
-        const pos = getMousePos(e);
-        [lastX, lastY] = [pos.x, pos.y];
-        
-        try {
-            if (canvas.width > 0 && canvas.height > 0) {
-                drawHistory.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
-            }
-        } catch (e) {
-            console.error('캔버스 getImageData 오류:', e);
-        }
-        
-        // 그림을 그리면 이 환자의 캐시된 이미지 초기화 (새 그림이므로)
-        const cacheKey = `${patientId}_${registerDate}`;
-        window.currentCanvasImageCache[cacheKey] = null;
-        window.currentCanvasImage = null;
-    }
-
-    function stopDrawing() {
-        if (isDrawing) {
-            isDrawing = false;
-            
-            // 드로잉 멈출 때 현재 캔버스 상태 캐시에 저장
-            try {
-                if (canvas.width > 0 && canvas.height > 0) {
-                    const cacheKey = `${patientId}_${registerDate}`;
-                    window.currentCanvasImageCache[cacheKey] = {
-                        patientId: patientId,
-                        registerDate: registerDate,
-                        image: canvas.toDataURL('image/png'),
-                        originalSize: {
-                            width: canvas.width,
-                            height: canvas.height
-                        }
-                    };
-                }
-            } catch (e) {
-                console.error('드로잉 완료 후 캐시 저장 오류:', e);
-            }
-        }
-    }
-
-    function draw(e) {
-        if (!isDrawing) return;
-        const pos = getMousePos(e);
-        ctx.beginPath();
-        ctx.moveTo(lastX, lastY);
-        ctx.lineTo(pos.x, pos.y);
-        ctx.stroke();
-        [lastX, lastY] = [pos.x, pos.y];
-    }
-
-    function undo() {
-        if (drawHistory.length > 0) {
-            try {
-                ctx.putImageData(drawHistory.pop(), 0, 0);
-                
-                // undo 후 캐시 업데이트
-                if (canvas.width > 0 && canvas.height > 0) {
-                    const cacheKey = `${patientId}_${registerDate}`;
-                    window.currentCanvasImageCache[cacheKey] = {
-                        patientId: patientId,
-                        registerDate: registerDate,
-                        image: canvas.toDataURL('image/png'),
-                        originalSize: {
-                            width: canvas.width,
-                            height: canvas.height
-                        }
-                    };
-                }
-            } catch (e) {
-                console.error('Undo 작업 중 오류:', e);
-            }
-        }
-    }
-
-    // 새 이벤트 리스너 등록 및 전역으로 저장
-    window.canvasMouseDownHandler = startDrawing;
-    window.canvasMouseUpHandler = stopDrawing;
-    window.canvasMouseLeaveHandler = stopDrawing;
-    window.canvasMouseMoveHandler = draw;
-    
-    canvas.addEventListener('mousedown', window.canvasMouseDownHandler);
-    canvas.addEventListener('mouseup', window.canvasMouseUpHandler);
-    canvas.addEventListener('mouseleave', window.canvasMouseLeaveHandler);
-    canvas.addEventListener('mousemove', window.canvasMouseMoveHandler);
-
-    // tooth chart 크기에 따라 입력폼 너비 조정
-    function updateFormWidth() {
-        const chartImg = document.querySelector('.tooth-chart-img');
-        if (!chartImg) {
-            console.warn('치아 차트 이미지를 찾을 수 없습니다');
-            return;
-        }
-        
-        const chartWidth = chartImg.offsetWidth;
-        if (chartWidth > 0) {
-            document.documentElement.style.setProperty('--chart-width', `${chartWidth}px`);
-            
-            // 상단 폼들의 전체 높이 계산 (margin 포함)
-            const symptomsForm = document.querySelector('.symptoms-form');
-            const locationForm = document.querySelector('.location-form');
-            
-            if (symptomsForm && locationForm) {
-                const symptomsHeight = symptomsForm.offsetHeight;
-                const locationHeight = locationForm.offsetHeight;
-                const totalUpperHeight = symptomsHeight + locationHeight + 65;  // Medical Records 타이틀(50px) + 하단 여백(15px) 포함
-                
-                document.documentElement.style.setProperty('--upper-forms-height', `${totalUpperHeight}px`);
-            }
-        }
-    }
-
-    // 기존 폼 리사이즈 리스너 제거 후 재설정
-    if (window.formResizeHandler) {
-        window.removeEventListener('resize', window.formResizeHandler);
-    }
-    window.formResizeHandler = updateFormWidth;
-    window.addEventListener('resize', window.formResizeHandler);
-    
-    // 초기 설정
-    updateFormWidth();
-    
-    // 초기 사이즈 설정 - requestAnimationFrame 사용하여 DOM이 업데이트된 후 실행
-    requestAnimationFrame(() => {
-        try {
-            resizeCanvas();
-        } catch (e) {
-            console.error('초기 캔버스 크기 조정 중 오류:', e);
-        }
-    });
-}
-
-// 폼 생성 함수 분리
-function createForms() {
-    // Symptoms 입력 폼 추가
-    const formDiv = document.createElement('div');
-    formDiv.className = 'symptoms-form';
-    formDiv.innerHTML = `
-        <div class="symptoms-label">Symptoms</div>
-        <textarea class="symptoms-input"></textarea>
-    `;
-    document.querySelector('.prescription-center-top').appendChild(formDiv);
-
-    // Location 입력 폼 추가
-    const locationFormDiv = document.createElement('div');
-    locationFormDiv.className = 'location-form';
-    locationFormDiv.innerHTML = `
-        <div class="location-label">Location</div>
-        <textarea class="location-input"></textarea>
-    `;
-    document.querySelector('.prescription-center-top').appendChild(locationFormDiv);
-
-    // Treatment Details 입력 폼 추가
-    const treatmentDetailsFormDiv = document.createElement('div');
-    treatmentDetailsFormDiv.className = 'treatment-details-form';
-    treatmentDetailsFormDiv.innerHTML = `
-        <div class="treatment-details-label">Treatment Details</div>
-        <textarea class="treatment-details-input"></textarea>
-    `;
-    document.querySelector('.prescription-center-top').appendChild(treatmentDetailsFormDiv);
-
-    // 컨트롤 버튼 추가
-    const controlsDiv = document.createElement('div');
-    controlsDiv.className = 'chart-controls';
-    controlsDiv.innerHTML = `
-        <button class="undo-btn">Undo</button>
-        <button class="clear-btn">Clear</button>
-    `;
-    document.querySelector('.prescription-center-top').appendChild(controlsDiv);
 }
 
 // CC 검색 및 자동완성 기능

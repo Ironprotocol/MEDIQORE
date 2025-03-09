@@ -46,7 +46,8 @@ export async function initializePrescriptionHistory(patientId) {
                         registerDate: doc.id,
                         doctor: data.doctor,
                         timestamp: data.timestamp,
-                        chartImage: data.chartImage
+                        chartImage: data.chartImage,
+                        patientId: patientId
                     }
                 });
                 document.dispatchEvent(event);

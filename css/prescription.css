@@ -114,6 +114,13 @@
     background-color : white;
 }
 
+.prescription-left-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: rgb(110, 110, 124);
+    margin: 10px 0 0 15px;  /* 상단과 좌측에 여백 */
+}
+
 .prescription-center-container {
     width: 75%;
     height: 100%;
@@ -131,25 +138,11 @@
     position: relative;
 }
 
-.tooth-chart-img {
-    height: calc(100% - 12px);
-    width: auto;
-    aspect-ratio: 1/1;
-    margin: 5px 5px 0px 5px;
-    object-fit: contain;
-    display: block;
-    border : 1px solid #ccc;
-}
-/* 기존 tooth-chart-img CSS는 그대로 두고 Canvas용 CSS만 추가 */
-.tooth-chart-canvas {
-    position: absolute;
-    height: calc(100% - 10px);  /* tooth-chart-img와 동일 */
-    margin: 5px 5px 0px 5px;
-    width: auto;
-    aspect-ratio: 1/1;
-    cursor: crosshair;
-    z-index: 1;
-}
+/* 치아 차트 이미지 스타일은 prescription_canvas.css로 이동했습니다 */
+/* .tooth-chart-img 스타일 제거됨 */
+
+/* 캔버스 스타일은 prescription_canvas.css로 이동했습니다 */
+/* .tooth-chart-canvas 스타일 제거됨 */
 
 .prescription-center-bottom {
     height: 40%;
@@ -207,33 +200,8 @@
     color: #333;
 }
 
-/* New Chart 버튼 스타일 */
-.new-chart-btn {
-    margin-left: 10px;
-    padding: 8px 16px;
-    background-color: rgb(0, 102, 255);
-    color: #ffffff;
-    border: none;
-    border-radius: 6px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    height: 33px;
-    width: 120px;
-    display: flex;  /* 아이콘과 텍스트를 가로로 배치 */
-    align-items: center;  /* 세로 중앙 정렬 */
-    justify-content: center;  /* 가로 중앙 정렬 */
-    gap: 10px;  /* 아이콘과 텍스트 사이 간격 */
-}
-
-.new-chart-btn img {
-    width: 20px;  /* 아이콘 크기 */
-    height: 20px;
-}
-
-.new-chart-btn:hover {
-    background-color: rgb(0, 82, 204);
-}
+/* New Chart 버튼 스타일은 prescription_canvas.css로 이동했습니다 */
+/* .new-chart-btn 스타일 제거됨 */
 
 /* 현재 room 이름 스타일 */
 .current-room-name {
@@ -242,38 +210,6 @@
     font-size: 14px;
     color: rgb(110, 110, 124);
     font-weight: bold;
-}
-
-.chart-controls {
-    position: absolute;
-    top: 15px;
-    right: 15px;  /* 우측 정렬 */
-    display: flex;
-    flex-direction: column;  /* 세로 방향 정렬 */
-    gap: 5px;
-    z-index: 2;  /* canvas보다 위에 표시 */
-}
-
-.chart-controls button {
-    padding: 5px 10px;
-    border: none;
-    border-radius: 4px;
-    background-color: rgb(0, 102, 255);
-    color: white;
-    cursor: pointer;
-    font-size: 12px;
-    width: 60px;  /* 버튼 너비 고정 */
-}
-
-.chart-controls button:hover {
-    background-color: rgb(0, 82, 204);
-}
-
-.prescription-left-title {
-    font-size: 12px;
-    font-weight: bold;
-    color: rgb(110, 110, 124);
-    margin: 10px 0 0 20px;  /* 상단과 좌측에 여백 */
 }
 
 /* 공통 타이틀 스타일 */
@@ -286,15 +222,8 @@
     color: rgb(110, 110, 124);
 }
 
-/* 이미지와 캔버스를 감싸는 새로운 컨테이너 */
-.tooth-chart-container {
-    position: absolute;
-    right: 0;
-    top: 0;
-    height: 100%;
-    display: flex;
-    justify-content: flex-end;
-}
+/* 이미지와 캔버스를 감싸는 컨테이너 스타일은 prescription_canvas.css로 이동했습니다 */
+/* .tooth-chart-container 스타일 제거됨 */
 
 .symptoms-form {
     margin: 50px 0 0 15px;
