@@ -273,18 +273,17 @@ export function initializePrescription() {
                 document.dispatchEvent(canvasEvent);
             });
             
-            // 이미지 데이터를 받아온 후 프린트 창 열기
+            // 이미지 데이터를 받아온 후 인쇄 처리
             chartImagePromise.then((chartImage) => {
-                // 프린트 창 HTML 구성
-                const printWindow = window.open('', '_blank');
+                // 인쇄용 iframe 생성 (화면에 표시되지 않음)
+                const printFrame = document.createElement('iframe');
+                printFrame.style.position = 'fixed';
+                printFrame.style.left = '-9999px';
+                printFrame.name = 'printFrame';
+                document.body.appendChild(printFrame);
                 
-                if (!printWindow) {
-                    alert('팝업 차단이 활성화되어 있습니다. 프린트를 위해 팝업을 허용해주세요.');
-                    return;
-                }
-                
-                // 프린트 창 HTML 구성
-                printWindow.document.write(`
+                // iframe 내용 작성 (인쇄될 처방전 양식)
+                printFrame.contentDocument.write(`
                     <!DOCTYPE html>
                     <html>
                     <head>
@@ -299,6 +298,13 @@ export function initializePrescription() {
                             th { background-color: #f2f2f2; }
                             .section { margin-bottom: 20px; }
                             .section-title { font-weight: bold; margin-bottom: 5px; }
+                            /* 성별 이미지 크기 조정 */
+                            .patient-info img, .gender-icon {
+                                width: 10px;
+                                height: 14.5px;
+                                vertical-align: middle;
+                                margin: 0 5px;
+                            }
                         </style>
                     </head>
                     <body>
@@ -365,12 +371,18 @@ export function initializePrescription() {
                     </html>
                 `);
                 
-                // 프린트 창 로드 완료 후 인쇄 다이얼로그 표시
-                printWindow.document.close();
-                printWindow.onload = function() {
-                    printWindow.print();
-                    // printWindow.close();
-                };
+                printFrame.contentDocument.close();
+                
+                // 잠시 대기 후 인쇄 실행 (내용이 완전히 로드되도록)
+                setTimeout(() => {
+                    printFrame.contentWindow.focus();
+                    printFrame.contentWindow.print();
+                    
+                    // 인쇄 대화상자가 닫히면 iframe 제거
+                    setTimeout(() => {
+                        document.body.removeChild(printFrame);
+                    }, 100);
+                }, 500);
             });
         } catch (error) {
             console.error('프린트 중 오류:', error);
