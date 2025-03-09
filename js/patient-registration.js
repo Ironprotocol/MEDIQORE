@@ -587,12 +587,29 @@ function displayPatientInfo(patientData) {
         const hasInsuranceRadio = document.querySelector('input[name="insuranceStatus"][value="has"]');
         const noInsuranceRadio = document.querySelector('input[name="insuranceStatus"][value="none"]');
         const insuranceDetails = document.querySelector('.insurance-details');
+        const insuranceProviderDropdown = document.getElementById('insuranceProvider');
 
         if (patientData.insurance && patientData.insurance.provider && patientData.insurance.cardNumber) {
             hasInsuranceRadio.checked = true;
             noInsuranceRadio.checked = false;
             insuranceDetails.style.display = 'block';
-            document.getElementById('insuranceProvider').value = patientData.insurance.provider;
+            
+            // 보험사가 드롭다운에 있는지 확인
+            const providerExists = Array.from(insuranceProviderDropdown.options).some(
+                option => option.value === patientData.insurance.provider
+            );
+            
+            // 보험사가 드롭다운에 없으면 추가
+            if (!providerExists && patientData.insurance.provider) {
+                const newOption = document.createElement('option');
+                newOption.value = patientData.insurance.provider;
+                newOption.textContent = patientData.insurance.provider;
+                insuranceProviderDropdown.appendChild(newOption);
+                console.log(`Added new insurance provider to dropdown: ${patientData.insurance.provider}`);
+            }
+            
+            // 보험사 선택
+            insuranceProviderDropdown.value = patientData.insurance.provider;
             document.getElementById('insuranceNumber').value = patientData.insurance.cardNumber;
         } else {
             hasInsuranceRadio.checked = false;
