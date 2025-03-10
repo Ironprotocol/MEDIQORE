@@ -95,10 +95,6 @@ async function loadPrescriptionDetails(patientId, container) {
         
         const prescriptionData = registerData.prescription;
         
-        // 디버깅을 위한 로그
-        console.log('처방전 데이터:', prescriptionData);
-        console.log('의사 정보:', registerData.doctor);
-        
         // 병원 정보 가져오기
         const hospitalRef = doc(db, 'hospitals', hospitalName);
         const hospitalDoc = await getDoc(hospitalRef);
