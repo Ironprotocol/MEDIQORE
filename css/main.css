@@ -18,7 +18,6 @@ body {
 .top-menu {
     width: 100%;
     height: 60px;
-    background-color: 87CEFA;
     border-bottom: 1px solid hsl(0, 0%, 100%);
     display: flex;
     justify-content: space-between;  /* 로고와 로그인 섹션 양쪽 정렬 */
@@ -44,51 +43,6 @@ body {
     font-weight: 700;
     font-size: 16px;
     color: rgb(0, 102, 255);
-}
-
-/* 로그인 섹션 스타일 */
-.login-section {
-    position: static;  /* absolute 제거 */
-    display: flex;
-    align-items: center;
-    gap: 10px;  /* 요소들 사이 간격 */
-    margin-right: 20px;  /* 우측 여백 추가 */
-}
-
-/* 로그인 섹션의 input 스타일 수정 */
-.login-section input {
-    margin: 0;
-    padding: 8px;
-    height: 36px;  /* 로그인 버튼과 동일한 높이 */
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-sizing: border-box;
-}
-
-/* 계정 입력 필드만 따로 너비 설정 */
-.login-section input#account {
-    width: 180px;  /* 기존 150px에서 20% 증가 */
-}
-
-/* 비밀번호 입력 필드 */
-.login-section input#password {
-    width: 150px;
-}
-
-.login-section button {
-    margin: 0;
-    padding: 8px 16px;
-    cursor: pointer;
-    background: none;
-    border: none;
-    font-weight: bold;
-    color: #000000 ;
-    font-size: 14px;
-}
-
-.login-section button:hover {
-    color: rgb(0, 102, 255) ;
-    text-shadow: 0 0 1px rgba(0, 0, 0, 0.6);
 }
 
 /* Footer 스타일 */
@@ -135,106 +89,4 @@ body {
 
 .legal-info {
     position: relative;
-}
-
-/* 모달 스타일 */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 400px;
-    max-width: 90%;
-    animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translate(-50%, -60%); }
-    to { opacity: 1; transform: translate(-50%, -50%); }
-}
-
-.modal-content {
-    background-color: rgb(0, 102, 255);
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0, 0, 102, 0.2);
-    overflow: hidden;
-}
-
-.modal-header {
-    background-color: rgb(0, 102, 255);
-    color: white;
-    padding: 15px 20px;
-    position: relative;
-    text-align: center;
-}
-
-.modal-header h4 {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 500;
-}
-
-.modal-header h2 {
-    margin: 0;
-    font-size: 20px;
-    font-weight: 500;
-}
-
-.modal-body {
-    padding: 20px;
-    background-color: white;
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
-}
-
-.close-modal {
-    display: none;
-}
-
-#modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 999;
-    animation: fadeInOverlay 0.3s ease;
-}
-
-@keyframes fadeInOverlay {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.input-group {
-    margin-bottom: 15px;
-}
-
-.input-group input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-    box-sizing: border-box;
-}
-
-.modal-body button {
-    width: 100%;
-    padding: 12px;
-    background-color: rgb(0, 102, 255);
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.modal-body button:hover {
-    background-color: rgb(0, 82, 204);
 }

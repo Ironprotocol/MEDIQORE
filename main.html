@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MEDIQORE</title>
     <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/signin.css">
+
 </head>
 <body>
     <div class="top-menu">
@@ -13,25 +15,40 @@
             <span class="logo-text">MEDIQORE</span>
         </div>
         <div class="login-section">
-            <button id="login">Log In</button>
+            <button id="login">Sign In</button>
             <button id="contact">Contact</button>
         </div>
     </div>
 
     <!-- 로그인 모달 -->
     <div id="login-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4>Wellcome to MEDIQORE</h4>
+        <div class="login-form-container shadow">
+            <div class="login-form-right-side">
+                <div class="top-logo-wrap">
+                    
+                </div>
+                <h1>Welcome to MEDIQORE</h1>
+                <p>MEDIQORE is a secure and efficient platform for managing medical information. Please sign in to use our services.</p>
             </div>
-            <div class="modal-body">
-                <div class="input-group">
-                    <input type="text" placeholder="Account" id="account">
+            <div class="login-form-left-side">
+                <div class="login-top-wrap">
+                    <span>Don't have an account?</span>
+                    <button class="create-account-btn shadow-light">Contact Us</button>
                 </div>
-                <div class="input-group">
-                    <input type="password" placeholder="Password" id="password">
+                <div class="login-input-container">
+                    <div class="login-input-wrap input-id">
+                        <img src="image/main/account.png" alt="Account" class="input-icon">
+                        <input placeholder="Account" type="text" id="account">
+                    </div>
+                    <div class="login-input-wrap input-password">
+                        <img src="image/main/key.png" alt="Password" class="input-icon">
+                        <input placeholder="Password" type="password" id="password">
+                    </div>
                 </div>
-                <button id="login-submit">Log In</button>
+                <div class="login-btn-wrap">
+                    <button class="login-btn" id="login-submit">Sign In</button>
+                    <a href="#">Forgot password?</a>
+                </div>
             </div>
         </div>
     </div>
@@ -66,6 +83,12 @@
             document.getElementById('account').focus();
         });
         
+        // contact 버튼에 이벤트 리스너 추가
+        const contactButton = document.getElementById('contact');
+        contactButton.addEventListener('click', function() {
+            window.location.href = 'mailto:support@mediqore.com';
+        });
+        
         // 모달 외부 클릭 시 모달 닫기
         window.addEventListener('click', function(event) {
             if (event.target === modalOverlay) {
@@ -73,6 +96,14 @@
                 modalOverlay.style.display = 'none';
             }
         });
+        
+        // 문의하기 버튼 클릭 시 이메일로 연결
+        const createAccountBtn = document.querySelector('.create-account-btn');
+        if (createAccountBtn) {
+            createAccountBtn.addEventListener('click', function() {
+                window.location.href = 'mailto:support@mediqore.com';
+            });
+        }
     </script>
     <script type="module">
         // Firebase SDK 임포트
