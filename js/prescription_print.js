@@ -18,9 +18,9 @@ export function printPrescription() {
             
             if (filename.includes('male')) {
                 // 인쇄 시 상대 경로 문제를 피하기 위해 base64 인코딩된 이미지 사용
-                gender = '<span style="color: blue;">♂ Male</span>';
+                gender = '<span style="color: black;">♂ Male</span>';
             } else if (filename.includes('female')) {
-                gender = '<span style="color: pink;">♀ Female</span>';
+                gender = '<span style="color: black;">♀ Female</span>';
             }
         }
         
@@ -166,7 +166,7 @@ export function printPrescription() {
                     <title>Prescription</title>
                     <style>
                         body { 
-                            font-family: Arial, sans-serif; 
+                            font-family: sans-serif; 
                             margin: 20px;
                             font-size: 12px;
                         }

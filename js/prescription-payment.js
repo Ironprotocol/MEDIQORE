@@ -102,14 +102,54 @@ async function loadPrescriptionDetails(patientId, container) {
         // 병원 정보 가져오기
         const hospitalRef = doc(db, 'hospitals', hospitalName);
         const hospitalDoc = await getDoc(hospitalRef);
-        let hospitalInfo = {};
+        let hospitalInfo = {
+            name: hospitalName,
+            phone: 'N/A',
+            fax: 'N/A',
+            email: 'N/A'
+        };
         
         if (hospitalDoc.exists()) {
-            hospitalInfo = hospitalDoc.data().info || {};
+            const docData = hospitalDoc.data();
+            if (docData.info) {
+                hospitalInfo = {
+                    ...hospitalInfo,
+                    ...docData.info
+                };
+            }
         }
         
         // 의사 이름 가져오기
         const doctorName = registerData.doctor || 'N/A';
+        
+        // 면허 정보 확인
+        let credentialName = 'N/A';
+        let credentialNumber = 'N/A';
+        
+        if (prescriptionData.credential) {
+            credentialName = prescriptionData.credential.name || 'N/A';
+            credentialNumber = prescriptionData.credential.number || 'N/A';
+        } else if (prescriptionData.doctor && prescriptionData.doctor.name) {
+            credentialName = prescriptionData.doctor.name;
+        } else if (registerData.doctor) {
+            credentialName = registerData.doctor;
+        }
+        
+        // 전역 변수에 데이터 저장 (인쇄 시 사용)
+        window.prescriptionPrintData = {
+            patientId,
+            patientName: patientId.split('.')[0],
+            patientID: patientId.split('.')[1] || 'N/A',
+            hospitalName: hospitalInfo.name,
+            hospitalPhone: hospitalInfo.phone,
+            hospitalFax: hospitalInfo.fax,
+            hospitalEmail: hospitalInfo.email,
+            licenseName: credentialName,
+            licenseNumber: credentialNumber,
+            doctorName,
+            issueNo: `${formattedDate} No.00001`,
+            medicines: prescriptionData.medicines || []
+        };
         
         // 처방전 정보 표시 - 테이블 형식으로 변경
         container.innerHTML = `

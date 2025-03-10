@@ -199,59 +199,70 @@
         display: none !important;
     }
     
-    /* QR 코드 컨테이너 - 인쇄 시에만 표시 */
-    .qr-code-container {
-        display: block !important;
+    /* QR 코드 테이블 - 인쇄 시에만 표시 */
+    .qr-code-table {
+        display: table !important;
+        border-collapse: collapse;
         position: absolute;
-        /* A4 용지 하단에 배치 */
         bottom: 10mm;
         left: 0;
-        right: 0;
-        height: 20mm;
         width: 100%;
+        margin-top: 0;
     }
     
-    /* 왼쪽 하단 QR 코드 */
-    .qr-code-left {
-        position: absolute;
-        /* A4 용지 왼쪽 하단 모서리에 배치 */
-        left: 10mm;
-        bottom: 0;
+    /* QR 코드 셀 - 인쇄 시 표시 */
+    .qr-code-cell {
+        display: table-cell !important;
+        width: 25mm;
+        height: 25mm;
+        text-align: center;
+        vertical-align: middle;
+        border: 1px solid rgb(0, 82, 204);
+    }
+    
+    /* QR 코드 스타일 */
+    .qr-code-left, .qr-code-right {
         width: 20mm;
         height: 20mm;
         display: block !important;
-    }
-    
-    /* 오른쪽 하단 QR 코드 */
-    .qr-code-right {
-        position: absolute;
-        /* A4 용지 오른쪽 하단 모서리에 배치 */
-        right: 10mm;
-        bottom: 0;
-        width: 20mm;
-        height: 20mm;
-        display: block !important;
+        margin: 0 auto;
     }
     
     /* QR 코드 내부 요소 표시 */
-    .qr-code-left img, .qr-code-right img {
+    .qr-code-left svg, .qr-code-right svg {
         display: block !important;
         width: 20mm !important;
         height: 20mm !important;
-    }
-    
-    /* 기존 숨김 처리된 QR 코드 요소 재정의 */
-    .qr-code, .qr-code svg, .qr-code canvas, .qr-code img {
-        display: none;
+        margin: 0 auto;
     }
 }
 
-/* QR 코드 셀 - 숨김 처리 */
+/* QR 코드 셀 - 기본 표시 설정 (숨김 처리 제거) */
 .qr-code-cell {
-    display: none;
+    width: 25mm;
+    height: 25mm;
+    text-align: center;
+    vertical-align: middle;
+    border: 1px solid rgb(0, 82, 204);
 }
 
-/* QR 코드 - 숨김 처리 */
+/* QR 코드 기본 스타일 */
+.qr-code-left, .qr-code-right {
+    width: 20mm;
+    height: 20mm;
+    display: block;
+    margin: 0 auto;
+}
+
+/* QR 코드 내부 SVG 요소 기본 스타일 */
+.qr-code-left svg, .qr-code-right svg {
+    display: block;
+    width: 20mm;
+    height: 20mm;
+    margin: 0 auto;
+}
+
+/* QR 코드 - 기본 숨김 처리 유지 */
 .qr-code {
     display: none !important;
     width: 0 !important;
@@ -261,43 +272,4 @@
     padding: 0 !important;
     margin: 0 !important;
     overflow: hidden !important;
-}
-
-/* QR 코드 내부 SVG 요소 - 숨김 처리 */
-.qr-code svg {
-    display: none !important;
-    width: 0 !important;
-    height: 0 !important;
-    min-width: 0 !important;
-    min-height: 0 !important;
-}
-
-/* QR 코드 내부 Canvas 요소 - 숨김 처리 */
-.qr-code canvas {
-    display: none !important;
-    width: 0 !important;
-    height: 0 !important;
-    min-width: 0 !important;
-    min-height: 0 !important;
-}
-
-.qr-code img {
-    display: none !important;
-    max-width: 0;
-    max-height: 0;
-}
-
-/* QR 코드 컨테이너 - 기본적으로 숨김 처리 */
-.qr-code-container {
-    display: none;
-}
-
-/* 왼쪽 하단 QR 코드 - 기본적으로 숨김 처리 */
-.qr-code-left {
-    display: none;
-}
-
-/* 오른쪽 하단 QR 코드 - 기본적으로 숨김 처리 */
-.qr-code-right {
-    display: none;
 }

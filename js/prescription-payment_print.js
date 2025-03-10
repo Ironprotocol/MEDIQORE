@@ -12,9 +12,17 @@ export function printPrescription(container, patientId) {
         return;
     }
     
+    // 전역 변수에서 데이터 가져오기
+    const printData = window.prescriptionPrintData || {};
+    console.log('인쇄에 사용할 데이터:', printData);
+    
+    // 데이터가 없으면 DOM에서 가져오기 (fallback)
+    if (!printData.patientId) {
+        console.warn('전역 변수에 데이터가 없어 DOM에서 가져옵니다.');
+    }
+    
     // 현재 문서의 내용 저장
     const originalContents = document.body.innerHTML;
-    const printContents = prescriptionContent.innerHTML;
     
     // QR 코드 데이터 가져오기 (전역 변수에 저장된 경우)
     const qrData = window.prescriptionQRData || {};
@@ -23,101 +31,178 @@ export function printPrescription(container, patientId) {
     // QR 코드 데이터를 JSON 문자열로 변환
     const qrString = JSON.stringify(qrData);
     
+    // 현재 시간 가져오기
+    const now = new Date();
+    const formattedTime = now.toLocaleString('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    });
+    
     // 프린트용 스타일 정의
     const printStyles = `
         <style>
+            @page {
+                size: A4;
+                margin: 0;
+            }
+            
             @media print {
-                body {
-                    font-family: Arial, sans-serif;
+                html, body {
+                    width: 210mm;
+                    height: 297mm;
                     margin: 0;
                     padding: 0;
-                    position: relative;
+                    font-family: Arial, sans-serif;
+                    font-size: 12px;
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                    color-adjust: exact !important;
                 }
+                
                 .print-container {
-                    width: 100%;
+                    width: 190mm;
+                    min-height: 277mm;
+                    margin: 10mm;
                     position: relative;
-                    /* A4 용지 크기 설정 (210mm x 297mm) */
-                    width: 210mm;
-                    min-height: 297mm;
-                    margin: 0 auto;
-                    padding: 0;
                     box-sizing: border-box;
-                    /* QR 코드를 위한 여백 */
-                    padding-bottom: 30mm;
                 }
+                
+                .document-header {
+                    position: relative;
+                    width: 100%;
+                    height: 10mm;
+                    margin-bottom: 5mm;
+                }
+                
+                .document-type {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    font-size: 8pt;
+                    color: #666;
+                }
+                
+                .document-time {
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    font-size: 8pt;
+                    color: #666;
+                    text-align: right;
+                }
+                
                 .prescription-title {
                     text-align: center;
-                    font-size: 24px;
+                    font-size: 16pt;
                     font-weight: bold;
                     padding: 10px 0;
-                    border-bottom: 2px solid #000;
+                    border-bottom: 2px solid rgb(0, 82, 204);
+                    background-color: rgb(211, 228, 255);
                 }
+                
                 .prescription-title-container {
                     display: flex;
                     justify-content: center;
                     align-items: center;
                 }
+                
                 .prescription-title-text {
                     margin: 0 20px;
                 }
+                
                 table {
                     width: 100%;
                     border-collapse: collapse;
-                    margin-bottom: 20px;
+                    margin-bottom: 5mm;
                 }
+                
                 td {
-                    border: 1px solid #000;
-                    padding: 8px;
+                    border: 1px solid rgb(0, 82, 204);
+                    padding: 2mm;
+                    font-size: 10pt;
                 }
+                
                 .table-header {
                     font-weight: bold;
-                    background-color: #f0f0f0;
+                    background-color: rgb(233, 242, 255);
                 }
+                
                 .table-label {
                     font-weight: bold;
                 }
+                
                 .medicines-title {
                     font-weight: bold;
                     text-align: center;
-                    background-color: #f0f0f0;
+                    background-color: rgb(211, 228, 255);
                 }
+                
                 .medicines-header {
                     font-weight: bold;
-                    background-color: #f0f0f0;
+                    background-color: rgb(233, 242, 255);
                     text-align: center;
                 }
+                
+                .medicines-data {
+                    height: 6mm;
+                }
+                
+                .empty-row {
+                    height: 6mm;
+                }
+                
                 .prescription-footer, .print-btn-payment, .payment-complete-btn {
                     display: none !important;
                 }
                 
-                /* QR 코드 스타일 - 인쇄 시에만 표시 */
-                .qr-code-container {
-                    display: block !important;
-                    position: absolute;
-                    /* A4 용지 하단에 배치 */
-                    bottom: 10mm;
-                    left: 0;
-                    right: 0;
-                    height: 20mm;
+                /* QR 코드 테이블 스타일 */
+                .qr-code-table {
                     width: 100%;
-                }
-                .qr-code-left {
+                    border-collapse: collapse;
+                    margin-top: 5mm;
                     position: absolute;
-                    /* A4 용지 왼쪽 하단 모서리에 배치 */
-                    left: 10mm;
-                    bottom: 0;
+                    bottom: 5mm;
+                    left: 0;
+                    display: table !important;
+                }
+                
+                .qr-code-table td {
+                    border: 1px solid rgb(0, 82, 204) !important;
+                    padding: 2mm;
+                    vertical-align: middle;
+                    text-align: center;
+                    display: table-cell !important;
+                }
+                
+                .qr-code-cell {
+                    width: 25mm;
+                    height: 25mm;
+                    text-align: center;
+                    vertical-align: middle;
+                    position: relative;
+                    display: table-cell !important;
+                }
+                
+                .qr-code-message {
+                    text-align: center;
+                    font-size: 10pt;
+                    display: table-cell !important;
+                }
+                
+                /* QR 코드 스타일 */
+                .qr-code-left, .qr-code-right {
                     width: 20mm;
                     height: 20mm;
-                    display: block !important;
-                }
-                .qr-code-right {
-                    position: absolute;
-                    /* A4 용지 오른쪽 하단 모서리에 배치 */
-                    right: 10mm;
-                    bottom: 0;
-                    width: 20mm;
-                    height: 20mm;
-                    display: block !important;
+                    display: flex !important;
+                    justify-content: center !important;
+                    align-items: center !important;
+                    margin: 0 auto;
+                    position: relative;
                 }
                 
                 /* QR 코드 내부 요소 표시 */
@@ -125,36 +210,16 @@ export function printPrescription(container, patientId) {
                     display: block !important;
                     width: 20mm !important;
                     height: 20mm !important;
+                    margin: 0 !important;
+                    position: absolute !important;
+                    top: 50% !important;
+                    left: 50% !important;
+                    transform: translate(-50%, -50%) !important;
                 }
                 
                 /* 기존 숨김 처리된 QR 코드 요소 재정의 */
                 .qr-code, .qr-code svg, .qr-code canvas, .qr-code img {
                     display: none;
-                }
-            }
-            
-            /* 인쇄 미리보기에서도 QR 코드 컨테이너 표시 */
-            @media screen {
-                .qr-code-container {
-                    display: block;
-                    position: relative;
-                    margin-top: 20px;
-                    height: 100px;
-                    width: 100%;
-                }
-                .qr-code-left {
-                    position: absolute;
-                    left: 20px;
-                    bottom: 0;
-                    width: 100px;
-                    height: 100px;
-                }
-                .qr-code-right {
-                    position: absolute;
-                    right: 20px;
-                    bottom: 0;
-                    width: 100px;
-                    height: 100px;
                 }
             }
         </style>
@@ -178,13 +243,139 @@ export function printPrescription(container, patientId) {
         </head>
         <body>
             <div class="print-container">
-                ${printContents}
-                
-                <!-- QR 코드 컨테이너 추가 -->
-                <div class="qr-code-container">
-                    <div class="qr-code-left" id="qr-left"></div>
-                    <div class="qr-code-right" id="qr-right"></div>
+                <!-- 문서 헤더 추가 -->
+                <div class="document-header">
+                    <div class="document-type">For Pharmacy Submission</div>
+                    <div class="document-time">Print Time: ${formattedTime}</div>
                 </div>
+                
+                <!-- 처방전 내용 -->
+                <div class="prescription-content">
+                    <!-- 처방전 메인 테이블 -->
+                    <table class="prescription-table">
+                        <!-- 제목 행 -->
+                        <tr>
+                            <td colspan="6" class="prescription-title">
+                                <div class="prescription-title-container">
+                                    <span class="prescription-title-text">PRESCRIPTION</span>
+                                </div>
+                            </td>
+                        </tr>
+                        
+                        <!-- Issue No 행 -->
+                        <tr>
+                            <td class="table-header" style="width:15%;">Issue No</td>
+                            <td colspan="5" class="table-data">${printData.issueNo || document.querySelector('.prescription-table .table-data')?.textContent || ''}</td>
+                        </tr>
+                        
+                        <!-- 환자 및 병원 정보 행 -->
+                        <tr>
+                            <td class="table-header" style="width:15%;" rowspan="2">Patient</td>
+                            <td class="table-label" style="width:15%;">Name</td>
+                            <td class="table-data" style="width:20%;">${printData.patientName || document.querySelector('.prescription-table tr:nth-child(3) .table-data:nth-child(3)')?.textContent || ''}</td>
+                            <td class="table-header" style="width:15%;" rowspan="4">Hospital</td>
+                            <td class="table-label" style="width:15%;">Name</td>
+                            <td class="table-data" style="width:20%;">${printData.hospitalName || document.querySelector('.prescription-table tr:nth-child(3) .table-data:nth-child(6)')?.textContent || ''}</td>
+                        </tr>
+                        
+                        <tr>
+                            <td class="table-label">ID</td>
+                            <td class="table-data">${printData.patientID || document.querySelector('.prescription-table tr:nth-child(4) .table-data:nth-child(2)')?.textContent || ''}</td>
+                            <td class="table-label">Phone</td>
+                            <td class="table-data">${printData.hospitalPhone || document.querySelector('.prescription-table tr:nth-child(4) .table-data:nth-child(4)')?.textContent || ''}</td>
+                        </tr>
+                        
+                        <tr>
+                            <td class="table-header" rowspan="2">License</td>
+                            <td class="table-label">Name</td>
+                            <td class="table-data">${printData.licenseName || document.querySelector('.prescription-table tr:nth-child(5) .table-data:nth-child(2)')?.textContent || ''}</td>
+                            <td class="table-label">Fax</td>
+                            <td class="table-data">${printData.hospitalFax || document.querySelector('.prescription-table tr:nth-child(5) .table-data:nth-child(4)')?.textContent || ''}</td>
+                        </tr>
+                        
+                        <tr>
+                            <td class="table-label">Number</td>
+                            <td class="table-data">${printData.licenseNumber || document.querySelector('.prescription-table tr:nth-child(6) .table-data:nth-child(2)')?.textContent || ''}</td>
+                            <td class="table-label">Email</td>
+                            <td class="table-data">${printData.hospitalEmail || document.querySelector('.prescription-table tr:nth-child(6) .table-data:nth-child(4)')?.textContent || ''}</td>
+                        </tr>
+                        
+                        <!-- 의사와 서명 행 -->
+                        <tr>
+                            <td class="table-header">Doctor</td>
+                            <td class="table-data" colspan="2">${printData.doctorName || document.querySelector('.prescription-table tr:nth-child(7) .table-data:nth-child(2)')?.textContent || ''}</td>
+                            <td class="table-header">Signature</td>
+                            <td class="table-data" colspan="2" style="height:40px;"></td>
+                        </tr>
+                    </table>
+                    
+                    <!-- 약품 정보 테이블 -->
+                    <table class="medicines-table">
+                        <tr>
+                            <td colspan="4" class="medicines-title">MEDICINES</td>
+                        </tr>
+                        <tr>
+                            <td class="medicines-header" style="width:40%;">Medicine Name</td>
+                            <td class="medicines-header" style="width:20%;">Dose</td>
+                            <td class="medicines-header" style="width:20%;">Frequency</td>
+                            <td class="medicines-header" style="width:20%;">Duration</td>
+                        </tr>
+                        ${(() => {
+                            // 약품 데이터 가져오기
+                            const medicineRows = Array.from(document.querySelectorAll('.medicines-table tr')).slice(2);
+                            let medicineHTML = '';
+                            
+                            // 기존 약품 데이터 추가
+                            for (let i = 0; i < Math.min(medicineRows.length, 10); i++) {
+                                medicineHTML += `
+                                    <tr>
+                                        <td class="medicines-data">${medicineRows[i]?.querySelector('td:nth-child(1)')?.textContent || ''}</td>
+                                        <td class="medicines-data">${medicineRows[i]?.querySelector('td:nth-child(2)')?.textContent || ''}</td>
+                                        <td class="medicines-data">${medicineRows[i]?.querySelector('td:nth-child(3)')?.textContent || ''}</td>
+                                        <td class="medicines-data">${medicineRows[i]?.querySelector('td:nth-child(4)')?.textContent || ''}</td>
+                                    </tr>
+                                `;
+                            }
+                            
+                            // 빈 행 추가 (총 10줄이 되도록)
+                            for (let i = medicineRows.length; i < 10; i++) {
+                                medicineHTML += `
+                                    <tr>
+                                        <td class="medicines-data empty-row"></td>
+                                        <td class="medicines-data empty-row"></td>
+                                        <td class="medicines-data empty-row"></td>
+                                        <td class="medicines-data empty-row"></td>
+                                    </tr>
+                                `;
+                            }
+                            
+                            return medicineHTML;
+                        })()}
+                    </table>
+                    
+                    <!-- 사용 기간 테이블 -->
+                    <table class="usage-table">
+                        <tr>
+                            <td class="table-header" style="width:30%;">Usage Period</td>
+                            <td class="table-data">Valid for 3 days from issue date</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <!-- QR 코드 테이블 -->
+                <table class="qr-code-table">
+                    <tr>
+                        <td class="qr-code-cell">
+                            <div id="qr-left" class="qr-code-left"></div>
+                        </td>
+                        <td class="qr-code-message">
+                            Please scan the QR code after running MEDIQORE
+                        </td>
+                        <td class="qr-code-cell">
+                            <div id="qr-right" class="qr-code-right"></div>
+                        </td>
+                    </tr>
+                </table>
             </div>
             
             <script>
@@ -262,6 +453,19 @@ export function printPrescription(container, patientId) {
                                     svgElement.setAttribute('height', '100');
                                     svgElement.style.width = '100px';
                                     svgElement.style.height = '100px';
+                                    svgElement.style.margin = '0';
+                                    svgElement.style.display = 'block';
+                                    svgElement.style.position = 'absolute';
+                                    svgElement.style.top = '50%';
+                                    svgElement.style.left = '50%';
+                                    svgElement.style.transform = 'translate(-50%, -50%)';
+                                    
+                                    // 부모 요소에도 스타일 적용
+                                    leftElement.style.position = 'relative';
+                                    leftElement.style.display = 'block';
+                                    leftElement.style.margin = '0 auto';
+                                    leftElement.style.width = '20mm';
+                                    leftElement.style.height = '20mm';
                                 }
                             }, 50);
                             
@@ -289,6 +493,19 @@ export function printPrescription(container, patientId) {
                                     svgElement.setAttribute('height', '100');
                                     svgElement.style.width = '100px';
                                     svgElement.style.height = '100px';
+                                    svgElement.style.margin = '0';
+                                    svgElement.style.display = 'block';
+                                    svgElement.style.position = 'absolute';
+                                    svgElement.style.top = '50%';
+                                    svgElement.style.left = '50%';
+                                    svgElement.style.transform = 'translate(-50%, -50%)';
+                                    
+                                    // 부모 요소에도 스타일 적용
+                                    rightElement.style.position = 'relative';
+                                    rightElement.style.display = 'block';
+                                    rightElement.style.margin = '0 auto';
+                                    rightElement.style.width = '20mm';
+                                    rightElement.style.height = '20mm';
                                 }
                             }, 50);
                             
@@ -311,6 +528,11 @@ export function printPrescription(container, patientId) {
                     // 인쇄 다이얼로그 표시
                     setTimeout(function() {
                         console.log('인쇄 다이얼로그 표시');
+                        
+                        // 배경색 인쇄 옵션 안내 (Chrome 기준)
+                        console.log('인쇄 시 배경색을 표시하려면 인쇄 대화상자에서 "배경 그래픽" 옵션을 체크하세요.');
+                        
+                        // 인쇄 다이얼로그 실행
                         window.print();
                         
                         // 인쇄 다이얼로그가 닫힌 후 부모 창에 메시지 전송
