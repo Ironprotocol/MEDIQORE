@@ -173,10 +173,20 @@
     body {
         padding: 0;
         margin: 0;
+        position: relative;
     }
     
     .print-container {
         width: 100%;
+        position: relative;
+        /* A4 용지 크기 설정 (210mm x 297mm) */
+        width: 210mm;
+        min-height: 297mm;
+        margin: 0 auto;
+        padding: 0;
+        box-sizing: border-box;
+        /* QR 코드를 위한 여백 */
+        padding-bottom: 30mm;
     }
     
     .prescription-table,
@@ -187,6 +197,52 @@
     
     .prescription-footer {
         display: none !important;
+    }
+    
+    /* QR 코드 컨테이너 - 인쇄 시에만 표시 */
+    .qr-code-container {
+        display: block !important;
+        position: absolute;
+        /* A4 용지 하단에 배치 */
+        bottom: 10mm;
+        left: 0;
+        right: 0;
+        height: 20mm;
+        width: 100%;
+    }
+    
+    /* 왼쪽 하단 QR 코드 */
+    .qr-code-left {
+        position: absolute;
+        /* A4 용지 왼쪽 하단 모서리에 배치 */
+        left: 10mm;
+        bottom: 0;
+        width: 20mm;
+        height: 20mm;
+        display: block !important;
+    }
+    
+    /* 오른쪽 하단 QR 코드 */
+    .qr-code-right {
+        position: absolute;
+        /* A4 용지 오른쪽 하단 모서리에 배치 */
+        right: 10mm;
+        bottom: 0;
+        width: 20mm;
+        height: 20mm;
+        display: block !important;
+    }
+    
+    /* QR 코드 내부 요소 표시 */
+    .qr-code-left img, .qr-code-right img {
+        display: block !important;
+        width: 20mm !important;
+        height: 20mm !important;
+    }
+    
+    /* 기존 숨김 처리된 QR 코드 요소 재정의 */
+    .qr-code, .qr-code svg, .qr-code canvas, .qr-code img {
+        display: none;
     }
 }
 
@@ -229,4 +285,19 @@
     display: none !important;
     max-width: 0;
     max-height: 0;
+}
+
+/* QR 코드 컨테이너 - 기본적으로 숨김 처리 */
+.qr-code-container {
+    display: none;
+}
+
+/* 왼쪽 하단 QR 코드 - 기본적으로 숨김 처리 */
+.qr-code-left {
+    display: none;
+}
+
+/* 오른쪽 하단 QR 코드 - 기본적으로 숨김 처리 */
+.qr-code-right {
+    display: none;
 }
