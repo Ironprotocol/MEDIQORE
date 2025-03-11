@@ -56,14 +56,16 @@ export function printPrescription(container, patientId) {
                     font-size: 12px;
                     -webkit-print-color-adjust: exact !important;
                     print-color-adjust: exact !important;
+                    overflow: hidden;
                 }
                 
                 .print-container {
                     width: 190mm;
-                    min-height: 277mm;
+                    height: 277mm; /* max-height 대신 고정 height 사용 */
                     margin: 10mm;
                     position: relative;
                     box-sizing: border-box;
+
                 }
                 
                 .document-header {
