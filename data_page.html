@@ -48,6 +48,7 @@
         import {initializePrescriptionPayment} from './js/prescription-payment.js';
         import {initializePatientEdit} from './js/patient-edit.js';
         import {initializePatientView} from './js/patient-view.js';
+        import {initializeTopBar} from './js/topbar.js';
 
         // 전역 함수
         window.app = app;
@@ -76,8 +77,8 @@
             const actionButtons = document.querySelector('.action-buttons');
             if (actionButtons) {
                   actionButtons.innerHTML = `
-                      <button class="action-button">
-                          <div class="action-button-placeholder" title="채팅"></div>
+                      <button class="action-button" id="refresh-button">
+                          <img src="image/update.png" alt="Update" title="Update" class="update-icon">
                       </button>
                       <button class="action-button">
                           <div class="action-button-placeholder" title="알림"></div>
@@ -85,15 +86,15 @@
                       <span class="user-name"></span>
                       <div class="status-selector">
                           <div class="current-status">
-                              <img src="${statusIcons.login}" alt="Status" class="status-icon">
+                              <img src="image/login.png" alt="Status" class="status-icon">
                           </div>
                           <div class="status-dropdown">
                               <div class="status-option" data-status="end">
-                                  <img src="${statusIcons.end}" alt="End Work" class="status-icon">
+                                  <img src="image/logout.png" alt="End Work" class="status-icon">
                                   <span>End</span>
                               </div>
                               <div class="status-option" data-status="break">
-                                  <img src="${statusIcons.break}" alt="Break" class="status-icon">
+                                  <img src="image/break.png" alt="Break" class="status-icon">
                                   <span>Break</span>
                               </div>
                           </div>
@@ -144,6 +145,7 @@
             });        
             setupCloseButtons();           //닫기 버튼 기능    
             setupLogoLogout();             // 로고 클릭 이벤트 설정
+            initializeTopBar();            // 탑바 초기화 (update 버튼 등)
 
             // 환자 등록 - patient registration
             initializeAddressSearch();
@@ -225,8 +227,8 @@
             New Patient
         </button>
         <div class="action-buttons">
-            <button class="action-button">
-                <div class="action-button-placeholder" title="채팅"></div>
+            <button class="action-button" id="refresh-button">
+                <img src="image/update.png" alt="Update" title="Update" class="update-icon">
             </button>
             <button class="action-button">
                 <div class="action-button-placeholder" title="알림"></div>

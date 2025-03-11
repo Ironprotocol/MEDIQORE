@@ -164,43 +164,39 @@ export function printPrescription(container, patientId) {
                     border-collapse: collapse;
                     margin-top: 5mm;
                     position: absolute;
-                    bottom: 5mm;
+                    bottom: 10mm;
                     left: 0;
-                    display: table !important;
                 }
                 
                 .qr-code-table td {
-                    border: 1px solid rgb(0, 82, 204) !important;
-                    padding: 2mm;
+                    border: 1px solid rgb(0, 82, 204);
+                    padding: 0;
                     vertical-align: middle;
                     text-align: center;
-                    display: table-cell !important;
                 }
                 
                 .qr-code-cell {
+                    position: relative;
                     width: 25mm;
                     height: 25mm;
                     text-align: center;
                     vertical-align: middle;
-                    position: relative;
-                    display: table-cell !important;
                 }
                 
                 .qr-code-message {
                     text-align: center;
                     font-size: 10pt;
-                    display: table-cell !important;
+                    padding: 2mm;
                 }
                 
                 /* QR 코드 스타일 */
                 .qr-code-left, .qr-code-right {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
                     width: 20mm;
                     height: 20mm;
-                    display: flex !important;
-                    justify-content: center !important;
-                    align-items: center !important;
-                    margin: 0 auto;
-                    position: relative;
                 }
                 
                 /* QR 코드 내부 요소 표시 */
@@ -208,11 +204,6 @@ export function printPrescription(container, patientId) {
                     display: block !important;
                     width: 20mm !important;
                     height: 20mm !important;
-                    margin: 0 !important;
-                    position: absolute !important;
-                    top: 50% !important;
-                    left: 50% !important;
-                    transform: translate(-50%, -50%) !important;
                 }
                 
                 /* 기존 숨김 처리된 QR 코드 요소 재정의 */
@@ -361,16 +352,16 @@ export function printPrescription(container, patientId) {
                 </div>
                 
                 <!-- QR 코드 테이블 -->
-                <table class="qr-code-table">
+                <table class="qr-code-table" style="width: 100%; border-collapse: collapse; position: absolute; bottom: 10mm; left: 0; margin-top: 5mm;">
                     <tr>
-                        <td class="qr-code-cell">
-                            <div id="qr-left" class="qr-code-left"></div>
+                        <td class="qr-code-cell" style="position: relative; width: 25mm; height: 25mm; text-align: center; vertical-align: middle; padding: 0;">
+                            <div id="qr-left" class="qr-code-left" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 20mm; height: 20mm;"></div>
                         </td>
-                        <td class="qr-code-message">
+                        <td class="qr-code-message" style="text-align: center; font-size: 10pt; padding: 2mm;">
                             Please scan the QR code after running MEDIQORE
                         </td>
-                        <td class="qr-code-cell">
-                            <div id="qr-right" class="qr-code-right"></div>
+                        <td class="qr-code-cell" style="position: relative; width: 25mm; height: 25mm; text-align: center; vertical-align: middle; padding: 0;">
+                            <div id="qr-right" class="qr-code-right" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 20mm; height: 20mm;"></div>
                         </td>
                     </tr>
                 </table>
@@ -380,13 +371,9 @@ export function printPrescription(container, patientId) {
                 // QR 코드 생성 함수 (qr-code-styling 라이브러리 사용)
                 function generateQRCodes() {
                     try {
-                        // console.log('QR 코드 생성 시작');
-                        
                         // QR 코드 데이터
                         const qrData = ${JSON.stringify(qrData)};
                         const qrString = JSON.stringify(qrData);
-                        
-                        // console.log('QR 코드 데이터:', qrString);
                         
                         // QRCode 라이브러리 확인
                         if (typeof QRCodeStyling === 'undefined') {
@@ -410,8 +397,8 @@ export function printPrescription(container, patientId) {
                         
                         // 공통 QR 코드 옵션
                         const qrOptions = {
-                            width: 100,
-                            height: 100,
+                            width: 75,
+                            height: 75,
                             type: "svg",
                             data: qrString,
                             dotsOptions: {
@@ -442,8 +429,6 @@ export function printPrescription(container, patientId) {
                             
                             // QR 코드를 DOM에 추가
                             qrCodeLeft.append(leftElement);
-                            
-                            // console.log('왼쪽 QR 코드 생성 완료');
                         } catch (error) {
                             console.error('왼쪽 QR 코드 생성 오류:', error);
                         }
@@ -458,8 +443,6 @@ export function printPrescription(container, patientId) {
                             
                             // QR 코드를 DOM에 추가
                             qrCodeRight.append(rightElement);
-                            
-                            // console.log('오른쪽 QR 코드 생성 완료');
                         } catch (error) {
                             console.error('오른쪽 QR 코드 생성 오류:', error);
                         }

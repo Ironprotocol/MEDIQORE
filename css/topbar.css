@@ -99,10 +99,6 @@
             transition: background-color 0.3s ease;
         }
 
-        /* 각 버튼 hover시 ===========*/
-        .action-button:hover {
-            background-color: #f5f5f5;
-        }
 
         /* 이미지 버튼용 임시 스타일 ========== */
         .action-button-placeholder {
@@ -110,6 +106,33 @@
             height: 24px;
             background-color: #ddd;
             border-radius: 50%;
+        }
+
+        /* Update 버튼 스타일 */
+        .update-icon {
+            width: 20px;
+            height: 22px;
+            transition: all 0.2s ease;
+        }
+
+        #update-button:hover .update-icon {
+            content: url('../image/update_hover.png');
+        }
+        
+        /* 로딩 스피너 스타일 */
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-top: 2px solid #0052cc;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 2px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         /*============================================================여기까지 탑바에 속하는 요소들들==========================================================*/
 
