@@ -28,11 +28,11 @@ async function createPatientElement(hospitalName, patientData, patientId, type, 
     
     // 이름 길이 처리 함수
     function formatPatientId(id) {
-        const maxLength = 24; // abcdefghijklmnopqr 길이
+        const maxLength = 10; // 10글자로 제한
         const namePart = id.split('.')[0]; // 점(.) 앞부분만 추출
         
         if (namePart.length > maxLength) {
-            return namePart.slice(0, maxLength - 3) + '...';
+            return namePart.slice(0, maxLength) + '...';
         }
         return namePart; // ID 번호 부분 제외하고 이름만 반환
     }

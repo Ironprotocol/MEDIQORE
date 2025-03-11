@@ -1,7 +1,7 @@
 /* QR 코드 스타일링을 위한 CSS */
 
 /* QR 코드 컨테이너 기본 스타일 */
-.qr-scan-message-left, .qr-scan-message-right {
+.qr-scan-message-left, .qr-scan-message-right, .qr-scan-message-center {
     display: flex;
     justify-content: center;
     align-items: center;

@@ -160,7 +160,7 @@ export function printPrescription(container, patientId) {
                     height: 150px;
                     margin-top: 15px;
                     page-break-inside: avoid;
-                    border: 3px solid rgb(0, 82, 204);
+                    border: 1px solid rgb(0, 82, 204);
                 }
                 
                 .qr-scan-message-left, .qr-scan-message-right {
@@ -181,8 +181,8 @@ export function printPrescription(container, patientId) {
                     text-align: center;
                     font-size: 14px;
                     background-color: #FFFFFF;
-                    border-left: 3px solid rgb(0, 82, 204); 
-                    border-right: 3px solid rgb(0, 82, 204); 
+                    border-left: 1px solid rgb(0, 82, 204); 
+                    border-right: 1px solid rgb(0, 82, 204); 
                 }
             }
         </style>

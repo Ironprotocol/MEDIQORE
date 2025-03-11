@@ -197,7 +197,7 @@ export async function initializeRoomManagement(hospitalName) {
                             ${item.patients.map(patient => `
                                 <div class="room-patient-item ${patient.id === selectedPatientId ? 'active' : ''}" 
                                      data-patient-id="${patient.id}">
-                                    <span class="patient-name">${patient.name}</span>
+                                    <span class="patient-name">${patient.name.length > 10 ? patient.name.slice(0, 10) + '...' : patient.name}</span>
                                     <span class="patient-age" style="display: none;">${patient.age || '0years'}</span>
                                     <img src="image/${patient.progress || 'waiting'}.png" alt="${patient.progress || 'waiting'}" 
                                          class="patient-status-icon">

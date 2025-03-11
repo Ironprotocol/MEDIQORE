@@ -20,6 +20,12 @@ export function generateQRCodes(patientId, prescriptionData, hospitalName, docto
         // 타임스탬프 생성
         const timestamp = `${year}.${month}.${day}_${hours}.${minutes}.${seconds}`;
         
+        // Extract ID number from patientId (assuming format 'name.idNumber')
+        const idNumber = patientId.split('.')[1];
+        
+        // Create the simplified data string for the QR code
+        const qrData = `${hospitalName}/${idNumber}/${timestamp}`;
+        
         // 파이어베이스 경로 생성
         const firebasePath = `/hospitals/${hospitalName}/patient/${patientId}/register.date/${timestamp}`;
         
@@ -30,8 +36,8 @@ export function generateQRCodes(patientId, prescriptionData, hospitalName, docto
         
         // QR 코드 렌더링 함수를 전역 변수에 저장 (인쇄 시 사용)
         window.renderQRCodesForPrint = (leftContainer, rightContainer) => {
-            renderQRCode(leftContainer, firebasePath, 'left');
-            renderQRCode(rightContainer, firebasePath, 'right');
+            renderQRCode(leftContainer, qrData, 'left');
+            renderQRCode(rightContainer, qrData, 'right');
         };
     } catch (error) {
         console.error('QR 코드 데이터 생성 중 예외 발생:', error);
@@ -96,13 +102,13 @@ function renderQRCode(container, data, position) {
         // 위치에 따라 다르게 배치
         if (position === 'left') {
             // 왼쪽 QR 코드: 오른쪽 상단 모서리에 배치
-            companyName.style.top = '10px';
-            companyName.style.left = '27px'; // QR 코드 크기(100px)에 맞춰 완전히 붙게 설정
+            companyName.style.top = '15px';
+            companyName.style.left = '35px'; // QR 코드 크기(100px)에 맞춰 완전히 붙게 설정
             companyName.className = 'mediqore-text-left';
         } else {
             // 오른쪽 QR 코드: 오른쪽 하단 모서리에 배치하고 180도 회전
-            companyName.style.bottom = '23px';
-            companyName.style.left = '123px'; // QR 코드 크기(100px)에 맞춰 완전히 붙게 설정
+            companyName.style.bottom = '27px';
+            companyName.style.left = '117px'; // QR 코드 크기(100px)에 맞춰 완전히 붙게 설정
             companyName.style.transform = 'rotate(180deg)'; // 180도 회전
             companyName.style.transformOrigin = 'left bottom'; // 회전 기준점
             companyName.className = 'mediqore-text-right';
