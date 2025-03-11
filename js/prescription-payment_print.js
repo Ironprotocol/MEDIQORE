@@ -140,10 +140,33 @@ export function printPrescription(container, patientId) {
                     font-weight: bold;
                     background-color: rgb(233, 242, 255);
                     text-align: center;
+                    border-left: 1px solid rgb(0, 82, 204);
+                    border-right: 1px solid rgb(0, 82, 204);
+                    border-bottom: 1px solid rgb(0, 82, 204);
                 }
                 
                 .medicines-data {
                     height: 6mm;
+                    border-top: none;
+                    border-left: 1px solid rgb(0, 82, 204);
+                    border-right: 1px solid rgb(0, 82, 204);
+                }
+                
+                /* 약품 테이블 행 사이 구분선을 점선으로 변경 */
+                .medicines-table tr:not(:first-child):not(:nth-child(2)):not(:last-child) td {
+                    border-top: none;
+                    border-bottom: 1px dotted rgb(0, 82, 204);
+                }
+                
+                /* 첫 번째 행(헤더) 아래의 구분선은 실선 유지 */
+                .medicines-table tr:nth-child(2) td {
+                    border-top: 1px solid rgb(0, 82, 204);
+                    border-bottom: 1px solid rgb(0, 82, 204);
+                }
+                
+                /* 마지막 행 아래의 구분선은 실선 유지 */
+                .medicines-table tr:last-child td {
+                    border-bottom: 1px solid rgb(0, 82, 204);
                 }
                 
                 .empty-row {
