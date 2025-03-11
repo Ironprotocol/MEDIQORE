@@ -2,6 +2,7 @@
 // 처방전 프린트 관련 기능을 담당하는 모듈
 
 import { initializePrescriptionPayment } from './prescription-payment.js';
+import { generateQRCodes } from './qrcode.js';
 
 // 프린트 함수 - 인쇄 취소 시 문제 해결
 export function printPrescription(container, patientId) {
@@ -53,7 +54,6 @@ export function printPrescription(container, patientId) {
                     font-size: 12px;
                     -webkit-print-color-adjust: exact !important;
                     print-color-adjust: exact !important;
-                    color-adjust: exact !important;
                 }
                 
                 .print-container {
@@ -321,7 +321,7 @@ export function printPrescription(container, patientId) {
                 <div class="qr-scan-message-container">
                     <div class="qr-scan-message-left"></div>
                     <div class="qr-scan-message-center">
-                        Access MEDIQORE and scan the QR code
+                        For pharmacy use - Scan with MEDIQORE Pharmacy App
                     </div>
                     <div class="qr-scan-message-right"></div>
                 </div>
@@ -330,13 +330,27 @@ export function printPrescription(container, patientId) {
             <script>
                 // 페이지 로드 시 인쇄 다이얼로그 표시
                 window.onload = function() {
-                    // 인쇄 다이얼로그 표시
+                    // QR 코드 생성 및 렌더링
+                    if (window.parent.renderQRCodesForPrint) {
+                        const leftQRElement = document.querySelector('.qr-scan-message-left');
+                        const rightQRElement = document.querySelector('.qr-scan-message-right');
+                        
+                        if (leftQRElement && rightQRElement) {
+                            window.parent.renderQRCodesForPrint(leftQRElement, rightQRElement);
+                        } else {
+                            console.error('QR 코드 컨테이너를 찾을 수 없습니다.');
+                        }
+                    } else {
+                        console.warn('renderQRCodesForPrint 함수를 찾을 수 없습니다.');
+                    }
+                    
+                    // 인쇄 다이얼로그 표시 - QR 코드 렌더링 후 약간의 지연을 두고 실행
                     setTimeout(() => {
                         window.print();
                         
                         // 인쇄 완료 메시지 전송
                         window.parent.postMessage('printCompleted', '*');
-                    }, 500);
+                    }, 800); // 800ms로 증가하여 QR 코드 렌더링 시간 확보
                 };
                 
                 // 인쇄 후 이벤트 처리
@@ -375,38 +389,4 @@ export function printPrescription(container, patientId) {
     };
 }
 
-// QR 코드 생성 함수
-export function generateQRCodes(patientId, prescriptionData, hospitalName, doctorName) {
-    try {
-        // QR 코드에 포함할 데이터 생성 (테스트 버전용 최적화)
-        const qrData = {
-            v: 1,  // 버전
-            h: {   // 병원 정보
-                n: hospitalName,
-                d: doctorName
-            },
-            p: {   // 환자 정보
-                id: patientId,
-                nm: patientId.split('.')[0]
-            },
-            d: new Date().toISOString().split('T')[0],  // 날짜 (YYYY-MM-DD)
-            m: prescriptionData.medicines ? prescriptionData.medicines.map(med => ({
-                n: med.name,
-                d: med.perDose || '',
-                f: med.perDay || '',
-                t: med.days || ''
-            })) : []
-        };
-        
-        // 데이터를 JSON 문자열로 변환
-        const qrString = JSON.stringify(qrData);
-        
-        // QR 코드 데이터를 전역 변수에 저장 (인쇄 시 사용)
-        window.prescriptionQRData = qrData;
-        
-        // QR 코드 데이터만 저장하고 화면에 표시하지 않음
-        // 나중에 프린트 시 필요하면 사용할 수 있도록 데이터 형식 유지
-    } catch (error) {
-        console.error('QR 코드 데이터 생성 중 예외 발생:', error);
-    }
-}
+// QR 코드 생성 함수는 qrcode.js로 이동했으므로 제거

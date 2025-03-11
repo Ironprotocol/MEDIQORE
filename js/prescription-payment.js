@@ -1,5 +1,6 @@
 import { auth, db, doc, getDoc, deleteDoc, collection, query, where, getDocs } from './firebase-config.js';
-import { printPrescription, generateQRCodes as generateQRCodesForPrint } from './prescription-payment_print.js';
+import { printPrescription } from './prescription-payment_print.js';
+import { generateQRCodes } from './qrcode.js';
 
 // Prescription Payment 컨테이너 초기화
 export function initializePrescriptionPayment() {
@@ -254,7 +255,7 @@ async function loadPrescriptionDetails(patientId, container) {
         
         // 처방전 정보 표시 후 QR 코드 생성
         setTimeout(() => {
-            generateQRCodesForPrint(patientId, prescriptionData, hospitalName, doctorName);
+            generateQRCodes(patientId, prescriptionData, hospitalName, doctorName);
         }, 100);
         
         // 결제 완료 버튼 이벤트 리스너 추가

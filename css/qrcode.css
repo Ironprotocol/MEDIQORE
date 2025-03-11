@@ -1,0 +1,45 @@
+/* QR 코드 스타일링을 위한 CSS */
+
+/* QR 코드 컨테이너 기본 스타일 */
+.qr-scan-message-left, .qr-scan-message-right {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+    padding: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* QR 코드 SVG 요소 스타일 */
+.qr-scan-message-left svg, .qr-scan-message-right svg {
+    width: 100%;
+    height: 100%;
+    max-width: 100px;
+    max-height: 100px;
+}
+
+/* 인쇄 전용 스타일 */
+@media print {
+    .qr-scan-message-left, .qr-scan-message-right {
+        background-color: white !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    /* QR 코드 SVG 요소 인쇄 스타일 */
+    .qr-scan-message-left svg, .qr-scan-message-right svg {
+        width: 100% !important;
+        height: 100% !important;
+    }
+    
+    /* QR 코드 점(도트) 인쇄 스타일 */
+    .qr-scan-message-left svg path, .qr-scan-message-right svg path {
+        fill: black !important;
+    }
+    
+    /* QR 코드 배경 인쇄 스타일 */
+    .qr-scan-message-left svg rect, .qr-scan-message-right svg rect {
+        fill: white !important;
+    }
+}
