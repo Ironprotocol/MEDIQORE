@@ -51,11 +51,14 @@ function renderQRCode(container, data, position) {
             container.removeChild(container.firstChild);
         }
         
+        // 컨테이너 스타일 설정
+        container.style.position = 'relative';
+        
         // QR 코드 스타일링 객체 생성
         const qrCode = new QRCodeStyling({
             width: 120,
             height: 120,
-            type: "svg",
+            type: "canvas",
             data: data,
             dotsOptions: {
                 color: "#000000",
@@ -79,6 +82,33 @@ function renderQRCode(container, data, position) {
         
         // QR 코드 렌더링
         qrCode.append(container);
+        
+        // 회사 이름 요소 생성
+        const companyName = document.createElement('div');
+        companyName.textContent = 'MEDIQORE';
+        companyName.style.fontWeight = 'bold';
+        companyName.style.fontSize = '10px';
+        companyName.style.position = 'absolute';
+        companyName.style.fontFamily = 'Arial, sans-serif';
+        companyName.style.letterSpacing = '0.5px';
+        companyName.style.whiteSpace = 'nowrap';
+        
+        // 위치에 따라 다르게 배치
+        if (position === 'left') {
+            // 왼쪽 QR 코드: 오른쪽 상단 모서리에 배치
+            companyName.style.top = '10px';
+            companyName.style.left = '27px'; // QR 코드 크기(100px)에 맞춰 완전히 붙게 설정
+            companyName.className = 'mediqore-text-left';
+        } else {
+            // 오른쪽 QR 코드: 오른쪽 하단 모서리에 배치하고 180도 회전
+            companyName.style.bottom = '23px';
+            companyName.style.left = '123px'; // QR 코드 크기(100px)에 맞춰 완전히 붙게 설정
+            companyName.style.transform = 'rotate(180deg)'; // 180도 회전
+            companyName.style.transformOrigin = 'left bottom'; // 회전 기준점
+            companyName.className = 'mediqore-text-right';
+        }
+        
+        container.appendChild(companyName);
         
         // 디버깅용 로그
         console.log(`QR 코드 (${position}) 생성 완료:`, data);

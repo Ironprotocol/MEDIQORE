@@ -42,6 +42,8 @@ export function printPrescription(container, patientId) {
             @page {
                 size: A4;
                 margin: 0;
+                /* 고정 배율 적용 */
+                scale: 1;
             }
             
             @media print {
@@ -155,27 +157,32 @@ export function printPrescription(container, patientId) {
                 .qr-scan-message-container {
                     display: flex;
                     width: 100%;
-                    height: 120px;
-                    margin-top: 10mm;
+                    height: 150px;
+                    margin-top: 15px;
                     page-break-inside: avoid;
+                    border: 3px solid rgb(0, 82, 204);
                 }
                 
                 .qr-scan-message-left, .qr-scan-message-right {
-                    width: 120px;
-                    height: 100%;
-                    border: 1px solid rgb(0, 82, 204);
+                    width: 150px;
+                    height: 150px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    background-color: #FFFFFF;
                 }
                 
                 .qr-scan-message-center {
                     flex: 1;
-                    height: 120px;
+                    height: 150px;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     text-align: center;
                     font-size: 14px;
-                    border-top: 1px solid rgb(0, 82, 204);
-                    border-bottom: 1px solid rgb(0, 82, 204);                    
+                    background-color: #FFFFFF;
+                    border-left: 3px solid rgb(0, 82, 204); 
+                    border-right: 3px solid rgb(0, 82, 204); 
                 }
             }
         </style>
