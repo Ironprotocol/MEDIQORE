@@ -330,11 +330,30 @@ async function createPatientElement(hospitalName, patientData, patientId, type, 
 
                     // 새로운 room에 환자 추가
                     const currentPatients = doctorRoom.patients || [];
+
+                    // 환자의 register.date에서 원본 timestamp 가져오기
+                    // 경로: /hospitals/병원명/patient/회원이름.idnumber/register.date/날짜
+                    let originalTimestamp = null;
+                    try {
+                        const patientRegisterRef = collection(db, 'hospitals', hospitalName, 'patient', patientId, 'register.date');
+                        const registerQuery = query(patientRegisterRef, where('timestamp', '>=', new Date(currentDate)));
+                        const registerDocs = await getDocs(registerQuery);
+                        
+                        if (!registerDocs.empty) {
+                            const registerData = registerDocs.docs[0].data();
+                            originalTimestamp = registerData.timestamp;
+                        }
+                    } catch (error) {
+                        console.error('Error getting original timestamp:', error);
+                    }
+                    
+                    // 환자 정보에 timestamp 추가하여 room에 저장
                     await updateDoc(doc(roomsRef, doctorRoom.id), {
                         patients: [...currentPatients, {
                             id: patientId,
                             name: patientId.split('.')[0],
-                            progress: type === 'reservation' ? 'waiting' : type  // timestamp 제거
+                            progress: type === 'reservation' ? 'waiting' : type,
+                            timestamp: originalTimestamp // 원본 timestamp 추가
                         }]
                     });
 
