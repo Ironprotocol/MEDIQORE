@@ -155,20 +155,20 @@ export function printPrescription(container, patientId) {
                 .qr-scan-message-container {
                     display: flex;
                     width: 100%;
-                    height: 100px;
+                    height: 120px;
                     margin-top: 10mm;
                     page-break-inside: avoid;
                 }
                 
                 .qr-scan-message-left, .qr-scan-message-right {
-                    width: 100px;
+                    width: 120px;
                     height: 100%;
                     border: 1px solid rgb(0, 82, 204);
                 }
                 
                 .qr-scan-message-center {
                     flex: 1;
-                    height: 100px;
+                    height: 120px;
                     display: flex;
                     justify-content: center;
                     align-items: center;

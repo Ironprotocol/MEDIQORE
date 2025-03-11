@@ -53,8 +53,8 @@ function renderQRCode(container, data, position) {
         
         // QR 코드 스타일링 객체 생성
         const qrCode = new QRCodeStyling({
-            width: 100,
-            height: 100,
+            width: 120,
+            height: 120,
             type: "svg",
             data: data,
             dotsOptions: {
