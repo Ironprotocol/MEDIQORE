@@ -179,14 +179,14 @@
     .print-container {
         width: 100%;
         position: relative;
-        /* A4 용지 크기 설정 (210mm x 297mm) */
-        width: 210mm;
-        min-height: 297mm;
+        /* A4 용지 크기 설정 (210mm x 297mm) - px로 변환 */
+        width: 794px; /* 210mm 상당 */
+        min-height: 1123px; /* 297mm 상당 */
         margin: 0 auto;
         padding: 0;
         box-sizing: border-box;
         /* QR 코드를 위한 여백 */
-        padding-bottom: 30mm;
+        padding-bottom: 120px; /* 30mm 상당 */
     }
     
     .prescription-table,
@@ -198,78 +198,4 @@
     .prescription-footer {
         display: none !important;
     }
-    
-    /* QR 코드 테이블 - 인쇄 시에만 표시 */
-    .qr-code-table {
-        display: table !important;
-        border-collapse: collapse;
-        position: absolute;
-        bottom: 10mm;
-        left: 0;
-        width: 100%;
-        margin-top: 0;
-    }
-    
-    /* QR 코드 셀 - 인쇄 시 표시 */
-    .qr-code-cell {
-        display: table-cell !important;
-        width: 25mm;
-        height: 25mm;
-        text-align: center;
-        vertical-align: middle;
-        border: 1px solid rgb(0, 82, 204);
-    }
-    
-    /* QR 코드 스타일 */
-    .qr-code-left, .qr-code-right {
-        width: 20mm;
-        height: 20mm;
-        display: block !important;
-        margin: 0 auto;
-    }
-    
-    /* QR 코드 내부 요소 표시 */
-    .qr-code-left svg, .qr-code-right svg {
-        display: block !important;
-        width: 20mm !important;
-        height: 20mm !important;
-        margin: 0 auto;
-    }
-}
-
-/* QR 코드 셀 - 기본 표시 설정 (숨김 처리 제거) */
-.qr-code-cell {
-    width: 25mm;
-    height: 25mm;
-    text-align: center;
-    vertical-align: middle;
-    border: 1px solid rgb(0, 82, 204);
-}
-
-/* QR 코드 기본 스타일 */
-.qr-code-left, .qr-code-right {
-    width: 20mm;
-    height: 20mm;
-    display: block;
-    margin: 0 auto;
-}
-
-/* QR 코드 내부 SVG 요소 기본 스타일 */
-.qr-code-left svg, .qr-code-right svg {
-    display: block;
-    width: 20mm;
-    height: 20mm;
-    margin: 0 auto;
-}
-
-/* QR 코드 - 기본 숨김 처리 유지 */
-.qr-code {
-    display: none !important;
-    width: 0 !important;
-    height: 0 !important;
-    min-width: 0 !important;
-    min-height: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    overflow: hidden !important;
 }

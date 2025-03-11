@@ -23,12 +23,6 @@ export function printPrescription(container, patientId) {
     // 현재 문서의 내용 저장
     const originalContents = document.body.innerHTML;
     
-    // QR 코드 데이터 가져오기 (전역 변수에 저장된 경우)
-    const qrData = window.prescriptionQRData || {};
-    
-    // QR 코드 데이터를 JSON 문자열로 변환
-    const qrString = JSON.stringify(qrData);
-    
     // 현재 시간 가져오기
     const now = new Date();
     const formattedTime = now.toLocaleString('en-US', {
@@ -158,57 +152,30 @@ export function printPrescription(container, patientId) {
                     display: none !important;
                 }
                 
-                /* QR 코드 테이블 스타일 */
-                .qr-code-table {
+                .qr-scan-message-container {
+                    display: flex;
                     width: 100%;
-                    border-collapse: collapse;
-                    margin-top: 5mm;
-                    position: absolute;
-                    bottom: 10mm;
-                    left: 0;
+                    height: 100px;
+                    margin-top: 10mm;
+                    page-break-inside: avoid;
                 }
                 
-                .qr-code-table td {
+                .qr-scan-message-left, .qr-scan-message-right {
+                    width: 100px;
+                    height: 100%;
                     border: 1px solid rgb(0, 82, 204);
-                    padding: 0;
-                    vertical-align: middle;
+                }
+                
+                .qr-scan-message-center {
+                    flex: 1;
+                    height: 100px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
                     text-align: center;
-                }
-                
-                .qr-code-cell {
-                    position: relative;
-                    width: 30mm;
-                    height: 30mm;
-                    text-align: center;
-                    vertical-align: middle;
-                }
-                
-                .qr-code-message {
-                    text-align: center;
-                    font-size: 10pt;
-                    padding: 2mm;
-                }
-                
-                /* QR 코드 스타일 */
-                .qr-code-left, .qr-code-right {
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    width: 25mm;
-                    height: 25mm;
-                }
-                
-                /* QR 코드 내부 요소 표시 */
-                .qr-code-left svg, .qr-code-right svg {
-                    display: block !important;
-                    width: 25mm !important;
-                    height: 25mm !important;
-                }
-                
-                /* 기존 숨김 처리된 QR 코드 요소 재정의 */
-                .qr-code, .qr-code svg, .qr-code canvas, .qr-code img {
-                    display: none;
+                    font-size: 14px;
+                    border-top: 1px solid rgb(0, 82, 204);
+                    border-bottom: 1px solid rgb(0, 82, 204);                    
                 }
             }
         </style>
@@ -228,7 +195,6 @@ export function printPrescription(container, patientId) {
         <head>
             <title>Prescription</title>
             ${printStyles}
-            <script src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
         </head>
         <body>
             <div class="print-container">
@@ -351,152 +317,33 @@ export function printPrescription(container, patientId) {
                     </table>
                 </div>
                 
-                <!-- QR 코드 테이블 -->
-                <table class="qr-code-table" style="width: 100%; border-collapse: collapse; position: absolute; bottom: 10mm; left: 0; margin-top: 5mm;">
-                    <tr>
-                        <td class="qr-code-cell" style="position: relative; width: 30mm; height: 30mm; text-align: center; vertical-align: middle; padding: 0;">
-                            <div id="qr-left" class="qr-code-left" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 25mm; height: 25mm;"></div>
-                        </td>
-                        <td class="qr-code-message" style="text-align: center; font-size: 10pt; padding: 2mm;">
-                            Please scan the QR code after running MEDIQORE
-                        </td>
-                        <td class="qr-code-cell" style="position: relative; width: 30mm; height: 30mm; text-align: center; vertical-align: middle; padding: 0;">
-                            <div id="qr-right" class="qr-code-right" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 25mm; height: 25mm;"></div>
-                        </td>
-                    </tr>
-                </table>
+                <!-- 하단 QR 코드 스캔 메시지 영역 -->
+                <div class="qr-scan-message-container">
+                    <div class="qr-scan-message-left"></div>
+                    <div class="qr-scan-message-center">
+                        Access MEDIQORE and scan the QR code
+                    </div>
+                    <div class="qr-scan-message-right"></div>
+                </div>
             </div>
             
             <script>
-                // QR 코드 생성 함수 (qr-code-styling 라이브러리 사용)
-                function generateQRCodes() {
-                    try {
-                        // QR 코드 데이터
-                        const qrData = ${JSON.stringify(qrData)};
-                        const qrString = JSON.stringify(qrData);
-                        
-                        // QRCode 라이브러리 확인
-                        if (typeof QRCodeStyling === 'undefined') {
-                            console.error('QRCodeStyling 라이브러리가 로드되지 않았습니다.');
-                            return;
-                        }
-                        
-                        // 왼쪽 QR 코드 요소 확인
-                        const leftElement = document.getElementById('qr-left');
-                        if (!leftElement) {
-                            console.error('왼쪽 QR 코드 요소를 찾을 수 없습니다.');
-                            return;
-                        }
-                        
-                        // 오른쪽 QR 코드 요소 확인
-                        const rightElement = document.getElementById('qr-right');
-                        if (!rightElement) {
-                            console.error('오른쪽 QR 코드 요소를 찾을 수 없습니다.');
-                            return;
-                        }
-                        
-                        // mm를 px로 변환 (1mm ≈ 3.78px)
-                        const mmToPx = 3.78;
-                        const qrSizeMm = 25; // 25mm
-                        const qrSizePx = Math.floor(qrSizeMm * mmToPx);
-                        
-                        // 공통 QR 코드 옵션
-                        const qrOptions = {
-                            width: qrSizePx,
-                            height: qrSizePx,
-                            type: "svg",
-                            data: qrString,
-                            dotsOptions: {
-                                color: "#000000",
-                                type: "square"
-                            },
-                            backgroundOptions: {
-                                color: "transparent",
-                            },
-                            cornersSquareOptions: {
-                                type: "square"
-                            },
-                            cornersDotOptions: {
-                                type: "square"
-                            },
-                            qrOptions: {
-                                errorCorrectionLevel: "M"
-                            }
-                        };
-                        
-                        // 왼쪽 QR 코드 생성
-                        try {
-                            // 기존 QR 코드가 있으면 제거
-                            leftElement.innerHTML = '';
-                            
-                            // QR Code Styling 라이브러리를 사용하여 QR 코드 생성
-                            const qrCodeLeft = new QRCodeStyling(qrOptions);
-                            
-                            // QR 코드를 DOM에 추가
-                            qrCodeLeft.append(leftElement);
-                            
-                            // SVG 요소에 스타일 적용
-                            setTimeout(() => {
-                                const svgElement = leftElement.querySelector('svg');
-                                if (svgElement) {
-                                    svgElement.style.width = '25mm';
-                                    svgElement.style.height = '25mm';
-                                    svgElement.style.display = 'block';
-                                }
-                            }, 100);
-                        } catch (error) {
-                            console.error('왼쪽 QR 코드 생성 오류:', error);
-                        }
-                        
-                        // 오른쪽 QR 코드 생성
-                        try {
-                            // 기존 QR 코드가 있으면 제거
-                            rightElement.innerHTML = '';
-                            
-                            // QR Code Styling 라이브러리를 사용하여 QR 코드 생성
-                            const qrCodeRight = new QRCodeStyling(qrOptions);
-                            
-                            // QR 코드를 DOM에 추가
-                            qrCodeRight.append(rightElement);
-                            
-                            // SVG 요소에 스타일 적용
-                            setTimeout(() => {
-                                const svgElement = rightElement.querySelector('svg');
-                                if (svgElement) {
-                                    svgElement.style.width = '25mm';
-                                    svgElement.style.height = '25mm';
-                                    svgElement.style.display = 'block';
-                                }
-                            }, 100);
-                        } catch (error) {
-                            console.error('오른쪽 QR 코드 생성 오류:', error);
-                        }
-                    } catch (error) {
-                        console.error('QR 코드 생성 중 예외 발생:', error);
-                    }
-                }
-                
-                // 페이지 로드 시 QR 코드 생성 및 인쇄 다이얼로그 표시
+                // 페이지 로드 시 인쇄 다이얼로그 표시
                 window.onload = function() {
-                    // console.log('iframe 내부 페이지 로드됨');
-                    
-                    // QR 코드 생성 (약간의 지연 후 실행)
+                    // 인쇄 다이얼로그 표시
                     setTimeout(() => {
-                        try {
-                            generateQRCodes();
-                        } catch (error) {
-                            console.error('QR 코드 생성 중 오류 발생:', error);
-                        }
+                        window.print();
                         
-                        // 인쇄 다이얼로그 표시
-                        setTimeout(() => {
-                            window.print();
-                            
-                            // 인쇄 완료 메시지 전송
-                            window.parent.postMessage('printCompleted', '*');
-                        }, 500);
-                    }, 300);
+                        // 인쇄 완료 메시지 전송
+                        window.parent.postMessage('printCompleted', '*');
+                    }, 500);
                 };
+                
+                // 인쇄 후 이벤트 처리
+                window.addEventListener('afterprint', function() {
+                    // 인쇄 완료 또는 취소 시 메시지 전송
+                    window.parent.postMessage('printClosed', '*');
+                });
             </script>
         </body>
         </html>
@@ -505,12 +352,9 @@ export function printPrescription(container, patientId) {
     
     // iframe이 로드된 후 처리
     iframe.onload = function() {
-        // console.log('iframe 로드됨');
-        
         // 메시지 이벤트 리스너 추가
         const messageHandler = function(event) {
             if (event.data === 'printClosed' || event.data === 'printTimeout') {
-                // console.log('인쇄 완료 메시지 수신:', event.data);
                 // iframe 제거
                 document.body.removeChild(iframe);
                 // 이벤트 리스너 제거
@@ -523,7 +367,6 @@ export function printPrescription(container, patientId) {
         
         // 추가 안전장치: 10초 후 무조건 iframe 제거
         setTimeout(function() {
-            // console.log('안전장치: iframe 제거 타임아웃');
             if (document.body.contains(iframe)) {
                 document.body.removeChild(iframe);
                 window.removeEventListener('message', messageHandler);
@@ -557,11 +400,6 @@ export function generateQRCodes(patientId, prescriptionData, hospitalName, docto
         
         // 데이터를 JSON 문자열로 변환
         const qrString = JSON.stringify(qrData);
-        
-        // 디버깅: QR 코드 데이터 크기 확인
-        // const dataSizeBytes = new Blob([qrString]).size;
-        // console.log('QR 코드 데이터 크기:', dataSizeBytes, 'bytes');
-        // console.log('QR 코드 데이터 내용:', qrString);
         
         // QR 코드 데이터를 전역 변수에 저장 (인쇄 시 사용)
         window.prescriptionQRData = qrData;
