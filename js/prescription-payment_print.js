@@ -47,6 +47,8 @@ export function printPrescription(container, patientId) {
             }
             
             @media print {
+
+                
                 html, body {
                     width: 210mm;
                     height: 297mm;
@@ -61,11 +63,10 @@ export function printPrescription(container, patientId) {
                 
                 .print-container {
                     width: 190mm;
-                    height: 277mm; /* max-height 대신 고정 height 사용 */
+                    height: 277mm;
                     margin: 10mm;
                     position: relative;
                     box-sizing: border-box;
-
                 }
                 
                 .document-header {
@@ -111,9 +112,11 @@ export function printPrescription(container, patientId) {
                     margin: 0 20px;
                 }
                 
+                /* 테이블 렌더링 최적화 */
                 table {
                     width: 100%;
-                    border-collapse: collapse;
+                    border-collapse: separate;
+                    border-spacing: 0;
                     margin-bottom: 5mm;
                 }
                 
@@ -154,10 +157,25 @@ export function printPrescription(container, patientId) {
                     border-right: 1px solid rgb(0, 82, 204);
                 }
                 
-                /* 약품 테이블 행 사이 구분선을 점선으로 변경 */
+                /* 점선 스타일 개선 */
                 .medicines-table tr:not(:first-child):not(:nth-child(2)):not(:last-child) td {
                     border-top: none;
-                    border-bottom: 1px dotted rgb(0, 82, 204);
+                    border-bottom: none;
+                    position: relative;
+                    padding-bottom: 5px; /* 점선을 위한 여백 확보 */
+                }
+                
+                /* 점선을 CSS로 더 명확하게 구현 */
+                .medicines-table tr:not(:first-child):not(:nth-child(2)):not(:last-child) td:after {
+                    content: "";
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 1px;
+                    background-image: linear-gradient(to right, rgb(0, 82, 204) 2px, transparent 2px);
+                    background-size: 4px 1px;
+                    background-repeat: repeat-x;
                 }
                 
                 /* 첫 번째 행(헤더) 아래의 구분선은 실선 유지 */
@@ -185,7 +203,7 @@ export function printPrescription(container, patientId) {
                     height: 150px;
                     margin-top: 15px;
                     page-break-inside: avoid;
-                    border: 1px solid rgb(0, 82, 204);
+                    border: 2px solid rgb(0, 82, 204);
                 }
                 
                 .qr-scan-message-left, .qr-scan-message-right {
@@ -206,8 +224,8 @@ export function printPrescription(container, patientId) {
                     text-align: center;
                     font-size: 14px;
                     background-color: #FFFFFF;
-                    border-left: 1px solid rgb(0, 82, 204); 
-                    border-right: 1px solid rgb(0, 82, 204); 
+                    border-left: 2px solid rgb(0, 82, 204); 
+                    border-right: 2px solid rgb(0, 82, 204); 
                 }
             }
         </style>
