@@ -20,6 +20,26 @@
     z-index: 1;
 }
 
+/* SVG 스타일 */
+.tooth-chart-svg {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    height: calc(100% - 10px);
+    width: auto;
+    aspect-ratio: 1/1;
+    pointer-events: none; /* 기본적으로 마우스 이벤트 비활성화 */
+    z-index: 2; /* 캔버스 위에 표시 */
+}
+
+/* SVG 경로 스타일 */
+.tooth-chart-svg path {
+    fill: none;
+    stroke: #FF0000;
+    stroke-width: 2;
+    vector-effect: non-scaling-stroke; /* 확대/축소해도 선 두께 유지 */
+}
+
 /* 이미지와 캔버스를 감싸는 컨테이너 */
 .tooth-chart-container {
     position: absolute;
@@ -38,7 +58,7 @@
     display: flex;
     flex-direction: column;
     gap: 5px;
-    z-index: 2;  /* canvas보다 위에 표시 */
+    z-index: 3;  /* SVG보다 위에 표시 */
 }
 
 .chart-controls button {

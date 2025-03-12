@@ -19,6 +19,8 @@
     <link rel="stylesheet" href="css/prescription-payment.css">
     <link rel="stylesheet" href="css/data-menu.css">
     <link rel="stylesheet" href="css/qrcode.css">
+    <!-- D3.js 라이브러리 추가 -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <!-- QR Code Styling 라이브러리 추가 -->
     <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
 </head>
@@ -303,8 +305,9 @@
                         <div class="prescription-center-top">
                             <div class="prescription-section-title">Medical Records</div>
                             <div class="tooth-chart-container">
-                                <img src="image/tooth.png" alt="Dental Chart" class="tooth-chart-img">
+                                <img src="image/tooth.svg" alt="Dental Chart" class="tooth-chart-img">
                                 <canvas class="tooth-chart-canvas"></canvas>
+                                <svg class="tooth-chart-svg"></svg>
                             </div>
                         </div>
                         <div class="prescription-center-bottom">

@@ -1,6 +1,6 @@
 import { auth, db, doc, getDoc, setDoc, collection, getDocs, serverTimestamp, updateDoc, deleteDoc, deleteField, EmailAuthProvider, reauthenticateWithCredential } from './firebase-config.js';
 import { initializePrescriptionHistory } from './prescriptHistory.js';
-import { initializeCanvas, clearCanvas } from './prescription_canvas.js';
+import { initializeCanvas, clearCanvas, enableDrawing, clearSVG } from './prescription_canvas.js';
 import { printPrescription } from './prescription_print.js';
 
 // Prescription 컨테이너 초기화
@@ -271,24 +271,10 @@ export function initializePrescription() {
                 days: item.querySelector('.duration-input').value || 'Duration (days)'
             }));
 
-            // Canvas 이미지 데이터 가져오기 (prescription_canvas.js의 함수 사용)
-            const chartImagePromise = new Promise((resolve) => {
-                // 이벤트를 생성하여 canvas 모듈에게 이미지 데이터 요청
-                const canvasEvent = new CustomEvent('getChartImageForPrint', {
-                    detail: {
-                        callback: (imageData) => resolve(imageData)
-                    }
-                });
-                document.dispatchEvent(canvasEvent);
-            });
+            // SVG 경로 데이터 가져오기 (prescription_canvas.js의 함수 사용)
+            const { getSVGPathsData } = await import('./prescription_canvas.js');
+            const svgPathsData = getSVGPathsData();
             
-            // 이미지 데이터를 받아온 후 처리 계속
-            const chartImage = await chartImagePromise;
-            
-            if (!chartImage) {
-                throw new Error('Failed to get chart image');
-            }
-
             // 1. register.date 문서의 progress 업데이트
             await updateDoc(doc(db, 'hospitals', hospitalName, 'patient', currentPatientId, 'register.date', currentRegisterDate), {
                 progress: 'payment'
@@ -361,7 +347,7 @@ export function initializePrescription() {
                     medicines: medicineItems,
                     credential: credential  // 자격증 정보 추가
                 },
-                chartImage,
+                chartImage: svgPathsData, // Canvas 이미지 대신 SVG 경로 데이터 저장
                 progress: 'payment'
             });
 
@@ -381,10 +367,12 @@ export function initializePrescription() {
             document.querySelectorAll('.cc-item').forEach(item => item.remove());
             document.querySelectorAll('.medicine-item').forEach(item => item.remove());
             
-            // Canvas 초기화 - prescription_canvas.js의 함수 사용
+            // SVG와 Canvas 초기화 - prescription_canvas.js의 함수 사용
             const canvas = document.querySelector('.tooth-chart-canvas');
             if (canvas) {
+                const { clearCanvas, clearSVG, initializeCanvas } = await import('./prescription_canvas.js');
                 clearCanvas(canvas);
+                clearSVG();
                 initializeCanvas(currentPatientId, currentRegisterDate);
             }
 
@@ -590,10 +578,12 @@ export function initializePrescription() {
             document.querySelectorAll('.cc-item').forEach(item => item.remove());
             document.querySelectorAll('.medicine-item').forEach(item => item.remove());
             
-            // Canvas 초기화
+            // SVG와 Canvas 초기화 - prescription_canvas.js의 함수 사용
             const canvas = document.querySelector('.tooth-chart-canvas');
             if (canvas) {
+                const { clearCanvas, clearSVG, initializeCanvas } = await import('./prescription_canvas.js');
                 clearCanvas(canvas);
+                clearSVG();
                 initializeCanvas(currentPatientId, currentRegisterDate);
             }
 
@@ -634,8 +624,8 @@ export function initializePrescription() {
     initializeMedicineSearch();
 
     // 히스토리 선택 시 데이터 로드 및 표시를 위한 상세 이벤트 리스너
-    document.addEventListener('prescriptionHistorySelected', function historySelectionDetailed(e) {
-        const { prescriptionData, registerDate, doctor, chartImage, patientId } = e.detail;
+    document.addEventListener('prescriptionHistorySelected', async function historySelectionDetailed(e) {
+        const { patientId, registerDate, chartImage, prescriptionData } = e.detail;
         
         // 기본 입력 필드 데이터 표시
         document.querySelector('.symptoms-input').value = prescriptionData.symptoms || '';
@@ -690,8 +680,22 @@ export function initializePrescription() {
         if (canvas) {
             canvas.style.pointerEvents = 'none';
             
-            // 차트 이미지가 있으면 prescription_canvas.js의 함수를 사용하여 표시
-            if (chartImage) {
+            // SVG도 비활성화
+            document.querySelector('.tooth-chart-svg').style.pointerEvents = 'none';
+            
+            // chartImage에 SVG 경로 데이터가 있으면 표시
+            if (chartImage && Array.isArray(chartImage)) {
+                // SVG 그리기 함수 가져오기
+                const { drawSVGFromData, disableDrawing } = await import('./prescription_canvas.js');
+                
+                // SVG 경로 데이터로 그리기
+                drawSVGFromData(chartImage);
+                
+                // SVG 그리기 비활성화
+                disableDrawing();
+            } 
+            // 이전 버전 호환성 - chartImage가 Canvas 이미지 URL인 경우 (이전 저장 방식)
+            else if (chartImage && typeof chartImage === 'string') {
                 // 이벤트를 생성하여 canvas 모듈에게 차트 이미지 로드 요청
                 const canvasEvent = new CustomEvent('loadChartImage', {
                     detail: {
@@ -728,11 +732,15 @@ export function initializePrescription() {
             document.querySelector('.location-input').value = '';
             document.querySelector('.treatment-details-input').value = '';
             
-            // Canvas 초기화 - prescription_canvas.js의 함수 사용
+            // SVG와 Canvas 초기화 - prescription_canvas.js의 함수 사용
             const canvas = document.querySelector('.tooth-chart-canvas');
             if (canvas) {
+                const { clearCanvas, clearSVG, initializeCanvas } = await import('./prescription_canvas.js');
                 clearCanvas(canvas);
+                clearSVG();
                 initializeCanvas(currentPatientId, currentRegisterDate);
+                // SVG 그리기 활성화
+                enableDrawing();
             }
 
             // 모든 입력 요소 활성화

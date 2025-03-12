@@ -2,9 +2,52 @@
 let canvasCache = {};
 let currentResizeHandler = null;
 
+// SVG 관련 변수
+let svg = null;
+let isDrawing = false;
+let isDrawingEnabled = false;
+let currentPath = null;
+let pathData = [];
+let svgPathHistory = [];
+
 // 전역 캐시 초기화
 if (!window.canvasCache) window.canvasCache = {};
 if (!window.currentCanvasImageCache) window.currentCanvasImageCache = {};
+
+// SVG 경로 데이터 수집 함수
+export function getSVGPathsData() {
+    if (!svg) return [];
+    
+    // SVG 경로 요소 수집
+    const paths = svg.selectAll('path').nodes();
+    
+    // 각 경로의 데이터와 속성을 배열로 변환
+    return paths.map(path => ({
+        d: path.getAttribute('d'),
+        stroke: path.getAttribute('stroke') || '#FF0000',
+        strokeWidth: path.getAttribute('stroke-width') || '2',
+        fill: path.getAttribute('fill') || 'none',
+        vectorEffect: path.getAttribute('vector-effect') || 'non-scaling-stroke'
+    }));
+}
+
+// SVG 경로 데이터로 그리기 함수
+export function drawSVGFromData(pathsData) {
+    if (!svg || !pathsData || !Array.isArray(pathsData)) return;
+    
+    // 기존 경로 제거
+    svg.selectAll('path').remove();
+    
+    // 저장된 경로 데이터로 새 경로 생성
+    pathsData.forEach(pathData => {
+        svg.append('path')
+            .attr('d', pathData.d)
+            .attr('stroke', pathData.stroke || '#FF0000')
+            .attr('stroke-width', pathData.strokeWidth || '2')
+            .attr('fill', pathData.fill || 'none')
+            .attr('vector-effect', pathData.vectorEffect || 'non-scaling-stroke');
+    });
+}
 
 // 이벤트 리스너 설정 - prescription.js에서 전송된 이벤트 처리
 document.addEventListener('loadChartImage', function(e) {
@@ -189,8 +232,216 @@ document.addEventListener('getChartImageForPrint', function(e) {
     img.src = toothImg.src;
 });
 
+// SVG 초기화 함수
+export function initializeSVG() {
+    // SVG 요소 선택 또는 생성
+    svg = d3.select('.tooth-chart-svg')
+        .attr('viewBox', '0 0 1000 1000')
+        .attr('preserveAspectRatio', 'xMidYMid meet');
+    
+    // SVG 요소가 존재하는지 확인
+    if (!svg.empty()) {
+        // 기존 이벤트 리스너 제거
+        svg.on('mousedown', null)
+           .on('mousemove', null)
+           .on('mouseup', null)
+           .on('mouseleave', null);
+        
+        // 새 이벤트 리스너 추가
+        svg.on('mousedown', startDrawing)
+           .on('mousemove', draw)
+           .on('mouseup', stopDrawing)
+           .on('mouseleave', stopDrawing);
+        
+        // 기본적으로 그리기 비활성화
+        disableDrawing();
+    } else {
+        console.error('SVG 요소를 찾을 수 없습니다');
+    }
+}
+
+// SVG 그리기 활성화 함수
+export function enableDrawing() {
+    isDrawingEnabled = true;
+    
+    // SVG 요소가 마우스 이벤트를 수신할 수 있도록 설정
+    d3.select('.tooth-chart-svg')
+        .style('pointer-events', 'all')
+        .style('cursor', 'crosshair');
+}
+
+// SVG 그리기 비활성화 함수
+export function disableDrawing() {
+    isDrawingEnabled = false;
+    
+    // SVG 요소가 마우스 이벤트를 수신하지 않도록 설정
+    d3.select('.tooth-chart-svg')
+        .style('pointer-events', 'none')
+        .style('cursor', 'default');
+}
+
+// 마우스 위치를 SVG 좌표로 변환하는 함수
+function getMousePosition(event) {
+    const svgElement = d3.select('.tooth-chart-svg').node();
+    if (!svgElement) return { x: 0, y: 0 };
+    
+    const rect = svgElement.getBoundingClientRect();
+    
+    // 뷰포트 좌표를 SVG 좌표로 변환
+    const x = ((event.clientX - rect.left) / rect.width) * 1000;
+    const y = ((event.clientY - rect.top) / rect.height) * 1000;
+    
+    return { x, y };
+}
+
+// 그리기 시작 함수
+function startDrawing(event) {
+    if (!isDrawingEnabled) return;
+    
+    isDrawing = true;
+    const pos = getMousePosition(event);
+    
+    // 경로 데이터 초기화
+    pathData = [`M ${pos.x} ${pos.y}`];
+    
+    // 이전 경로 저장 (실행 취소 기능용)
+    const paths = d3.select('.tooth-chart-svg').selectAll('path');
+    if (!paths.empty()) {
+        svgPathHistory.push(paths.nodes().map(path => path.getAttribute('d')));
+    } else {
+        svgPathHistory.push([]);
+    }
+    
+    // Canvas 상태 저장 코드 제거 (Canvas 기능 제거 예정이므로)
+    
+    // 새 경로 요소 생성
+    currentPath = svg.append('path')
+        .attr('stroke', '#FF0000')
+        .attr('stroke-width', 2)
+        .attr('fill', 'none')
+        .attr('vector-effect', 'non-scaling-stroke');
+}
+
+// 그리기 함수
+function draw(event) {
+    if (!isDrawingEnabled || !isDrawing || !currentPath) return;
+    
+    const pos = getMousePosition(event);
+    pathData.push(`L ${pos.x} ${pos.y}`);
+    currentPath.attr('d', pathData.join(' '));
+}
+
+// 그리기 중지 함수
+function stopDrawing() {
+    if (!isDrawingEnabled || !isDrawing) return;
+    
+    isDrawing = false;
+    currentPath = null;
+}
+
+// SVG 초기화 함수
+export function clearSVG() {
+    if (!svg) return;
+    
+    // 모든 경로 요소 삭제
+    svg.selectAll('path').remove();
+    
+    // 경로 기록 초기화
+    svgPathHistory = [];
+}
+
+// 실행 취소 함수
+export function undoSVG() {
+    if (svgPathHistory.length === 0) return;
+    
+    // 마지막 경로 기록 가져오기
+    const lastPaths = svgPathHistory.pop();
+    
+    // 현재 모든 경로 제거
+    svg.selectAll('path').remove();
+    
+    // 이전 경로 복원
+    lastPaths.forEach(pathD => {
+        svg.append('path')
+            .attr('stroke', '#FF0000')
+            .attr('stroke-width', 2)
+            .attr('fill', 'none')
+            .attr('vector-effect', 'non-scaling-stroke')
+            .attr('d', pathD);
+    });
+}
+
+// 컨트롤 버튼 추가
+function addControlButtons() {
+    // 기존 컨트롤 버튼들 제거
+    const existingControls = document.querySelector('.chart-controls');
+    if (existingControls) {
+        existingControls.remove();
+    }
+
+    // 새로운 컨트롤 버튼 추가
+    const controlsDiv = document.createElement('div');
+    controlsDiv.className = 'chart-controls';
+    controlsDiv.innerHTML = `
+        <button class="undo-btn">Undo</button>
+    `;
+    
+    const container = document.querySelector('.prescription-center-top');
+    if (container) {
+        container.appendChild(controlsDiv);
+        
+        // Undo 버튼 이벤트 리스너 추가
+        const undoBtn = controlsDiv.querySelector('.undo-btn');
+        if (undoBtn) {
+            undoBtn.addEventListener('click', function() {
+                // 통합된 Undo 기능 호출 - SVG와 Canvas 모두 지원
+                undoDrawing();
+            });
+        }
+    }
+}
+
+// 통합 Undo 함수 추가
+function undoDrawing() {
+    console.log("Undo 버튼 클릭됨");
+    
+    // SVG Undo 실행
+    if (svgPathHistory && svgPathHistory.length > 0) {
+        try {
+            // 마지막 경로 기록 가져오기
+            const lastPaths = svgPathHistory.pop();
+            
+            // 현재 모든 경로 제거
+            svg.selectAll('path').remove();
+            
+            // 이전 경로 복원
+            lastPaths.forEach(pathD => {
+                svg.append('path')
+                    .attr('stroke', '#FF0000')
+                    .attr('stroke-width', 2)
+                    .attr('fill', 'none')
+                    .attr('vector-effect', 'non-scaling-stroke')
+                    .attr('d', pathD);
+            });
+            
+            console.log("SVG Undo 성공");
+        } catch (e) {
+            console.error('SVG Undo 작업 중 오류:', e);
+        }
+    } else {
+        console.log("실행 취소할 작업이 없습니다.");
+    }
+}
+
 // Canvas 관련 기능 초기화
 export function initializeCanvas(currentPatientId, currentRegisterDate) {
+    // SVG 초기화
+    initializeSVG();
+    disableDrawing();
+    
+    // 컨트롤 버튼 추가
+    addControlButtons();
+    
     const canvas = document.querySelector('.tooth-chart-canvas');
     if (!canvas) {
         console.error('캔버스 요소를 찾을 수 없습니다');
@@ -201,8 +452,7 @@ export function initializeCanvas(currentPatientId, currentRegisterDate) {
     let isDrawing = false;
     let lastX = 0;
     let lastY = 0;
-    const drawHistory = [];
-
+    
     // 처방전 ID 생성 (환자ID와 등록 날짜 조합)
     const prescriptionId = `${currentPatientId}_${currentRegisterDate}`;
     
@@ -234,7 +484,6 @@ export function initializeCanvas(currentPatientId, currentRegisterDate) {
     // Canvas 초기화
     function clearCanvas() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawHistory.length = 0;
         
         // 캐시된 이미지 삭제
         window.currentCanvasImageCache[cacheKey] = null;
@@ -254,24 +503,13 @@ export function initializeCanvas(currentPatientId, currentRegisterDate) {
     // Canvas 초기화 실행
     clearCanvas();
     
-    // 기존 컨트롤 버튼들 제거
-    const existingControls = document.querySelector('.chart-controls');
-    if (existingControls) {
-        existingControls.remove();
-    }
-
-    // 컨트롤 버튼 추가
-    const controlsDiv = document.createElement('div');
-    controlsDiv.className = 'chart-controls';
-    controlsDiv.innerHTML = `
-        <button class="undo-btn">Undo</button>
-    `;
-    document.querySelector('.prescription-center-top').appendChild(controlsDiv);
-
     // 이벤트 리스너 설정 - 직접 버튼 요소 가져오기
-    const undoBtn = controlsDiv.querySelector('.undo-btn');
-
-    undoBtn.addEventListener('click', undo);
+    const undoBtn = document.querySelector('.chart-controls .undo-btn');
+    
+    if (undoBtn) {
+        // SVG Undo 함수만 호출하도록 수정
+        undoBtn.addEventListener('click', undoDrawing);
+    }
     
     // 이벤트 리스너 등록 전에 기존 리스너 제거
     function removeOldListeners() {
@@ -402,14 +640,6 @@ export function initializeCanvas(currentPatientId, currentRegisterDate) {
         const pos = getMousePos(e);
         [lastX, lastY] = [pos.x, pos.y];
         
-        try {
-            if (canvas.width > 0 && canvas.height > 0) {
-                drawHistory.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
-            }
-        } catch (e) {
-            console.error('캔버스 getImageData 오류:', e);
-        }
-        
         // 그림을 그리면 이 환자의 캐시된 이미지 초기화 (새 그림이므로)
         const cacheKey = prescriptionId;
         window.currentCanvasImageCache[cacheKey] = null;
@@ -448,30 +678,6 @@ export function initializeCanvas(currentPatientId, currentRegisterDate) {
         ctx.lineTo(pos.x, pos.y);
         ctx.stroke();
         [lastX, lastY] = [pos.x, pos.y];
-    }
-
-    function undo() {
-        if (drawHistory.length > 0) {
-            try {
-                ctx.putImageData(drawHistory.pop(), 0, 0);
-                
-                // undo 후 캐시 업데이트
-                if (canvas.width > 0 && canvas.height > 0) {
-                    const cacheKey = prescriptionId;
-                    window.currentCanvasImageCache[cacheKey] = {
-                        patientId: currentPatientId,
-                        registerDate: currentRegisterDate,
-                        image: canvas.toDataURL('image/png'),
-                        originalSize: {
-                            width: canvas.width,
-                            height: canvas.height
-                        }
-                    };
-                }
-            } catch (e) {
-                console.error('Undo 작업 중 오류:', e);
-            }
-        }
     }
 
     // 새 이벤트 리스너 등록 및 전역으로 저장
@@ -570,14 +776,6 @@ export function createForms() {
         <textarea class="treatment-details-input"></textarea>
     `;
     document.querySelector('.prescription-center-top').appendChild(treatmentDetailsFormDiv);
-
-    // 컨트롤 버튼 추가
-    const controlsDiv = document.createElement('div');
-    controlsDiv.className = 'chart-controls';
-    controlsDiv.innerHTML = `
-        <button class="undo-btn">Undo</button>
-    `;
-    document.querySelector('.prescription-center-top').appendChild(controlsDiv);
 }
 
 // 캔버스 관련 이벤트 리스너 제거 유틸리티 함수
