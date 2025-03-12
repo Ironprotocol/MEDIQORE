@@ -235,6 +235,12 @@ export function initializeRegistrationForm() {
             }
 
             // Have medical insurance 선택 시 추가 필수값 체크
+            let insuranceData = {
+                status: '',
+                provider: '',
+                cardNumber: ''
+            };
+            
             if (insuranceStatus.value === 'has') {
                 const insuranceProvider = document.getElementById('insuranceProvider').value.trim();
                 const insuranceNumber = document.getElementById('insuranceNumber').value.trim();
@@ -243,10 +249,75 @@ export function initializeRegistrationForm() {
                     alert('Please fill in all required fields');
                     return;
                 }
+                
+                insuranceData = {
+                    status: 'have',
+                    provider: insuranceProvider,
+                    cardNumber: insuranceNumber
+                };
             }
 
             // 병원명 추출
-            const [hospitalName] = user.email.split('@')[0].split('.');
+            const hospitalName = user.email.split('@')[0].split('.')[0];
+            
+            // 입력된 ID로 이미 등록된 환자가 있는지 확인
+            const patientsRef = collection(db, 'hospitals', hospitalName, 'patient');
+            const q = query(patientsRef, where('info.idNumber', '==', idNumber));
+            const querySnapshot = await getDocs(q);
+            
+            // 이미 등록된 환자가 있는 경우, 정보 비교
+            if (!querySnapshot.empty) {
+                const existingPatient = querySnapshot.docs[0].data().info;
+                
+                // 생년월일 비교를 위한 변환
+                const inputBirthDate = new Date(
+                    parseInt(birthYear),
+                    parseInt(birthMonth) - 1,
+                    parseInt(birthDay),
+                    0, 0, 0
+                );
+                
+                const existingBirthDate = existingPatient.birthDate.toDate ? 
+                    existingPatient.birthDate.toDate() : 
+                    new Date(existingPatient.birthDate);
+                
+                // 주소 비교
+                const inputAddress = `${district}, ${city}, ${state}`;
+                
+                // 보험 정보 비교
+                let isInsuranceMatching = true;
+                if (existingPatient.insurance) {
+                    if (insuranceStatus.value === 'has') {
+                        isInsuranceMatching = 
+                            existingPatient.insurance.provider === insuranceData.provider && 
+                            existingPatient.insurance.cardNumber === insuranceData.cardNumber;
+                    } else {
+                        // 기존에 보험이 있었는데 지금은 '없음'으로 등록하려는 경우
+                        isInsuranceMatching = 
+                            (!existingPatient.insurance.provider && !existingPatient.insurance.cardNumber);
+                    }
+                } else {
+                    // 기존에 보험 정보가 없었는데 지금은 '있음'으로 등록하려는 경우
+                    isInsuranceMatching = insuranceStatus.value !== 'has';
+                }
+                
+                // 이름, 생년월일, 주소, 전화번호, 성별, 보험정보 중 하나라도 다른 경우
+                const isBirthDateMatching = 
+                    inputBirthDate.getFullYear() === existingBirthDate.getFullYear() && 
+                    inputBirthDate.getMonth() === existingBirthDate.getMonth() && 
+                    inputBirthDate.getDate() === existingBirthDate.getDate();
+                
+                if (patientName !== existingPatient.patientName || 
+                    !isBirthDateMatching || 
+                    inputAddress !== existingPatient.address || 
+                    phoneNumber !== existingPatient.phoneNumber || 
+                    gender !== existingPatient.gender || 
+                    !isInsuranceMatching) {
+                    
+                    alert("This patient is already registered. Please use the 'Check' button to retrieve patient information and register. For changing patient information, please use the 'Data' menu.");
+                    return;
+                }
+            }
 
             // 환자 문서 ID 생성 (이름.ID번호)
             const patientId = `${patientName}.${idNumber}`;
@@ -257,21 +328,6 @@ export function initializeRegistrationForm() {
 
             // 새로운 환자인 경우에만 info 필드 생성
             if (!patientDoc.exists()) {
-                // insurance 정보 수집
-                let insuranceData = {
-                    status: '',
-                    provider: '',
-                    cardNumber: ''
-                };
-
-                if (insuranceStatus.value === 'has') {
-                    insuranceData = {
-                        status: 'have',
-                        provider: document.getElementById('insuranceProvider').value,
-                        cardNumber: document.getElementById('insuranceNumber').value
-                    };
-                }
-
                 // info 필드를 포함한 환자 문서 생성
                 await setDoc(patientRef, {
                     info: {
