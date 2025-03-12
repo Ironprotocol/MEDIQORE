@@ -8,7 +8,7 @@ let isDrawing = false;
 let isDrawingEnabled = false;
 let currentPath = null;
 let pathData = [];
-let svgPathHistory = [];
+let svgPaths = [];
 
 // 전역 캐시 초기화
 if (!window.canvasCache) window.canvasCache = {};
@@ -304,16 +304,6 @@ function startDrawing(event) {
     // 경로 데이터 초기화
     pathData = [`M ${pos.x} ${pos.y}`];
     
-    // 이전 경로 저장 (실행 취소 기능용)
-    const paths = d3.select('.tooth-chart-svg').selectAll('path');
-    if (!paths.empty()) {
-        svgPathHistory.push(paths.nodes().map(path => path.getAttribute('d')));
-    } else {
-        svgPathHistory.push([]);
-    }
-    
-    // Canvas 상태 저장 코드 제거 (Canvas 기능 제거 예정이므로)
-    
     // 새 경로 요소 생성
     currentPath = svg.append('path')
         .attr('stroke', '#FF0000')
@@ -335,6 +325,18 @@ function draw(event) {
 function stopDrawing() {
     if (!isDrawingEnabled || !isDrawing) return;
     
+    // 그리기 완료 시 현재 경로 저장
+    if (currentPath && pathData.length > 1) {  // 1보다 커야 시작점 외에 다른 점이 있는 것
+        // 현재 경로 정보 저장
+        svgPaths.push({
+            d: pathData.join(' '),
+            stroke: '#FF0000',
+            strokeWidth: 2,
+            fill: 'none',
+            vectorEffect: 'non-scaling-stroke'
+        });
+    }
+    
     isDrawing = false;
     currentPath = null;
 }
@@ -347,27 +349,28 @@ export function clearSVG() {
     svg.selectAll('path').remove();
     
     // 경로 기록 초기화
-    svgPathHistory = [];
+    svgPaths = [];
 }
 
-// 실행 취소 함수
+// 단순화된 실행 취소 함수
 export function undoSVG() {
-    if (svgPathHistory.length === 0) return;
+    // 경로가 없으면 종료
+    if (svgPaths.length === 0) return;
     
-    // 마지막 경로 기록 가져오기
-    const lastPaths = svgPathHistory.pop();
+    // 가장 마지막에 그린 경로 제거
+    svgPaths.pop();
     
     // 현재 모든 경로 제거
     svg.selectAll('path').remove();
     
-    // 이전 경로 복원
-    lastPaths.forEach(pathD => {
+    // 남은 경로 다시 그리기
+    svgPaths.forEach(path => {
         svg.append('path')
-            .attr('stroke', '#FF0000')
-            .attr('stroke-width', 2)
-            .attr('fill', 'none')
-            .attr('vector-effect', 'non-scaling-stroke')
-            .attr('d', pathD);
+            .attr('d', path.d)
+            .attr('stroke', path.stroke)
+            .attr('stroke-width', path.strokeWidth)
+            .attr('fill', path.fill)
+            .attr('vector-effect', path.vectorEffect);
     });
 }
 
@@ -390,41 +393,18 @@ function addControlButtons() {
     if (container) {
         container.appendChild(controlsDiv);
         
-        // Undo 버튼 이벤트 리스너 추가
+        // 이벤트 리스너 설정 - 직접 버튼 요소 가져오기
         const undoBtn = controlsDiv.querySelector('.undo-btn');
         if (undoBtn) {
-            undoBtn.addEventListener('click', function() {
-                // 통합된 Undo 기능 호출 - SVG와 Canvas 모두 지원
-                undoDrawing();
-            });
-        }
-    }
-}
-
-// 통합 Undo 함수 추가
-function undoDrawing() {
-    
-    // SVG Undo 실행
-    if (svgPathHistory && svgPathHistory.length > 0) {
-        try {
-            // 마지막 경로 기록 가져오기
-            const lastPaths = svgPathHistory.pop();
+            // 이벤트 리스너 중복 등록 방지를 위해 기존 리스너 제거 
+            undoBtn.replaceWith(undoBtn.cloneNode(true));
             
-            // 현재 모든 경로 제거
-            svg.selectAll('path').remove();
-            
-            // 이전 경로 복원
-            lastPaths.forEach(pathD => {
-                svg.append('path')
-                    .attr('stroke', '#FF0000')
-                    .attr('stroke-width', 2)
-                    .attr('fill', 'none')
-                    .attr('vector-effect', 'non-scaling-stroke')
-                    .attr('d', pathD);
-            });
-        
-        } catch (e) {
-            console.error('SVG Undo 작업 중 오류:', e);
+            // 새 버튼 요소 다시 가져오기
+            const newUndoBtn = document.querySelector('.chart-controls .undo-btn');
+            // 새 이벤트 리스너 등록 - 직접 undoSVG 함수 호출
+            if (newUndoBtn) {
+                newUndoBtn.addEventListener('click', undoSVG);
+            }
         }
     }
 }
@@ -498,14 +478,6 @@ export function initializeCanvas(currentPatientId, currentRegisterDate) {
     
     // Canvas 초기화 실행
     clearCanvas();
-    
-    // 이벤트 리스너 설정 - 직접 버튼 요소 가져오기
-    const undoBtn = document.querySelector('.chart-controls .undo-btn');
-    
-    if (undoBtn) {
-        // SVG Undo 함수만 호출하도록 수정
-        undoBtn.addEventListener('click', undoDrawing);
-    }
     
     // 이벤트 리스너 등록 전에 기존 리스너 제거
     function removeOldListeners() {
