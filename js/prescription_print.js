@@ -1,5 +1,5 @@
 // 프린트 관련 함수
-export function printPrescription() {
+export async function printPrescription() {
     try {
         // 환자 정보 가져오기
         const patientInfoElement = document.querySelector('#prescription-content .content-title-prescription');
@@ -68,8 +68,8 @@ export function printPrescription() {
         // 처방전 작성 일자 (현재 날짜 사용)
         const prescriptionDate = printDate;
         
-        // 캔버스 이미지 가져오기 - 치아 배경과 그림 함께 캡처
-        const canvas = document.querySelector('.tooth-chart-canvas');
+        // SVG 그림 데이터 가져오기
+        const svgElement = document.querySelector('.tooth-chart-svg');
         const toothImg = document.querySelector('.tooth-chart-img');
         
         // 현재 증상, 위치, 치료 세부사항 가져오기
@@ -138,262 +138,300 @@ export function printPrescription() {
             `;
         }
         
-        // 캔버스 이미지 데이터 URL 가져오기 (prescription_canvas.js의 함수 사용)
-        const chartImagePromise = new Promise((resolve) => {
-            // 이벤트를 생성하여 canvas 모듈에게 이미지 데이터 요청
-            const canvasEvent = new CustomEvent('getChartImageForPrint', {
-                detail: {
-                    callback: (imageData) => resolve(imageData)
-                }
-            });
-            document.dispatchEvent(canvasEvent);
-        });
+        // SVG 그림 데이터를 가져와 인쇄용 SVG 생성
+        // SVG 요소와 배경 이미지 복제
+        const { getSVGPathsData } = await import('./prescription_canvas.js');
+        const pathsData = getSVGPathsData();
         
-        // 이미지 데이터를 받아온 후 인쇄 처리
-        return chartImagePromise.then((chartImage) => {
-            // 인쇄용 iframe 생성 (화면에 표시되지 않음)
-            const printFrame = document.createElement('iframe');
-            printFrame.style.position = 'fixed';
-            printFrame.style.left = '-9999px';
-            printFrame.name = 'printFrame';
-            document.body.appendChild(printFrame);
-            
-            // iframe 내용 작성 (인쇄될 처방전 양식)
-            printFrame.contentDocument.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Prescription</title>
-                    <style>
-                        body { 
-                            font-family: sans-serif; 
-                            margin: 20px;
-                            font-size: 12px;
-                        }
-                        /* 인쇄 시 배경색이 표시되도록 설정 */
-                        @media print {
-                            * {
-                                -webkit-print-color-adjust: exact !important;
-                                print-color-adjust: exact !important;
-                                color-adjust: exact !important;
-                            }
-                        }
-                        .hospital-name {
-                            font-size: 14px;
-                            margin-bottom: 5px;
-                            float: left;
-                        }
-                        .prescription-date {
-                            font-size: 12px;
-                            float: right;
-                            text-align: right;
-                            margin-bottom: 5px;
-                        }
-                        .clearfix::after {
-                            content: "";
-                            clear: both;
-                            display: table;
-                        }
-                        .chart-title {
-                            font-size: 20px;
-                            font-weight: bold;
-                            text-align: center;
-                            margin: 10px 0 15px 0;
-                            clear: both;
-                        }
-                        table {
-                            width: 100%;
-                            border-collapse: collapse;
-                            margin-bottom: 15px;
-                            table-layout: fixed;
-                        }
-                        th, td {
-                            border: 1px solid #000;
-                            padding: 8px;
-                            text-align: left;
-                            vertical-align: middle;
-                        }
-                        th {
-                            background-color: rgb(217, 217, 217) !important;
-                            font-weight: bold;
-                            color: black !important;
-                        }
-                        .chart-image-cell {
-                            text-align: center;
-                            vertical-align: middle;
-                            padding: 0;
-                            position: relative;
-                            border: 1px solid #000;
-                        }
-                        .chart-image { 
-                            max-width: 95%; 
-                            max-height: 480px; 
-                            object-fit: contain; 
-                            margin: 0 auto;
-                            display: block;
-                            position: relative;
-                            top: 10px;
-                        }
-                        .inner-table {
-                            width: 100%;
-                            border-collapse: collapse;
-                            margin: 0;
-                        }
-                        .inner-table th, .inner-table td {
-                            border: 1px solid #000;
-                            padding: 8px;
-                        }
-                        .inner-table th {
-                            background-color: #f2f2f2;
-                            font-weight: bold;
-                        }
-                        .section-title {
-                            font-weight: bold;
-                            width: 150px;
-                            vertical-align: middle;
-                            background-color: rgb(217, 217, 217) !important;
-                            color: black !important;
-                        }
-                        .treatment-details-title {
-                            font-weight: bold;
-                            background-color: rgb(217, 217, 217) !important;
-                            text-align: center;
-                            color: black !important;
-                        }
-                        .signature-cell {
-                            text-align: right;
-                            border: none;
-                            padding-top: 30px;
-                        }
-                        .signature-line {
-                            display: inline-block;
-                            width: 200px;
-                            border-bottom: 1px solid #000;
-                            text-align: center;
-                            padding-top: 20px;
-                        }
-                        .medicine-table {
-                            margin-top: 15px;
-                        }
-                        .medicine-title {
-                            font-weight: bold;
-                            margin: 15px 0 5px 0;
-                            text-align: center;
-                            font-size: 14px;
-                        }
-                        /* 성별 이미지 크기 정확히 설정 */
-                        .gender-icon, img.gender-icon {
-                            width: 10px !important;
-                            height: 14.5px !important;
-                            vertical-align: middle;
-                            margin: 0 5px;
-                            object-fit: contain;
-                        }
-                        .print-info {
-                            text-align: right;
-                            font-size: 10px;
-                            color: #666;
-                            margin-top: 20px;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="clearfix">
-                        <div class="hospital-name">${hospitalName.toUpperCase()} Hospital</div>
-                        <div class="prescription-date">Date: ${prescriptionDate}</div>
-                    </div>
-                    <div class="chart-title">Treatment Chart</div>
-                    
-                    <table>
-                        <tr>
-                            <th width="25%" style="background-color: rgb(217, 217, 217) !important; color: black !important;">Name</th>
-                            <th width="25%" style="background-color: rgb(217, 217, 217) !important; color: black !important;">Gender</th>
-                            <th width="25%" style="background-color: rgb(217, 217, 217) !important; color: black !important;">Years</th>
-                            <th width="25%" style="background-color: rgb(217, 217, 217) !important; color: black !important;">Birthdate</th>
-                        </tr>
-                        <tr>
-                            <td>${patientName}</td>
-                            <td>${gender}</td>
-                            <td>${age}</td>
-                            <td>${birthdate}</td>
-                        </tr>
-                    </table>
-                    
-                    <table style="height: 500px;">
-                        <tr style="height: 40px;">
-                            <th width="30%" style="background-color: rgb(217, 217, 217) !important; color: black !important;">CC</th>
-                            <td width="70%" rowspan="6" class="chart-image-cell">
-                                ${chartImage ? `<img src="${chartImage}" class="chart-image" alt="Dental Chart">` : '<p>No chart available</p>'}
-                            </td>
-                        </tr>
-                        <tr style="height: 100px;">
-                            <td style="vertical-align: top;">${ccItems}</td>
-                        </tr>
-                        <tr style="height: 40px;">
-                            <th style="background-color: rgb(217, 217, 217) !important; color: black !important;">Location</th>
-                        </tr>
-                        <tr style="height: 100px;">
-                            <td style="vertical-align: top;">${location}</td>
-                        </tr>
-                        <tr style="height: 40px;">
-                            <th style="background-color: rgb(217, 217, 217) !important; color: black !important;">Symptoms</th>
-                        </tr>
-                        <tr style="height: 180px;">
-                            <td style="vertical-align: top;">${symptoms}</td>
-                        </tr>
-                    </table>
-                    
-                    <table>
-                        <tr>
-                            <th class="treatment-details-title" style="background-color: rgb(217, 217, 217) !important; color: black !important;">Treatment Details</th>
-                        </tr>
-                        <tr>
-                            <td>${treatmentDetails}</td>
-                        </tr>
-                    </table>
-                    
-                    <div class="medicine-title">Prescribed Medicines</div>
-                    <table class="medicine-table">
-                        <thead>
-                            <tr>
-                                <th>Medicine</th>
-                                <th>Dose</th>
-                                <th>Frequency</th>
-                                <th>Duration</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${medicinesHTML}
-                        </tbody>
-                    </table>
-                    
-                    <div class="signature-cell">
-                        <div>Doctor's Signature</div>
-                        <div class="signature-line"></div>
-                    </div>
-                    
-                    <div class="print-info">
-                        Printed on: ${printDate} at ${printTime}
-                    </div>
-                </body>
-                </html>
-            `);
-            
-            printFrame.contentDocument.close();
-            
-            // 잠시 대기 후 인쇄 실행 (내용이 완전히 로드되도록)
-            return new Promise((resolve) => {
-                setTimeout(() => {
-                    printFrame.contentWindow.focus();
-                    printFrame.contentWindow.print();
-                    
-                    // 인쇄 대화상자가 닫히면 iframe 제거
-                    setTimeout(() => {
-                        document.body.removeChild(printFrame);
+        // 이미지 URL 가져오기 및 토큰화 처리
+        let toothImageSrc = '';
+        if (toothImg) {
+            // 이미지를 Base64로 변환하여 토큰화 문제 해결
+            try {
+                // 임시 캔버스 생성 및 이미지 그리기
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = 1000;
+                tempCanvas.height = 1000;
+                const ctx = tempCanvas.getContext('2d');
+                
+                // 이미지 로드 및 캔버스에 그리기
+                await new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        ctx.drawImage(img, 0, 0, 1000, 1000);
                         resolve();
-                    }, 100);
-                }, 500);
-            });
+                    };
+                    img.onerror = reject;
+                    img.src = toothImg.src;
+                });
+                
+                // Canvas를 Data URL로 변환
+                toothImageSrc = tempCanvas.toDataURL('image/png');
+            } catch (error) {
+                console.error('이미지 변환 중 오류:', error);
+                toothImageSrc = '';
+            }
+        }
+        
+        // SVG 프린트 콘텐츠 생성
+        const svgContent = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="500" height="500" viewBox="0 0 1000 1000">
+            ${toothImageSrc ? `<image href="${toothImageSrc}" width="1000" height="1000" />` : ''}
+            ${pathsData.map(path => 
+                `<path d="${path.d}" 
+                    stroke="${path.stroke}" 
+                    stroke-width="${path.strokeWidth}" 
+                    fill="${path.fill}" 
+                    vector-effect="${path.vectorEffect}"/>`
+            ).join('')}
+        </svg>`;
+        
+        // 인쇄용 iframe 생성 (화면에 표시되지 않음)
+        const printFrame = document.createElement('iframe');
+        printFrame.style.position = 'fixed';
+        printFrame.style.left = '-9999px';
+        printFrame.name = 'printFrame';
+        document.body.appendChild(printFrame);
+        
+        // iframe 내용 작성 (인쇄될 처방전 양식)
+        printFrame.contentDocument.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Prescription</title>
+                <style>
+                    body { 
+                        font-family: sans-serif; 
+                        margin: 20px;
+                        font-size: 12px;
+                    }
+                    /* 인쇄 시 배경색이 표시되도록 설정 */
+                    @media print {
+                        * {
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                        }
+                    }
+                    .hospital-name {
+                        font-size: 14px;
+                        margin-bottom: 5px;
+                        float: left;
+                    }
+                    .prescription-date {
+                        font-size: 12px;
+                        float: right;
+                        text-align: right;
+                        margin-bottom: 5px;
+                    }
+                    .clearfix::after {
+                        content: "";
+                        clear: both;
+                        display: table;
+                    }
+                    .chart-title {
+                        font-size: 20px;
+                        font-weight: bold;
+                        text-align: center;
+                        margin: 10px 0 15px 0;
+                        clear: both;
+                    }
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-bottom: 15px;
+                        table-layout: fixed;
+                    }
+                    th, td {
+                        border: 1px solid #000;
+                        padding: 8px;
+                        text-align: left;
+                        vertical-align: middle;
+                    }
+                    th {
+                        background-color: rgb(217, 217, 217) !important;
+                        font-weight: bold;
+                        color: black !important;
+                    }
+                    .chart-image-cell {
+                        text-align: center;
+                        vertical-align: middle;
+                        padding: 8px;
+                        position: relative;
+                        border: 1px solid #000;
+                        height: 100%;
+                    }
+                    .chart-svg { 
+                        width: 100%;
+                        height: 100%;
+                        object-fit: contain;
+                        margin: 0 auto;
+                        display: block;
+                    }
+                    svg {
+                        width: 100%;
+                        height: 100%;
+                        max-height: 450px;
+                    }
+                    .inner-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin: 0;
+                    }
+                    .inner-table th, .inner-table td {
+                        border: 1px solid #000;
+                        padding: 8px;
+                    }
+                    .inner-table th {
+                        background-color: #f2f2f2;
+                        font-weight: bold;
+                    }
+                    .section-title {
+                        font-weight: bold;
+                        width: 150px;
+                        vertical-align: middle;
+                        background-color: rgb(217, 217, 217) !important;
+                        color: black !important;
+                    }
+                    .treatment-details-title {
+                        font-weight: bold;
+                        background-color: rgb(217, 217, 217) !important;
+                        text-align: center;
+                        color: black !important;
+                    }
+                    .signature-cell {
+                        text-align: right;
+                        border: none;
+                        padding-top: 30px;
+                    }
+                    .signature-line {
+                        display: inline-block;
+                        width: 200px;
+                        border-bottom: 1px solid #000;
+                        text-align: center;
+                        padding-top: 20px;
+                    }
+                    .medicine-table {
+                        margin-top: 15px;
+                    }
+                    .medicine-title {
+                        font-weight: bold;
+                        margin: 15px 0 5px 0;
+                        text-align: center;
+                        font-size: 14px;
+                    }
+                    /* 성별 이미지 크기 정확히 설정 */
+                    .gender-icon, img.gender-icon {
+                        width: 10px !important;
+                        height: 14.5px !important;
+                        vertical-align: middle;
+                        margin: 0 5px;
+                        object-fit: contain;
+                    }
+                    .print-info {
+                        text-align: right;
+                        font-size: 10px;
+                        color: #666;
+                        margin-top: 20px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="clearfix">
+                    <div class="hospital-name">${hospitalName.toUpperCase()} Hospital</div>
+                    <div class="prescription-date">Date: ${prescriptionDate}</div>
+                </div>
+                <div class="chart-title">Treatment Chart</div>
+                
+                <table>
+                    <tr>
+                        <th width="25%" style="background-color: rgb(217, 217, 217) !important; color: black !important;">Name</th>
+                        <th width="25%" style="background-color: rgb(217, 217, 217) !important; color: black !important;">Gender</th>
+                        <th width="25%" style="background-color: rgb(217, 217, 217) !important; color: black !important;">Years</th>
+                        <th width="25%" style="background-color: rgb(217, 217, 217) !important; color: black !important;">Birthdate</th>
+                    </tr>
+                    <tr>
+                        <td>${patientName}</td>
+                        <td>${gender}</td>
+                        <td>${age}</td>
+                        <td>${birthdate}</td>
+                    </tr>
+                </table>
+                
+                <table style="height: 500px;">
+                    <tr style="height: 40px;">
+                        <th width="30%" style="background-color: rgb(217, 217, 217) !important; color: black !important;">CC</th>
+                        <td width="70%" rowspan="6" class="chart-image-cell">
+                            ${pathsData.length > 0 ? svgContent : '<p>No chart available</p>'}
+                        </td>
+                    </tr>
+                    <tr style="height: 100px;">
+                        <td style="vertical-align: top;">${ccItems}</td>
+                    </tr>
+                    <tr style="height: 40px;">
+                        <th style="background-color: rgb(217, 217, 217) !important; color: black !important;">Location</th>
+                    </tr>
+                    <tr style="height: 100px;">
+                        <td style="vertical-align: top;">${location}</td>
+                    </tr>
+                    <tr style="height: 40px;">
+                        <th style="background-color: rgb(217, 217, 217) !important; color: black !important;">Symptoms</th>
+                    </tr>
+                    <tr style="height: 180px;">
+                        <td style="vertical-align: top;">${symptoms}</td>
+                    </tr>
+                </table>
+                
+                <table>
+                    <tr>
+                        <th class="treatment-details-title" style="background-color: rgb(217, 217, 217) !important; color: black !important;">Treatment Details</th>
+                    </tr>
+                    <tr>
+                        <td>${treatmentDetails}</td>
+                    </tr>
+                </table>
+                
+                <div class="medicine-title">Prescribed Medicines</div>
+                <table class="medicine-table">
+                    <thead>
+                        <tr>
+                            <th>Medicine</th>
+                            <th>Dose</th>
+                            <th>Frequency</th>
+                            <th>Duration</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${medicinesHTML}
+                    </tbody>
+                </table>
+                
+                <div class="signature-cell">
+                    <div>Doctor's Signature</div>
+                    <div class="signature-line"></div>
+                </div>
+                
+                <div class="print-info">
+                    Printed on: ${printDate} at ${printTime}
+                </div>
+            </body>
+            </html>
+        `);
+        
+        printFrame.contentDocument.close();
+        
+        // 잠시 대기 후 인쇄 실행 (내용이 완전히 로드되도록)
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                printFrame.contentWindow.focus();
+                printFrame.contentWindow.print();
+                
+                // 인쇄 대화상자가 닫히면 iframe 제거
+                setTimeout(() => {
+                    document.body.removeChild(printFrame);
+                    resolve();
+                }, 100);
+            }, 500);
         });
     } catch (error) {
         console.error('프린트 중 오류:', error);
