@@ -1,6 +1,6 @@
 import { auth, db, doc, getDoc, setDoc, collection, getDocs, serverTimestamp, updateDoc, deleteDoc, deleteField, EmailAuthProvider, reauthenticateWithCredential } from './firebase-config.js';
 import { initializePrescriptionHistory } from './prescriptHistory.js';
-import { initializeCanvas, clearCanvas, enableDrawing, clearSVG } from './prescription_canvas.js';
+import { initializeCanvas, clearCanvas, enableDrawing, clearSVG, disableDrawing } from './prescription_canvas.js';
 import { printPrescription } from './prescription_print.js';
 
 // Prescription 컨테이너 초기화
@@ -31,7 +31,7 @@ export function initializePrescription() {
     });
 
     // 처방전 내용 초기화 함수 추가
-    function clearPrescriptionForm() {
+    async function clearPrescriptionForm() {
         // CC 항목 초기화
         const ccItemsContainer = document.querySelector('.cc-items-container');
         if (ccItemsContainer) {
@@ -49,15 +49,19 @@ export function initializePrescription() {
             element.value = '';
         });
         
-        // Canvas 초기화 - prescription_canvas.js의 함수 사용
+        // Canvas 및 SVG 초기화 - prescription_canvas.js의 함수 사용
         try {
             // 캔버스가 존재하는지 확인
             const canvas = document.querySelector('.tooth-chart-canvas');
             if (canvas) {
                 // currentPatientId와 currentRegisterDate 값이 있는 경우에만 캔버스 초기화
                 if (typeof currentPatientId !== 'undefined' && typeof currentRegisterDate !== 'undefined') {
-                    // prescription_canvas.js의 함수 호출
+                    // prescription_canvas.js의 함수 가져오기
+                    const { clearCanvas, clearSVG, initializeCanvas } = await import('./prescription_canvas.js');
+                    
+                    // 초기화 함수 호출
                     clearCanvas(canvas);
+                    clearSVG(); // SVG 초기화 추가
                     requestAnimationFrame(() => {
                         initializeCanvas(currentPatientId, currentRegisterDate);
                     });
@@ -66,18 +70,18 @@ export function initializePrescription() {
                 }
             }
         } catch (error) {
-            console.error('캔버스 초기화 중 오류:', error);
+            console.error('캔버스/SVG 초기화 중 오류:', error);
         }
     }
     
     // 처방전 화면 초기화 함수
-    function resetPrescriptionView() {
+    async function resetPrescriptionView() {
         // 현재 환자 정보 초기화
         currentPatientId = null;
         currentRegisterDate = null;
         
         // 처방전 내용 초기화
-        clearPrescriptionForm();
+        await clearPrescriptionForm();
         
         // 처방전 화면 숨기기
         prescriptionBody.style.display = 'none';
@@ -94,16 +98,16 @@ export function initializePrescription() {
     }
 
     // 환자 삭제 이벤트 리스너 등록
-    document.addEventListener('patientDeleted', (e) => {
+    document.addEventListener('patientDeleted', async (e) => {
         const { patientId } = e.detail;
         // 현재 표시 중인 환자가 삭제된 환자인 경우에만 초기화
         if (patientId === currentPatientId) {
-            resetPrescriptionView();
+            await resetPrescriptionView();
         }
     });
 
     // Room의 환자 클릭 이벤트에 대한 처리
-    document.addEventListener('prescriptionPatientSelected', (e) => {
+    document.addEventListener('prescriptionPatientSelected', async (e) => {
         const { name, gender, birthDate, age, patientId, registerDate } = e.detail;
         
         // 현재 환자 정보 저장
@@ -143,7 +147,7 @@ export function initializePrescription() {
         });
         
         // 환자가 변경되었을 때 현재 처방전 내용 초기화
-        clearPrescriptionForm();
+        await clearPrescriptionForm();
         
         // 처방전 히스토리 초기화
         initializePrescriptionHistory(patientId);
@@ -157,6 +161,14 @@ export function initializePrescription() {
             
             // Canvas 비활성화
             document.querySelector('.tooth-chart-canvas').style.pointerEvents = 'none';
+            
+            // SVG 비활성화
+            const svgElement = document.querySelector('.tooth-chart-svg');
+            if (svgElement) {
+                svgElement.style.pointerEvents = 'none';
+                // SVG 그리기 비활성화 함수 호출
+                disableDrawing();
+            }
         });
         
         // 초기 상태는 저장되지 않은 상태로 설정
