@@ -403,7 +403,6 @@ function addControlButtons() {
 
 // 통합 Undo 함수 추가
 function undoDrawing() {
-    console.log("Undo 버튼 클릭됨");
     
     // SVG Undo 실행
     if (svgPathHistory && svgPathHistory.length > 0) {
@@ -423,13 +422,10 @@ function undoDrawing() {
                     .attr('vector-effect', 'non-scaling-stroke')
                     .attr('d', pathD);
             });
-            
-            console.log("SVG Undo 성공");
+        
         } catch (e) {
             console.error('SVG Undo 작업 중 오류:', e);
         }
-    } else {
-        console.log("실행 취소할 작업이 없습니다.");
     }
 }
 
