@@ -18,15 +18,15 @@
         display: flex;
         align-items: center;
         gap: 5px; 
-        margin: 10px;
+        margin: 15px 10px 10px 22px;
         line-height: 1;
         cursor: pointer
         }
 
         /*------------로고 이미지 스타일-------------*/
         .logo-image {
-            width: 183.6px;    
-            height: 40px;  
+            width: 119.86px;    
+            height: 30px;  
             object-fit: contain;
             display: block;  /* 이미지 하단의 여백 제거 */
         }
