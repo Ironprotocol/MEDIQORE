@@ -248,6 +248,21 @@ export function initializePrescription() {
             const treatmentDetails = document.querySelector('.treatment-details-input').value.trim();
             const ccItems = Array.from(document.querySelectorAll('.cc-item .cc-item-text'));
 
+            // 약물 복용 정보 검증 추가
+            const medicineValidationElements = document.querySelectorAll('.medicine-item');
+            if (medicineValidationElements.length > 0) {
+                for (const item of medicineValidationElements) {
+                    const doseInput = item.querySelector('.dose-input');
+                    const frequencyInput = item.querySelector('.frequency-input');
+                    const durationInput = item.querySelector('.duration-input');
+                    
+                    if (!doseInput.value.trim() || !frequencyInput.value.trim() || !durationInput.value.trim()) {
+                        alert('Please set the frequency and duration of medication');
+                        return;
+                    }
+                }
+            }
+
             // 빈 항목 체크
             const emptyFields = [];
             if (!symptoms) emptyFields.push('Symptoms');
