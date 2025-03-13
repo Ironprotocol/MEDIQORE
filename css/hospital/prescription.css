@@ -1,0 +1,779 @@
+.prescription-test-box {                         /* 네모 상자 추가 */
+    width: 300px;
+    height: 300px;
+    background-color: black;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.main-content-prescription {
+    position: absolute;
+    top: 60px;          
+    left: 450px;       
+    right: 0;
+    height: calc(100vh - 60px);  /* 전체 높이에서 탑바 높이 뺌 */
+    background-color: rgb(211, 228, 255);  
+    display: flex; /**/
+    gap: 10px; /**/
+    padding : 10px;/**/
+    box-sizing: border-box;
+}
+
+.content-container-prescription {
+    background-color: white;
+    border-radius: 8px;
+    height: calc(100%); /* 상하 마진 각 10px 고려 */
+    position: relative;
+    display: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    width: calc(100%); /* 좌우 마진 각 10px 고려 */
+}
+
+       /* --------------상단 메뉴바 스타일------------- */
+       .content-header-prescription {
+        height: 50px;
+        border-bottom: 1px solid hsl(0, 0%, 85%);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        border-radius: 8px 8px 0 0;
+    }
+
+    /* --------------푸터 스타일------------- */
+    .content-footer-prescription {
+        height: 50px;
+        border-top: 1px solid hsl(0, 0%, 85%);
+        border-right: 2px solid #ccc;
+        display: flex;
+        align-items: center;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: white;
+        width: calc(80% - 2px);  /* 75%에서 1px 줄임 */
+    }
+
+    /* Footer 내부 세로줄 */
+    .content-footer-prescription::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: calc(25% - 1px);  /* Left 컨테이너 너비와 동일 */
+        width: 2px;
+        height: 100%;
+        background-color: #ccc;
+    }
+
+    .content-body-prescription {
+        height: calc(100% - 100px);  /* 전체 높이에서 헤더와 푸터 높이를 뺌 */
+        overflow-y: auto;
+        width: 80%;  /* 1,2,3번 컨테이너 영역 */
+        border-right: 1px solid #ccc;
+    }
+
+    /*////////////////////////// 오른쪽 컨테이너다. ///////////////////////*/
+    .content-body-prescription2 {
+        position: absolute;
+        top: 50px;  /* 헤더 높이만큼 */
+        right: 0;
+        width: 20%;  /* 4번 컨테이너 영역 */
+        height: calc(100% - 50px);  /* 헤더 높이만 뺌 */
+        background-color: white;
+        border-top: 1px solid #ccc;
+    }
+
+    .content-title-prescription {
+        font-size: 15px;
+        color: #333;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .content-title-prescription .gender-icon {
+        width: 10px;
+        height: 14.5px;
+        object-fit: contain;
+    }
+
+.prescription-layout {
+    width: 100%;
+    height: 100%;
+    display: flex;  /* 컨테이너들을 가로로 배치 */
+     ;
+}
+
+.prescription-left-container {
+    width: 25%;
+    height: 100%;
+    border-right: 2px solid #ccc;
+    background-color : white;
+}
+
+.prescription-left-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: rgb(110, 110, 124);
+    margin: 10px 0 0 15px;  /* 상단과 좌측에 여백 */
+}
+
+.prescription-center-container {
+    width: 75%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border-right: 2px solid #ccc;
+    background-color: rgb(211, 228, 255);
+}
+
+.prescription-center-top {
+    height: 60%;
+    margin: 5px 5px 5px 5px;
+    border-bottom: 1px solid #ccc;
+    background-color: white;
+    position: relative;
+}
+
+/* 치아 차트 이미지 스타일은 prescription_canvas.css로 이동했습니다 */
+/* .tooth-chart-img 스타일 제거됨 */
+
+/* 캔버스 스타일은 prescription_canvas.css로 이동했습니다 */
+/* .tooth-chart-canvas 스타일 제거됨 */
+
+.prescription-center-bottom {
+    height: 40%;
+    margin: 0px 5px 5px 5px;
+    border: 1px solid #ccc;
+    background-color: white;
+    position: relative;
+}
+
+/* 세로선 추가 */
+.prescription-center-bottom::before {
+    content: '';
+    position: absolute;
+    top: 40px;  /* 가로선과 동일한 시작점 */
+    left: 50%;  /* 컨테이너의 중앙 */
+    width: 1px;
+    height: calc(100% - 40px);  /* 컨테이너 높이에서 상단 여백(40px)과 하단 마진(5px)을 뺌 */
+    background-color: #ccc;
+}
+
+/* Diagnosis & Prescription 섹션의 가로선 */
+.prescription-center-bottom::after {
+    content: '';
+    position: absolute;
+    top: 40px;  /* 타이틀(10px) + 타이틀 높이(15px) + 여백(10px) */
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: #ccc;
+}
+
+.prescription-right-container {
+    width: 100%;  /* content-body-prescription2의 전체 너비 사용 */
+    height: 100%;
+}
+
+/* 환자 선택 메시지 컨테이너 */
+.patient-select-wrapper {
+    position: absolute;
+    top: 50px;  /* 헤더 높이만큼 */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: white;
+    border-radius: 0 0 8px 8px;
+    display: flex;
+    justify-content: center;
+    border-top: 1px solid #ccc;
+    align-items: center;
+}
+
+.patient-select-message {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* New Chart 버튼 스타일은 prescription_canvas.css로 이동했습니다 */
+/* .new-chart-btn 스타일 제거됨 */
+
+/* 현재 room 이름 스타일 */
+.current-room-name {
+    position: absolute;
+    left: calc(28% - 20px); /* 세로선(30%) 기준으로 30px 떨어짐 */
+    font-size: 14px;
+    color: rgb(110, 110, 124);
+    font-weight: bold;
+}
+
+/* 공통 타이틀 스타일 */
+.prescription-section-title {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    font-size: 12px;
+    font-weight: bold;
+    color: rgb(110, 110, 124);
+}
+
+/* 이미지와 캔버스를 감싸는 컨테이너 스타일은 prescription_canvas.css로 이동했습니다 */
+/* .tooth-chart-container 스타일 제거됨 */
+
+.symptoms-form {
+    margin: 50px 0 0 15px;
+    width: calc(100% - var(--chart-width) - 35px);  /* form 자체의 너비 조절 */
+}
+
+.symptoms-label {
+    font-size: 10px;
+    color: rgb(110, 110, 124);
+    font-weight: bold;
+    margin-bottom: 5px;
+    width: 100%;  /* form의 전체 너비 사용 */
+}
+
+.symptoms-input {
+    width: 100%;  /* form의 전체 너비 사용 */
+    height: 60px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 12px;
+    resize: none;
+    box-sizing: border-box;
+}
+
+.location-form {
+    margin: 15px 0 0 15px;  /* symptoms-form과의 간격 15px */
+    width: calc(100% - var(--chart-width) - 35px);
+}
+
+.location-label {
+    font-size: 10px;
+    color: rgb(110, 110, 124);
+    font-weight: bold;
+    margin-bottom: 5px;
+    width: 100%;
+}
+
+.location-input {
+    width: 100%;
+    height: 50px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 12px;
+    resize: none;
+    box-sizing: border-box;
+}
+
+.treatment-details-form {
+    margin: 15px 0 0 15px;
+    width: calc(100% - var(--chart-width) - 35px);
+    height: calc(100% - var(--upper-forms-height));  /* 상단 폼들의 높이를 뺀 나머지 */
+}
+
+.treatment-details-label {
+    font-size: 10px;
+    color: rgb(110, 110, 124);
+    font-weight: bold;
+    margin-bottom: 5px;
+    width: 100%;
+}
+
+.treatment-details-input {
+    width: 100%;
+    height: calc(100% - 40px);  /* form 높이에서 label 높이와 margin 제외 */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 12px;
+    resize: none;
+    box-sizing: border-box;
+}
+
+.send-btn {
+    position: absolute;
+    right: 10px;
+    padding: 8px 16px;
+    background-color: #22fc16;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    height: 33px;
+    width: 80px;
+}
+
+.send-btn:hover {
+    background-color: #30e026;
+}
+
+.print-btn-prescription {
+    position: absolute;
+    right: 220px;  /* desk-select(100px) + Send 버튼(80px) + 간격(40px) */
+    width: 35px;
+    height: 35px;
+    border: none;
+    cursor: pointer;
+    background: url('../image/printer.png') no-repeat center;
+    background-size: 35px;  /* 내부 이미지 크기 */
+    transition: background-image 0.3s ease;
+}
+
+.print-btn-prescription:hover {
+    background: url('../image/printer_hover.png') no-repeat center;
+    background-size: 35px;
+}
+
+.cc-search-container {
+    position: absolute;
+    top: 50px;
+    left: 10px;
+    width: calc(50% - 20px);
+}
+
+.cc-search-input {
+    width: 100%;
+    height: 33px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 8px;  /* 왼쪽 패딩 원래대로 복구 */
+    font-size: 12px;
+    box-sizing: border-box;
+}
+
+.cc-search-input::placeholder {
+    color: #999;
+    font-size: 12px;
+}
+
+.cc-items-container {
+    position: absolute;
+    top: 90px;  /* CC 검색창 아래 */
+    left: 10px;
+    width: calc(50% - 20px);  /* CC 검색창과 동일한 너비 */
+    max-height: calc(100% - 100px);  /* 컨테이너 높이 제한 */
+    overflow-y: auto;  /* 세로 스크롤 활성화 */
+}
+
+/* 스크롤바 스타일 (Webkit 기반 브라우저) */
+.cc-items-container::-webkit-scrollbar {
+    width: 6px;  /* 얇은 스크롤바 */
+}
+
+.cc-items-container::-webkit-scrollbar-track {
+    background: #f1f1f1;  /* 스크롤바 트랙 색상 */
+    border-radius: 3px;
+}
+
+.cc-items-container::-webkit-scrollbar-thumb {
+    background: #ccc;  /* 스크롤바 색상 */
+    border-radius: 3px;
+}
+
+.cc-items-container::-webkit-scrollbar-thumb:hover {
+    background: #aaa;  /* 스크롤바 호버 색상 */
+}
+
+.cc-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f8f9fa;
+}
+
+.cc-item img {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+}
+
+.cc-item-text {
+    flex-grow: 1;
+    font-size: 10px;
+    color: #333;
+}
+
+.cc-item-remove {
+    cursor: pointer;
+    color: #999;
+    font-size: 16px;
+    padding: 0 5px;
+}
+
+.cc-item-remove:hover {
+    color: #666;
+}
+
+/* 자동완성 드롭다운 스타일 */
+.cc-autocomplete {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+    z-index: 1000;
+}
+
+.cc-autocomplete-item {
+    padding: 8px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.cc-autocomplete-item:hover {
+    background-color: #f0f0f0;
+}
+
+.cc-autocomplete-item.selected {
+    background-color: #e9ecef;
+}
+
+.medicine-search-container {
+    position: absolute;
+    top: 50px;
+    right: 10px;
+    width: calc(50% - 20px);  /* CC 검색폼과 동일한 너비 */
+}
+
+.medicine-search-input {
+    width: 100%;
+    height: 33px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 12px;
+    box-sizing: border-box;
+}
+
+.medicine-search-input::placeholder {
+    color: #999;
+    font-size: 12px;
+}
+
+.medicine-items-container {
+    position: absolute;
+    top: 90px;
+    right: 10px;
+    width: calc(50% - 20px);
+    max-height: calc(100% - 100px);  /* 컨테이너 높이 제한 */
+    overflow-y: auto;  /* 세로 스크롤 활성화 */
+}
+
+/* 스크롤바 스타일 (Webkit 기반 브라우저) */
+.medicine-items-container::-webkit-scrollbar {
+    width: 6px;  /* 얇은 스크롤바 */
+}
+
+.medicine-items-container::-webkit-scrollbar-track {
+    background: #f1f1f1;  /* 스크롤바 트랙 색상 */
+    border-radius: 3px;
+}
+
+.medicine-items-container::-webkit-scrollbar-thumb {
+    background: #ccc;  /* 스크롤바 색상 */
+    border-radius: 3px;
+}
+
+.medicine-items-container::-webkit-scrollbar-thumb:hover {
+    background: #aaa;  /* 스크롤바 호버 색상 */
+}
+
+.medicine-item {
+    display: flex;
+    align-items: center;  /* 세로 중앙 정렬 강화 */
+    margin-bottom: 5px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f8f9fa;
+    height: 35px;  /* 높이 고정 */
+    box-sizing: border-box;
+}
+.medicine-item img {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    flex-shrink: 0;  /* 아이콘 크기 고정 */
+}
+.medicine-item-text {
+    flex: 1;
+    min-width: 0;
+    font-size: 10px;
+    color: #333;
+    margin-right: 10px;
+    line-height: 20px;  /* 텍스트 세로 중앙 정렬 */
+    display: flex;
+    align-items: center;
+}
+
+.medicine-controls {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+    flex-shrink: 0;
+    align-items: center;  /* 드롭다운들 세로 중앙 정렬 */
+    height: 100%;  /* 부모 높이에 맞춤 */
+}
+
+.medicine-dropdown {
+    position: relative;
+    width: 60px;
+    height: 20px;  /* 드롭다운 버튼 높이 고정 */
+    display: flex;
+    align-items: center;
+}
+
+.medicine-dropdown-button {
+    width: 100%;
+    height: 100%;  /* 부모 높이에 맞춤 */
+    padding: 2px 4px;  /* 패딩 조정 */
+    font-size: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.medicine-dropdown-content {
+    position: absolute;
+    bottom: 100%;  /* 위로 펼쳐지기 */
+    left: 0;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    z-index: 1000;  /* 최상위 레이어 */
+    display: none;
+}
+
+.medicine-dropdown-item {
+    padding: 4px 8px;
+    font-size: 10px;  /* 글자 크기 축소 */
+    cursor: pointer;
+}
+
+.medicine-dropdown-item:hover {
+    background-color: #f0f0f0;
+}
+
+.medicine-item-remove {
+    cursor: pointer;
+    color: #999;
+    font-size: 16px;
+    padding: 0 5px;
+    flex-shrink: 0;  /* 삭제 버튼 크기 고정 */
+}
+
+.medicine-autocomplete {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+    z-index: 1000;
+}
+
+.medicine-autocomplete-item {
+    padding: 8px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.medicine-autocomplete-item:hover {
+    background-color: #f0f0f0;
+}
+
+.medicine-autocomplete-item.selected {
+    background-color: #e9ecef;
+}
+
+/* 처방전 히스토리 아이템 스타일 */
+.prescript-history-record {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin: 10px;
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.prescript-history-record:hover {
+    border: 2px solid #81d9fc;  /* Patient List와 동일한 hover 효과 */
+    padding: 9px;  /* border가 두꺼워진만큼 padding 감소 */
+}
+
+.prescript-history-record.selected {
+    border: 2px solid rgb(0, 102, 255);  /* Patient List와 동일한 선택 효과 */
+    padding: 9px;  /* border가 두꺼워진만큼 padding 감소 */
+}
+
+.prescript-history-record .record-date {
+    font-size: 14px;
+    font-weight: bold;
+    color: #000;
+}
+
+.prescript-history-record .record-date span {
+    color: #666;
+}
+
+.prescript-history-record .record-doctor {
+    font-size: 14px;
+    font-weight: bold;
+    color: #666;
+    margin-top: 5px;
+}
+
+.prescript-history-record .record-cc {
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+}
+
+/* 수납실 선택 드롭다운 추가 */
+.desk-select {
+    position: absolute;
+    right: 100px;  /* Send 버튼(80px) + 간격(20px) */
+    width: 100px;
+    height: 30px;
+    padding: 0 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 12px;
+    color: rgb(110, 110, 124);
+    background-color: white;
+}
+
+/* 비활성화된 버튼 스타일 */
+.save-btn.disabled, .send-btn.disabled {
+    background-color: #cccccc !important;
+    cursor: not-allowed !important;
+    opacity: 0.7;
+}
+
+/* Save 버튼 스타일 수정 */
+.save-btn {
+    position: absolute;
+    right: 275px;
+    width: 80px;
+    height: 33px;
+    border: none;
+    border-radius: 6px;
+    background-color: rgb(0, 102, 255);
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.save-btn:hover {
+    background-color: rgb(0, 82, 204);
+}
+
+/* Delete 버튼 스타일 */
+.delete-btn {
+    position: absolute;
+    right: 365px;
+    width: 80px;
+    height: 33px;
+    border: none;
+    border-radius: 6px;
+    background-color: #ff3333;
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.delete-btn:hover {
+    background-color: #cc0000;
+}
+
+.delete-btn.disabled {
+    background-color: #ffcccc;
+    cursor: not-allowed;
+}
+
+/* Send 버튼 스타일 수정 */
+.send-btn {
+    position: absolute;
+    right: 10px;
+    padding: 8px 16px;
+    background-color: #22fc16;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    height: 33px;
+    width: 80px;
+}
+
+.medicine-input-group {
+    margin-right: 8px;
+    display: flex;
+    flex-direction: column;
+}
+
+.medicine-input {
+    width: 25px;
+    padding: 4px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 10px;
+}
+
+.medicine-controls {
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+}
+
+.medicine-text-info {
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+}
+
+.medicine-text-info span {
+    margin-right: 15px;
+    font-size: 12px;
+    color: #555;
+}
+
+/* Firefox용 스크롤바 스타일 */
+.cc-items-container, .medicine-items-container {
+    scrollbar-width: thin;
+    scrollbar-color: #ccc #f1f1f1;
+}
+
+

@@ -1,0 +1,167 @@
+.current-date {
+    margin-left: 15px;
+    font-size: 0.9em;
+    color: #666;
+}
+
+
+/* 환자 정보 카드 스타일 */
+.patient-info-container {
+    width: calc 80%;  /* margin과 padding을 모두 고려한 너비 계산 */
+    margin: 10px;
+    padding: 10px;
+    border: 1px solid hsl(0, 0%, 85%);
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    cursor: pointer;  /* 마우스 오버시 포인터 커서로 변경 */
+    transition: all 0.2s ease;  /* border-color만이 아닌 모든 변화에 transition 적용 */
+}
+
+.patient-info-container:hover {
+    border: 2px solid #81d9fc;  /* 테두리 두께를 2px로 증가하고 색상 변경 */
+}
+
+/* active 상태를 selected로 변경 */
+.patient-info-container.selected {
+    border: 2px solid rgb(0, 102, 255);  /* 클릭시 진한 파란색으로 테두리 변경 */
+}
+
+/* 기본 span 스타일 - flex 유지 */
+.patient-info-container span {
+    text-align: center;
+    padding: 0 10px;
+    color: rgb(110, 110, 124);
+    font-size: 12px;
+}
+
+/* 환자 ID/이름 span - 고정 너비 */
+.patient-info-container .patient-id-span {
+    display: flex;
+    align-items: center;
+    width: 160px;              /* 18자를 수용할 수 있는 너비로 수정 */
+    text-align: left;          /* 왼쪽 정렬 */
+    white-space: nowrap;       /* 줄바꿈 방지 */
+    overflow: hidden;          /* 넘치는 텍스트 숨김 */
+    text-overflow: ellipsis;   /* 말줄임표 처리 */
+    font-size: 15px;
+    color : black;
+    font-style: bold;
+    
+}
+
+/* 나이 span - 고정 너비 */
+.patient-info-container .age-span {
+    display: inline-block;
+    width: 70px;               /* "58years" 길이를 수용할 수 있는 너비 */
+    text-align: left;          /* 왼쪽 정렬 */
+    white-space: nowrap;       /* 줄바꿈 방지 */
+}
+
+/* 증상 span - 고정 너비 */
+.patient-info-container .complaint-span {
+    display: inline-block;
+    width: 100px;              /* "swollen_gums" 길이를 수용할 수 있는 너비 */
+    text-align: left;          /* 왼쪽 정렬 */
+    white-space: nowrap;       /* 줄바꿈 방지 */
+    overflow: hidden;          /* 넘치는 텍스트 숨김 */
+    text-overflow: ellipsis;   /* 말줄임표 처리 */
+}
+
+/* progress 이미지 span 스타일 */
+.patient-info-container .progress-span {
+    flex: none;  /* flex 해제 */
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;  /* 오른쪽 정렬 */
+    width: 81px;  /* 이미지 너비만큼 */
+    margin-left: auto;  /* C와 D 사이 간격 확보 */
+    margin-right: 0;    /* E와의 간격 최소화 */
+}
+
+/* 의사 선택 드롭다운 span 스타일 */
+.patient-info-container .doctor-dropdown-span {
+    flex: none;  /* flex 해제 */
+    width: 170px;  /* 드롭다운 너비 */
+}
+
+/* 드롭다운 옵션 스타일 */
+.doctor-option {
+    padding: 8px 12px;
+    cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* 호버 효과 (disabled 클래스가 없는 경우에만) */
+.doctor-option:not(.disabled):hover {
+    background-color: #f8f9fa;
+}
+
+/* 옵션 내부 컨텐츠 정렬 */
+.doctor-option-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* 의사 이름 스타일 */
+.doctor-option span {
+    color: rgb(110, 110, 124);
+    font-size: 12px;
+    text-align: left;
+}
+
+/* 상태 아이콘 스타일 */
+.doctor-option .status-icon {
+    width: 12px;
+    height: 12px;
+    object-fit: contain;
+    vertical-align: middle;
+}
+
+/* disabled 상태 스타일 */
+.doctor-option.disabled {
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.doctor-option.disabled span,
+.doctor-option span.disabled {
+    color: rgb(180, 180, 180);
+}
+
+/* 드롭다운 컨테이너 스타일 //2025-02-11 17:25 */
+.doctor-dropdown {
+    position: relative;
+}
+
+/* 드롭다운 목록 스타일 //2025-02-11 17:25 */
+.doctor-options {
+    position: absolute;
+    z-index: 1000;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 100%;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* 시간 표시 스타일 */
+.time-span {
+    display: inline-block;
+    min-width: 55px;
+    text-align: right;
+    margin-right: 10px;
+    color: rgb(110, 110, 124);
+    font-size: 13px;
+}
+
+.gender-icon {
+    width: 10px;
+    height: 14.5px;
+    margin-right: 20px;
+    vertical-align: middle;
+}

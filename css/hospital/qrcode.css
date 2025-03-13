@@ -1,0 +1,69 @@
+/* QR 코드 스타일링을 위한 CSS */
+
+/* QR 코드 컨테이너 기본 스타일 */
+.qr-scan-message-left, .qr-scan-message-right, .qr-scan-message-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+    padding: 0px;
+    box-sizing: border-box;
+    overflow: visible; /* overflow를 visible로 변경하여 텍스트가 넘쳐도 보이게 함 */
+    width: 150px; /* 150px로 확장 */
+    height: 150px; /* 150px로 확장 */
+    /* 테두리는 prescription-payment_print.js에서 관리 */
+}
+
+/* MEDIQORE 회사명 스타일 */
+.mediqore-text-left, .mediqore-text-right {
+    color: #000;
+    font-weight: bold;
+    font-size: 10px;
+    font-family: Arial, sans-serif;
+    line-height: 1;
+    white-space: nowrap;
+    z-index: 10; /* QR 코드 위에 표시 */
+}
+
+/* QR 코드 canvas 요소 스타일 */
+.qr-scan-message-left canvas, .qr-scan-message-right canvas {
+    max-width: 120px;
+    max-height: 120px;
+    display: block;
+    margin: 0;
+    /* Canvas 렌더링 품질 향상 */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges; 
+}
+
+/* 인쇄 전용 스타일 */
+@media print {
+    /* 전체 인쇄 품질 향상 */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    .qr-scan-message-left, .qr-scan-message-right {
+        background-color: white !important;
+        width: 150px !important;
+        height: 150px !important;
+        overflow: visible !important;
+    }
+    
+    /* MEDIQORE 회사명 인쇄 스타일 */
+    .mediqore-text-left, .mediqore-text-right {
+        color: #000 !important;
+        font-weight: bold !important;
+        font-size: 10px !important;
+    }
+    
+    /* QR 코드 canvas 요소 인쇄 스타일 */
+    .qr-scan-message-left canvas, .qr-scan-message-right canvas {
+        max-width: 120px !important;
+        max-height: 120px !important;
+        /* 인쇄 시 Canvas 선명도 향상 */
+        image-rendering: -webkit-optimize-contrast !important;
+        image-rendering: crisp-edges !important;
+    }
+}

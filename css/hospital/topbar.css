@@ -1,0 +1,139 @@
+        /*============================================================여기부터 탑바에 속하는 요소들들==========================================================*/
+        /* top-bar: 상단 바 컨테이너 */
+        .top-bar {
+            position: absolute;
+            top: 0;
+            left: 200px;
+            right: 0;
+            height: 60px;
+            background-color: white;
+            border-bottom: 1px solid hsl(0, 0%, 85%);
+            border-left: 1px solid hsl(0, 0%, 85%);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 0;  /* 기본 gap 제거 */
+            z-index: 1;  /* 상단 바를 sidebar2 위에 표시 */
+        }
+
+        /* page-title: 현재 페이지 제목 (Chart) */
+        .page-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: rgb(110, 110, 124);
+            min-width: 100px;
+            margin-right: -30px;
+        }
+
+        /* search-form: 검색 입력 폼 */
+        .search-form {
+            flex-grow: 1;
+            max-width: 400px;
+            margin-right: 50px;
+        }
+
+        /* search-form: 검색 입력하는 공간 */
+        .search-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid hsl(0, 0%, 85%);
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        /* 검색창 클릭시 테두리가 파랗게 변함함  */
+        .search-input:focus {
+            border-color: rgb(0, 102, 255);
+        }
+
+        /* new-patient-btn: 신규환자 버튼 */
+        .new-patient-btn {
+            padding: 8px 16px;
+            background-color: rgb(0, 102, 255);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            height: 33px;
+            width: 140px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: flex;  /* 아이콘과 텍스트를 가로로 배치 */
+            align-items: center;  /* 세로 중앙 정렬 */
+            justify-content: center;  /* 가로 중앙 정렬 */
+            gap: 10px;  /* 아이콘과 텍스트 사이 간격 */
+        }
+
+        .new-patient-btn img {
+            width: 25px;  /* 아이콘 크기 */
+            height: 25px;
+        }
+
+        /* new-patient-btn: 신규환자 버튼 hover */
+        .new-patient-btn:hover {
+            background-color: rgb(0, 82, 204);
+        }
+
+        /* action-buttons: 우측 상단 버튼 그룹 */
+        .action-buttons {
+            display: flex;
+            align-items: center;  /* 세로 중앙 정렬 */
+            height: 100%;        /* 부모 높이만큼 차지 */
+            gap: 15px;          /* 요소들 사이 간격 */
+            margin-left: auto;   /* 우측 정렬을 위해 추가 */
+        }
+
+        /* action-button: 각 버튼의 공통된 스타일 */
+        .action-button {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background-color: transparent;
+            cursor: pointer;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease;
+        }
+
+
+        /* 이미지 버튼용 임시 스타일 ========== */
+        .action-button-placeholder {
+            width: 24px;
+            height: 24px;
+            background-color: #ddd;
+            border-radius: 50%;
+        }
+
+        /* Update 버튼 스타일 */
+        .update-icon {
+            width: 20px;
+            height: 22px;
+            transition: all 0.2s ease;
+        }
+
+        #update-button:hover .update-icon {
+            content: url('../image/update_hover.png');
+        }
+        
+        /* 로딩 스피너 스타일 */
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-top: 2px solid #0052cc;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 2px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /*============================================================여기까지 탑바에 속하는 요소들들==========================================================*/
+
+       

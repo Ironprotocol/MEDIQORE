@@ -1,0 +1,105 @@
+/* 치아 차트 이미지 스타일 */
+.tooth-chart-img {
+    height: calc(100% - 12px);
+    width: auto;
+    aspect-ratio: 1/1;
+    margin: 5px 5px 0px 5px;
+    object-fit: contain;
+    display: block;
+    border: 1px solid #ccc;
+}
+
+/* 캔버스 스타일 */
+.tooth-chart-canvas {
+    position: absolute;
+    height: calc(100% - 10px);
+    margin: 5px 5px 0px 5px;
+    width: auto;
+    aspect-ratio: 1/1;
+    cursor: crosshair;
+    z-index: 1;
+}
+
+/* SVG 스타일 */
+.tooth-chart-svg {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    height: calc(100% - 10px);
+    width: auto;
+    aspect-ratio: 1/1;
+    pointer-events: none; /* 기본적으로 마우스 이벤트 비활성화 */
+    z-index: 2; /* 캔버스 위에 표시 */
+}
+
+/* SVG 경로 스타일 */
+.tooth-chart-svg path {
+    fill: none;
+    stroke: #FF0000;
+    stroke-width: 2;
+    vector-effect: non-scaling-stroke; /* 확대/축소해도 선 두께 유지 */
+}
+
+/* 이미지와 캔버스를 감싸는 컨테이너 */
+.tooth-chart-container {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* 차트 컨트롤 버튼 스타일 */
+.chart-controls {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    z-index: 3;  /* SVG보다 위에 표시 */
+}
+
+.chart-controls button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: rgb(0, 102, 255);
+    color: white;
+    cursor: pointer;
+    font-size: 12px;
+    width: 60px;
+}
+
+.chart-controls button:hover {
+    background-color: rgb(0, 82, 204);
+}
+
+/* New Chart 버튼 스타일 */
+.new-chart-btn {
+    margin-left: 10px;
+    padding: 8px 16px;
+    background-color: rgb(0, 102, 255);
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    height: 33px;
+    width: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.new-chart-btn img {
+    width: 20px;
+    height: 20px;
+}
+
+.new-chart-btn:hover {
+    background-color: rgb(0, 82, 204);
+} 

@@ -1,0 +1,36 @@
+.menu-item-pharmacy {
+    position: absolute;
+    left: 15px;  /* 왼쪽 여백 */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 15px;  /* 아이콘 크기 */
+    height: 27px;
+    transition: opacity 0.3s ease;
+}
+
+/* 기본 아이콘 스타일(회색 상태) */
+.menu-item-pharmacy.menu-icon-default {
+    opacity: 1;
+}
+
+/* 활성 아이콘 스타일(파랑 상태) */
+.menu-item-pharmacy.menu-icon-active {
+    opacity: 0;
+}
+
+/* 호버 및 활성 상태에서의 아이콘 스타일 */
+.menu-item:hover .menu-item-pharmacy.menu-icon-default,
+.menu-item.active .menu-item-pharmacy.menu-icon-default {
+    opacity: 0;
+}
+
+.menu-item:hover .menu-item-pharmacy.menu-icon-active,
+.menu-item.active .menu-item-pharmacy.menu-icon-active {
+    opacity: 1;
+}
+
+/* Pharmacy 이미지만을 위한 특별 클래스 */
+.pharmacy-icon-special {
+    width: 15px !important;
+    height: 27px !important;
+}

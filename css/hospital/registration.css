@@ -1,0 +1,598 @@
+       /* ================================================메인컨텐츠 영역, Desk , Patient register 영역======================================*/
+        /* Register 버튼 스타일 */
+        .register-btn {
+            padding: 8px 16px;
+            background-color: rgb(0, 102, 255);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            height: 33px;
+            width: 110px;
+            display: flex;  /* 아이콘과 텍스트를 가로로 배치 */
+            align-items: center;  /* 세로 중앙 정렬 */
+            justify-content: center;  /* 가로 중앙 정렬 */
+            gap: 10px;  /* 아이콘과 텍스트 사이 간격 */
+        }
+
+        .register-btn img {
+            width: 20px;  /* 아이콘 크기 */
+            height: 20px;
+        }
+
+        .register-btn:hover {
+            background-color: rgb(0, 82, 204);
+        }
+
+        /* Patient Registration 텍스트 스타일 */
+
+
+
+        /* Patient Registration Form Styles */
+        .patient-registration-form {
+            display: flex;
+            flex-wrap: wrap;
+            width: 100%;
+            box-sizing: border-box;
+            align-items: flex-start;
+        }
+
+        .patient-registration-form h2 {
+            position: relative;
+            margin: 0;
+            width: 100%;
+            font-size: 15px;
+        }
+
+        /* 가로선 스타일 */
+        .patient-registration-form::after {
+            content: '';
+            position: absolute;
+            top: 50px;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background-color: hsl(0, 0%, 85%);
+        }
+
+        /* 입력 폼 컨테이너 스타일 수정 */
+        .form-container {
+            display: flex;
+            margin-top: 5px;  /* 가로선과의 여백 제거 */
+            height: calc(100% - 51px);  /* 전체 높이에서 제목+가로선 높이 제외 */
+            width: 100%;
+
+        }
+
+        /* 각 섹션 컨테이너 스타일 수정 */
+        .section-box {
+            flex: 1;
+            background-color: white;
+            height: 100%;
+            padding: 0 20px;
+
+        }
+
+
+        /* 첫 번째 섹션의 왼쪽 아래 모서리 */
+        .section-box:first-child {
+            border-bottom-left-radius: 8px;  /* 컨텐츠 박스와 동일한 둥근 정도 */
+        }
+
+        /* 마지막 섹션의 오른쪽 아래 모서리 */
+        .section-box:last-child {
+            border-bottom-right-radius: 8px;  /* 컨텐츠 박스와 동일한 둥근 정도 */
+        }
+
+        /* 첫 번째와 두 번째 섹션의 오른쪽 테두리 */
+        .form-section-container:not(:last-child) {
+            border-right: 1px solid hsl(0, 0%, 85%);
+        }
+
+        .form-section h3 {
+            margin: 0 0 15px 0;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            color: #495057;
+            font-weight: bold;  /* 라벨 텍스트 볼드 처리 */
+        }
+
+        /* 입력 필드와 드롭박스 공통 스타일 수정 */
+        .form-group input[type="text"],
+        .form-group input[type="date"],
+        .form-group input[type="tel"],
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 12px;
+            box-sizing: border-box;
+            height: 28px;
+            color: rgb(110, 110, 124);  /* 회색톤으로 변경 */
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            margin: 0;
+            width: 16px;
+            height: 16px;
+        }
+
+        .checkbox-group label {
+            font-weight: normal;
+        }
+
+        /* 필수 입력 필드 표시 */
+        .form-group label[for]::after {
+            color: #dc3545;
+        }
+
+        /* date input 스타일 추가 */
+        input[type="date"] {
+            position: relative;
+            min-height: 40px;
+            padding: 10px;
+        }
+
+        /* date input의 placeholder 스타일 */
+        input[type="date"]::before {
+            content: attr(placeholder);
+            position: absolute;
+            color: #999;
+        }
+
+        input[type="date"]:focus::before,
+        input[type="date"]:valid::before {
+            display: none;
+        }
+
+        /* 날짜 선택 그룹 스타일 */
+        .date-select-group {
+            display: flex;
+            gap: 5px;
+            width: calc(100% - 16px);  /* padding 고려한 너비 */
+            margin: 5px 0;
+        }
+
+        .date-select-group select {
+            flex: 1;
+            padding: 4px 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            height: 28px;
+        }
+
+        .address-select-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .address-input {
+            width: 40%;  /* 첫 번째 입력창 너비 */
+            position: relative;
+        }
+
+        .search-results {
+            width: 100%;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            background: white;
+            margin-top: 5px;
+        }
+
+        .search-results option {
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        .search-results option:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Doctor Selection 스타일 */
+        #doctorSelect option {
+            padding: 8px;
+            display: none;
+        }
+
+        /* 주소 검색 결과 스타일 */
+        .address-results {
+            position: absolute;
+            left: 0;
+            width: 135px;  /* district input과 같은 너비 */
+            top: 100%;
+            background: white;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-height: 200px;
+            overflow-y: auto;
+            display : none;
+        }
+
+        .address-results div {
+            padding: 8px 4px;
+            cursor: pointer;
+            font-size: 12px;
+            color: rgb(110, 110, 124);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 135px;
+        }
+
+        .address-results div:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* 주소 상세 정보 스타일 */
+        .address-details {
+            display: flex;
+            gap: 10px;
+            position: relative;  /* 추가: 드롭다운의 기준점 */
+        }
+
+        .address-details select {
+            width: 30%;  /* 나머지 두 선택창의 너비 */
+        }
+
+        /* 드롭박스 옵션 스타일 */
+        .form-group select option {
+            color: rgb(110, 110, 124);  /* 드롭박스 옵션도 동일한 회색톤 적용 */
+        }
+
+        .doctor-select-container {
+            position: relative;
+        }
+
+        .doctor-selected {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .doctor-dropdown {
+            width: 170px;  /* 200px에서 30px 줄임 */
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .doctor-options {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .doctor-option {
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        .doctor-option.disabled {
+            color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* 의사 선택 드롭다운 컨테이너 */
+        .registration-doctor-select-container {
+            position: relative;
+            width: 100%;
+        }
+
+        /* 드롭다운 기본 스타일 */
+        .registration-doctor-dropdown {
+            width: calc(100% - 2px);
+            border: 1px solid hsl(0, 0%, 85%);
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* 선택된 항목 스타일 */
+        .registration-doctor-selected {
+            padding: 8px 12px;
+            color: rgb(110, 110, 124);
+            font-size: 12px;
+        }
+
+        /* 옵션 컨테이너 스타일 */
+        .registration-doctor-options {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid hsl(0, 0%, 85%);
+            border-radius: 4px;
+            margin-top: 0;
+            display: none;
+            z-index: 1000;
+        }
+
+        /* 드롭다운 옵션 스타일 */
+        .registration-doctor-option {
+            padding: 8px 12px;
+            cursor: pointer;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* 호버 효과 */
+        .registration-doctor-option:not(.disabled):hover {
+            background-color: #f8f9fa;
+        }
+
+        /* 옵션 내부 컨텐츠 정렬 */
+        .registration-doctor-option-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* 의사 이름 스타일 */
+        .registration-doctor-option span {
+            color: rgb(110, 110, 124);
+            font-size: 12px;
+            text-align: left;
+        }
+
+        /* 상태 아이콘 스타일 */
+        .registration-doctor-option .status-icon {
+            width: 12px;
+            height: 12px;
+            object-fit: contain;
+            vertical-align: middle;
+        }
+
+        /* disabled 상태 스타일 */
+        .registration-doctor-option.disabled {
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .registration-doctor-option.disabled span,
+        .registration-doctor-option span.disabled {
+            color: rgb(180, 180, 180);
+        }
+
+        /* ID 입력 필드 래퍼 스타일 */
+        .id-input-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .id-input-wrapper input {
+            width: 100%;
+            padding-right: 70px; /* Check 버튼 공간 확보 */
+            box-sizing: border-box;
+        }
+
+        .id-check-btn {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgb(0, 102, 255);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .id-check-btn:hover {
+            background-color: rgb(0, 82, 204);
+        }
+
+        /* 환자 정보 표시 스타일 */
+        .registered-patient-info {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: flex-start;
+            text-align: left;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            background-color: #fff;
+            cursor: pointer;
+            transition: border-color 0.2s ease;
+        }
+
+        .registered-patient-info:hover {
+            border-color: #4a90e2;
+        }
+
+        .registered-patient-info:active {
+            border-color: #357abd;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            width: 100%;
+            align-items: flex-start;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .info-label {
+            font-weight: bold;
+            font-size: 12px;
+            color: #495057;
+            text-align: left;
+        }
+
+        .info-value {
+            font-size: 12px;
+            color: rgb(110, 110, 124);
+            word-break: break-word;
+            text-align: left;
+            width: 100%;
+        }
+
+        /* Patient Registration 헤더 스타일 */
+        .patient-registration-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        /* 헤더 버튼 컨테이너 */
+        .header-buttons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Reset 버튼 스타일 */
+        .reset-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease;
+            position: absolute;
+            top: 10px;
+            right: 30px;
+        }
+
+        .reset-btn:hover {
+            transform: rotate(180deg);
+        }
+
+        .reset-btn img {
+            width: 20px;
+            height: 22px; /* 137:151 비율에 맞춤 (20 * 151/137 = 약 22px) */
+        }
+
+        /* 환자 방문 기록 구분선 */
+        .visit-history-divider {
+            height: 1px;
+            background-color: #ccc;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        /* 환자 방문 기록 컨테이너 */
+        .visit-history-container {
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 12px;
+            width: 100%;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+
+        /* 방문 기록 테이블 */
+        .visit-history-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed; /* 고정 레이아웃 사용 */
+        }
+
+        .visit-history-table th, 
+        .visit-history-table td {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* 각 열의 너비 지정 */
+        .visit-history-table th:nth-child(1),
+        .visit-history-table td:nth-child(1) {
+            width: 90px; /* date 열 너비 (dd.mmm.yyyy 형식에 맞춤) */
+        }
+
+        .visit-history-table th:nth-child(2),
+        .visit-history-table td:nth-child(2) {
+            width: 25%; /* doctor 열 너비 */
+        }
+
+        .visit-history-table th:nth-child(3),
+        .visit-history-table td:nth-child(3) {
+            width: 40%; /* cc 열 너비 (가장 긴 콘텐츠 예상) */
+        }
+
+        .visit-history-table th:nth-child(4),
+        .visit-history-table td:nth-child(4) {
+            width: 80px; /* progress 열 너비 (complete 길이에 맞춤) */
+        }
+
+        .visit-history-table th {
+            text-align: left;
+            padding: 8px 5px;
+            font-weight: 600;
+            color: #444;
+            border-bottom: 1px solid #ddd;
+            background-color: #D3E4FF;
+            position: sticky;
+            top: 0;
+        }
+
+        .visit-history-table td {
+            padding: 6px 5px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .visit-history-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .visit-history-table tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        /* 방문 기록 없음 메시지 */
+        .no-history-message {
+            text-align: center;
+            color: #888;
+            padding: 10px;
+            font-style: italic;
+        }

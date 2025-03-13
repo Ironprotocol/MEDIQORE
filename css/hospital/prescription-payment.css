@@ -1,0 +1,201 @@
+/* Prescription Payment 스타일 */
+
+/* 초기 메시지 스타일 */
+.payment-message {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    color: #666;
+}
+
+/* 처방전 상세 정보 컨테이너 */
+.prescription-payment-details {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    height: calc(100% - 80px);
+    overflow-y: auto;
+}
+
+/* 처방전 메인 테이블 */
+.prescription-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 2px solid rgb(0, 82, 204);
+    margin-bottom: 20px;
+}
+
+/* 테이블 제목 행 */
+.prescription-title {
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    padding: 10px;
+    background-color: rgb(211, 228, 255);
+    border-bottom: 2px solid rgb(0, 82, 204);
+}
+
+/* 처방전 타이틀 컨테이너 - QR 코드와 타이틀 텍스트를 함께 배치 */
+.prescription-title-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* 처방전 타이틀 텍스트 */
+.prescription-title-text {
+    font-size: 14px;
+    font-weight: bold;
+    flex: 1;
+    text-align: center;
+}
+
+/* 테이블 헤더 셀 */
+.table-header {
+    padding: 8px;
+    border: 1px solid rgb(0, 82, 204);
+    font-weight: bold;
+    background-color: rgb(233, 242, 255);
+    font-size: 12px;
+    text-align: center;
+}
+
+/* 테이블 데이터 셀 */
+.table-data {
+    padding: 8px;
+    border: 1px solid rgb(0, 82, 204);
+    font-size: 12px;
+}
+
+/* 테이블 라벨 셀 */
+.table-label {
+    padding: 8px;
+    border: 1px solid rgb(0, 82, 204);
+    font-weight: bold;
+    font-size: 12px;
+    text-align: center;
+}
+
+/* 약품 정보 테이블 */
+.medicines-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 2px solid rgb(0, 82, 204);
+    margin-bottom: 20px;
+}
+
+/* 약품 테이블 제목 */
+.medicines-title {
+    text-align: center;
+    font-weight: bold;
+    padding: 8px;
+    border-bottom: 2px solid rgb(0, 82, 204);
+    background-color: rgb(211, 228, 255);
+    font-size: 14px;
+}
+
+/* 약품 테이블 헤더 */
+.medicines-header {
+    padding: 8px;
+    border: 1px solid rgb(0, 82, 204);
+    font-weight: bold;
+    background-color: rgb(233, 242, 255);
+    font-size: 12px;
+    text-align: center;
+}
+
+/* 약품 테이블 데이터 */
+.medicines-data {
+    padding: 8px;
+    border: 1px solid rgb(0, 82, 204);
+    font-size: 12px;
+}
+
+/* 사용 기간 테이블 */
+.usage-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 2px solid rgb(0, 82, 204);
+}
+
+/* 하단 고정 Footer */
+.prescription-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50px;
+    border-top: 1px solid #ddd;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0 20px;
+}
+
+/* 프린트 버튼 */
+.print-btn-payment {
+    width: 35px;
+    height: 35px;
+    border: none;
+    cursor: pointer;
+    background: url('../image/printer.png') no-repeat center;
+    background-size: 35px;
+    margin-right: 20px;
+    transition: background-image 0.3s ease;
+}
+
+/* 프린트 버튼 hover 효과 */
+.print-btn-payment:hover {
+    background: url('../image/printer_hover.png') no-repeat center;
+    background-size: 35px;
+}
+
+/* 결제 완료 버튼 */
+.payment-complete-btn {
+    background-color: #C00000;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+/* 결제 완료 버튼 hover 효과 */
+.payment-complete-btn:hover {
+    background-color: #8d0000;
+    transform: scale(1.02);
+}
+
+@media print {
+    body {
+        padding: 0;
+        margin: 0;
+        position: relative;
+    }
+    
+    .print-container {
+        width: 100%;
+        position: relative;
+        /* A4 용지 크기 설정 (210mm x 297mm) - px로 변환 */
+        width: 794px; /* 210mm 상당 */
+        min-height: 1123px; /* 297mm 상당 */
+        margin: 0 auto;
+        padding: 0;
+        box-sizing: border-box;
+        /* QR 코드를 위한 여백 */
+        padding-bottom: 120px; /* 30mm 상당 */
+    }
+    
+    .prescription-table,
+    .medicines-table,
+    .usage-table {
+        page-break-inside: avoid;
+    }
+    
+    .prescription-footer {
+        display: none !important;
+    }
+}
