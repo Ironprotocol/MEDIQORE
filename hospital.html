@@ -40,19 +40,19 @@
     </style>
     <script type="module">
         import {app, auth, db, doc, getDoc, setDoc, collection, query, where, getDocs, updateDoc,  serverTimestamp, Timestamp,onSnapshot,orderBy } from './js/firebase-config.js';
-        import {setupCloseButtons, setupLogoLogout, initializeStatusSelector, initializeZoomPrevention, displayUserName, initializeUserName, synchronizeUserState} from './js/common.js';
-        import {checkUserPermissions, initializeMenuEvents} from './js/desk-menu.js';
-        import {initializePatientList} from './js/patient-list.js';
-        import {initializeRoomManagement, handleRoomLogout} from './js/room.js';
-        import {initializeSubmenuEvents, initializeSubmenuItemEvents } from './js/sidebar2.js';
-        import {CustomCalendar,initializeScheduler} from './js/calendar.js';
-        import {handleComplaintChange, initializeNewPatientButton, loadDoctors, initializeAddressSearch, initializeInsuranceForm, initializeRegistrationForm} from './js/patient-registration.js';
-        import {initializePrescription} from './js/prescription.js';
-        import {initializeDataMenu} from './js/data-menu.js';
-        import {initializePrescriptionPayment} from './js/prescription-payment.js';
-        import {initializePatientEdit} from './js/patient-edit.js';
-        import {initializePatientView} from './js/patient-view.js';
-        import {initializeTopBar} from './js/topbar.js';
+        import {setupCloseButtons, setupLogoLogout, initializeStatusSelector, initializeZoomPrevention, displayUserName, initializeUserName, synchronizeUserState} from './js/hospital/common.js';
+        import {checkUserPermissions, initializeMenuEvents} from './js/hospital/desk-menu.js';
+        import {initializePatientList} from './js/hospital/patient-list.js';
+        import {initializeRoomManagement, handleRoomLogout} from './js/hospital/room.js';
+        import {initializeSubmenuEvents, initializeSubmenuItemEvents } from './js/hospital/sidebar2.js';
+        import {CustomCalendar,initializeScheduler} from './js/hospital/calendar.js';
+        import {handleComplaintChange, initializeNewPatientButton, loadDoctors, initializeAddressSearch, initializeInsuranceForm, initializeRegistrationForm} from './js/hospital/patient-registration.js';
+        import {initializePrescription} from './js/hospital/prescription.js';
+        import {initializeDataMenu} from './js/hospital/data-menu.js';
+        import {initializePrescriptionPayment} from './js/hospital/prescription-payment.js';
+        import {initializePatientEdit} from './js/hospital/patient-edit.js';
+        import {initializePatientView} from './js/hospital/patient-view.js';
+        import {initializeTopBar} from './js/hospital/topbar.js';
 
         // 전역 함수
         window.app = app;

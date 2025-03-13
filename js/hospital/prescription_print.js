@@ -441,5 +441,5 @@ export async function printPrescription() {
 }
 
 // Firebase 모듈 가져오기
-import { auth } from './firebase-config.js';
+import { auth } from '../firebase-config.js';
 

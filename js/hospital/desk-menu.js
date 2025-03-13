@@ -1,4 +1,4 @@
-import { auth, db, doc, getDoc } from './firebase-config.js';
+import { auth, db, doc, getDoc } from '../firebase-config.js';
 import { CustomCalendar, updateSchedulerReservations } from './calendar.js';
 import { clearPatientSelection } from './patient-list.js';
 

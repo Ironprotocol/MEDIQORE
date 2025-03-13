@@ -1,5 +1,5 @@
 // 환자 방문 기록 조회 기능을 위한 JavaScript 파일
-import { auth, db, doc, getDoc, collection, getDocs, orderBy, query } from './firebase-config.js';
+import { auth, db, doc, getDoc, collection, getDocs, orderBy, query } from '../firebase-config.js';
 
 // 전역 변수
 let currentPatientId = null;

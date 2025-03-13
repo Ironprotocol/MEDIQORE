@@ -1,4 +1,4 @@
-import { auth, db, doc, getDoc, setDoc, collection, getDocs, serverTimestamp, updateDoc, deleteDoc, deleteField, EmailAuthProvider, reauthenticateWithCredential } from './firebase-config.js';
+import { auth, db, doc, getDoc, setDoc, collection, getDocs, serverTimestamp, updateDoc, deleteDoc, deleteField, EmailAuthProvider, reauthenticateWithCredential } from '../firebase-config.js';
 import { initializePrescriptionHistory } from './prescriptHistory.js';
 import { initializeCanvas, clearCanvas, enableDrawing, clearSVG, disableDrawing } from './prescription_canvas.js';
 import { printPrescription } from './prescription_print.js';

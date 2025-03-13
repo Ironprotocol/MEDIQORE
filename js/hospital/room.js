@@ -1,4 +1,4 @@
-import { auth, db, doc, getDoc, collection, getDocs, updateDoc, onSnapshot, query, where, deleteDoc } from './firebase-config.js';
+import { auth, db, doc, getDoc, collection, getDocs, updateDoc, onSnapshot, query, where, deleteDoc } from '../firebase-config.js';
 
 // 펼침 상태를 저장할 Map 추가
 const expandedRooms = new Map();

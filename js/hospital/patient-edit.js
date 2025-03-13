@@ -1,5 +1,5 @@
 // 환자 정보 수정 기능을 위한 JavaScript 파일
-import { auth, db, doc, getDoc, updateDoc, Timestamp, serverTimestamp } from './firebase-config.js';
+import { auth, db, doc, getDoc, updateDoc, Timestamp, serverTimestamp } from '../firebase-config.js';
 
 // 전역 변수
 let currentPatientId = null;

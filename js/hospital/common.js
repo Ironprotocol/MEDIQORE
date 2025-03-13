@@ -1,4 +1,4 @@
-import { auth, db, doc, getDoc, collection, getDocs, updateDoc, serverTimestamp, onSnapshot } from './firebase-config.js';
+import { auth, db, doc, getDoc, collection, getDocs, updateDoc, serverTimestamp, onSnapshot } from '../firebase-config.js';
 import { checkCurrentRoomPatients } from './room.js';
 
 // 전역 변수로 리스너 해제 함수 저장

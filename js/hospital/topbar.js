@@ -1,4 +1,4 @@
-import { auth, db, doc, getDoc, collection, getDocs, deleteDoc, updateDoc, query, where } from './firebase-config.js';
+import { auth, db, doc, getDoc, collection, getDocs, deleteDoc, updateDoc, query, where } from '../firebase-config.js';
 
 //------------------------------------------ 우측 상단에 표시되는 이름 조정 함수----------------------------------------- 
 export async function displayUserName(user) {

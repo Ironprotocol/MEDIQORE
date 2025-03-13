@@ -1,6 +1,6 @@
 import {  auth, db, collection, query, where, getDocs, 
     doc, getDoc, setDoc, serverTimestamp, Timestamp,
-    onSnapshot, orderBy, updateDoc, deleteDoc } from './firebase-config.js';
+    onSnapshot, orderBy, updateDoc, deleteDoc } from '../firebase-config.js';
 
 // 전역 상태로 환자 목록 관리
 let allPatients = [];

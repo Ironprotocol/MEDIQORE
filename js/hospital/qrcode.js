@@ -1,6 +1,3 @@
-// qrcode.js
-// QR 코드 생성 관련 기능을 담당하는 모듈
-
 // QR 코드 생성 함수
 export function generateQRCodes(patientId, prescriptionData, hospitalName, doctorName) {
     try {

@@ -6,7 +6,18 @@
     <title>MEDIQORE</title>
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/signin.css">
-
+    <style>
+        /* 로그인 버튼 눌림 효과 */
+        .login-btn:active {
+            transform: scale(0.95);
+            background-color: #1f4e97;
+        }
+        
+        /* 로딩 커서 스타일 */
+        .cursor-loading {
+            cursor: wait !important;
+        }
+    </style>
 </head>
 <body>
     <div class="top-menu">
@@ -103,6 +114,15 @@
                 window.location.href = 'mailto:support@mediqore.com';
             });
         }
+
+        // 커서 로딩 상태 설정 함수
+        function setCursorLoading(isLoading) {
+            if (isLoading) {
+                document.body.classList.add('cursor-loading');
+            } else {
+                document.body.classList.remove('cursor-loading');
+            }
+        }
     </script>
     <script type="module">
         // Firebase SDK 임포트
@@ -146,6 +166,13 @@
 
         // 로그인 버튼 이벤트
         loginSubmitButton.addEventListener('click', async () => {
+            // 로그인 버튼 클릭 시 로딩 커서 활성화
+            setCursorLoading(true);
+            
+            // 로그인 버튼 비활성화 및 텍스트 변경
+            loginSubmitButton.disabled = true;
+            loginSubmitButton.textContent = "Signing in...";
+            
             try {
                 const userCredential = await signInWithEmailAndPassword(
                     auth, 
@@ -182,12 +209,17 @@
                     lastUpdated: serverTimestamp()
                 });
 
-                // 로딩 페이지로 리다이렉션
+                // 로딩 페이지로 리다이렉션 (로딩 커서는 유지)
                 window.location.href = 'loading.html';
 
             } catch (error) {
                 console.error('Login error:', error);
                 alert('Login failed: ' + error.message);
+                
+                // 에러 발생 시 로딩 커서 비활성화 및 버튼 상태 복원
+                setCursorLoading(false);
+                loginSubmitButton.disabled = false;
+                loginSubmitButton.textContent = "Sign In";
             }
         });
     </script>

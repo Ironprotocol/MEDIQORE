@@ -1,4 +1,4 @@
-import { auth, db, collection, query, orderBy, getDocs } from './firebase-config.js';
+import { auth, db, collection, query, orderBy, getDocs } from '../firebase-config.js';
 
 export async function initializePrescriptionHistory(patientId) {
     const historyContainer = document.querySelector('.prescription-left-container');

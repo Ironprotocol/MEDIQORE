@@ -1,4 +1,4 @@
-import { auth, db, collection, query, getDocs, doc, getDoc, onSnapshot, where, setDoc, serverTimestamp, Timestamp, orderBy, updateDoc, deleteDoc } from './firebase-config.js';
+import { auth, db, collection, query, getDocs, doc, getDoc, onSnapshot, where, setDoc, serverTimestamp, Timestamp, orderBy, updateDoc, deleteDoc } from '../firebase-config.js';
 import { openEditPatientModal } from './patient-edit.js';
 import { openViewPatientModal } from './patient-view.js';
 

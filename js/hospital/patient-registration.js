@@ -1,4 +1,4 @@
-import { auth, db, collection, query, where, getDocs, doc, getDoc, setDoc, serverTimestamp, Timestamp, orderBy } from './firebase-config.js';
+import { auth, db, collection, query, where, getDocs, doc, getDoc, setDoc, serverTimestamp, Timestamp, orderBy } from '../firebase-config.js';
 
 // 폼 초기화 함수
 function resetRegistrationForm() {

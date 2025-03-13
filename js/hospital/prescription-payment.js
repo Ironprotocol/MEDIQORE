@@ -1,4 +1,4 @@
-import { auth, db, doc, getDoc, deleteDoc, collection, query, where, getDocs } from './firebase-config.js';
+import { auth, db, doc, getDoc, deleteDoc, collection, query, where, getDocs } from '../firebase-config.js';
 import { printPrescription } from './prescription-payment_print.js';
 import { generateQRCodes } from './qrcode.js';
 
