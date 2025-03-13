@@ -53,9 +53,8 @@ export async function initializePrescriptionHistory(patientId) {
                 document.dispatchEvent(event);
             });
 
-            // prescription-left-title 다음에 추가
-            const titleElement = historyContainer.querySelector('.prescription-left-title');
-            titleElement.insertAdjacentElement('afterend', historyItem);
+            // 타이틀 바로 다음에 추가 (항상 최신 기록이 상단에 위치하도록)
+            historyContainer.appendChild(historyItem);
         }
     });
 }
