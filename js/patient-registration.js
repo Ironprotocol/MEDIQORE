@@ -424,7 +424,7 @@ export function initializeRegistrationForm() {
             // waiting 컬렉션에 환자 추가할 때
             const waitingRef = doc(collection(db, 'hospitals', hospitalName, 'dates', currentDate, 'waiting'), patientId);
             await setDoc(waitingRef, {
-                primaryComplaint: primaryComplaint,
+                primaryComplaint: complaintData,
                 progress: 'waiting',
                 doctor: null,
                 timestamp: serverTimestamp(),
@@ -451,7 +451,6 @@ async function checkPatientId() {
         
         // 병원명 추출
         const hospitalName = user.email.split('@')[0].split('.')[0];
-        console.log(`Checking for patient with ID: ${idNumber} in hospital: ${hospitalName}`);
         
         // 환자 컬렉션에서 해당 ID를 가진 환자 검색
         const patientsRef = collection(db, 'hospitals', hospitalName, 'patient');
@@ -460,15 +459,12 @@ async function checkPatientId() {
         
         // 검색 결과가 없는 경우
         if (querySnapshot.empty) {
-            console.log(`No patient found with ID: ${idNumber}`);
             alert('Patient information does not exist.');
-            
             return;
         }
         
         // 검색 결과가 있는 경우 - 첫 번째 문서 사용
         const patientDoc = querySnapshot.docs[0];
-        console.log(`Patient found. Document ID: ${patientDoc.id}`);
         const patientData = patientDoc.data().info;
         
         // 중요: 문서 ID를 patientData에 추가
@@ -506,8 +502,6 @@ function displayPatientInfo(patientData) {
         }
     }
     
-    console.log('Displaying patient info for:', patientData);
-    
     // HTML 생성 - 세로 레이아웃으로 변경
     infoBox.innerHTML = `
         <h3>Patient Information</h3>
@@ -543,12 +537,47 @@ function displayPatientInfo(patientData) {
         </div>
         <div class="visit-history-divider"></div>
         <div class="visit-history-container">
+            <style>
+                .visit-history-container {
+                    width: 100%;
+                    max-height: 200px;
+                    overflow-y: auto;
+                    box-sizing: border-box;
+                    padding: 0;
+                    margin: 0;
+                }
+                .visit-history-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-top: 20px;
+                    box-sizing: border-box;
+                }
+                .visit-history-table th {
+                    background-color: #e6f2ff;
+                    padding: 5px;
+                    text-align: left;
+                    font-weight: normal;
+                    border: 1px solid #b3d9ff;
+                }
+                .visit-history-table td {
+                    padding: 8px;
+                    border: 1px solid #ddd;
+                }
+                .visit-history-table tr:last-child td {
+                    border-bottom: 1px solid #ddd;
+                }
+                .no-history-message {
+                    text-align: center;
+                    color: #888;
+                    padding: 10px;
+                }
+            </style>
             <table class="visit-history-table">
                 <thead>
                     <tr>
                         <th>Date</th>
                         <th>Doctor</th>
-                        <th>CC</th>
+                        <th>Primary Complaint</th>
                         <th>Progress</th>
                     </tr>
                 </thead>
@@ -563,10 +592,8 @@ function displayPatientInfo(patientData) {
 
     // 환자 방문 기록 가져오기 - 문서 ID와 ID 번호 둘 다 전달
     if (patientData.documentId) {
-        console.log(`Using document ID for fetch: ${patientData.documentId}`);
         fetchPatientVisitHistory(patientData.documentId);
     } else {
-        console.log(`Using ID number for fetch: ${patientData.idNumber}`);
         fetchPatientVisitHistory(patientData.idNumber);
     }
 
@@ -617,7 +644,6 @@ function displayPatientInfo(patientData) {
                 newOption.value = patientData.insurance.provider;
                 newOption.textContent = patientData.insurance.provider;
                 insuranceProviderDropdown.appendChild(newOption);
-                console.log(`Added new insurance provider to dropdown: ${patientData.insurance.provider}`);
             }
             
             // 보험사 선택
@@ -643,29 +669,23 @@ async function fetchPatientVisitHistory(patientId) {
     try {
         const user = auth.currentUser;
         if (!user) {
-            console.error('No user is logged in');
             return;
         }
         
         // 병원명 추출
         const hospitalName = user.email.split('@')[0].split('.')[0];
-        console.log(`Fetching visit history for patient ${patientId} in hospital ${hospitalName}`);
         
         // 환자의 register.date 컬렉션 참조
         const registerDateRef = collection(db, 'hospitals', hospitalName, 'patient', patientId, 'register.date');
-        console.log(`Collection path: hospitals/${hospitalName}/patient/${patientId}/register.date`);
         
         // 등록 날짜 문서 가져오기
-        console.log('Fetching documents...');
         const querySnapshot = await getDocs(registerDateRef);
-        console.log(`Query completed. Empty: ${querySnapshot.empty}, Size: ${querySnapshot.size}`);
         
         // 방문 기록 테이블 업데이트
         const visitHistoryBody = document.getElementById('visit-history-body');
         
         // 데이터가 없는 경우
         if (querySnapshot.empty) {
-            console.warn(`No documents found in register.date collection for patient ${patientId}`);
             visitHistoryBody.innerHTML = `
                 <tr>
                     <td colspan="4" class="no-history-message">No visit history found.</td>
@@ -674,8 +694,6 @@ async function fetchPatientVisitHistory(patientId) {
             return;
         }
         
-        console.log(`Found ${querySnapshot.size} documents in register.date collection`);
-        
         // 문서를 배열로 변환
         const docs = [];
         querySnapshot.forEach(doc => {
@@ -683,48 +701,50 @@ async function fetchPatientVisitHistory(patientId) {
             const docId = doc.id;
             const datePart = docId.includes('_') ? docId.split('_')[0] : docId;
             
-            console.log(`Document ID: ${docId}, extracted date: ${datePart}`);
+            // 날짜를 yyyy-mmm-dd 형식으로 변환
+            let formattedDate = datePart;
+            if (datePart.includes('.')) {
+                const [day, month, year] = datePart.split('.');
+                formattedDate = `${year}-${month}-${day}`;
+            }
+            
             const docData = doc.data();
-            console.log(`Document data:`, docData);
             
             docs.push({
-                id: doc.id,
+                id: docId,
                 date: datePart,
+                formattedDate: formattedDate,
                 data: docData
             });
         });
         
-        // 문서 ID 기준으로 내림차순 정렬 (최신순)
-        docs.sort((a, b) => b.id.localeCompare(a.id));
+        // 실제 날짜 기준으로 내림차순 정렬 (최신순)
+        docs.sort((a, b) => b.formattedDate.localeCompare(a.formattedDate));
+        
+        // 최근 3개의 방문 기록만 표시
+        const recentVisits = docs.slice(0, 3);
         
         // 방문 기록 행 생성
         let tableRows = '';
         
-        for (const doc of docs) {
+        for (const doc of recentVisits) {
             const data = doc.data;
             const date = doc.date;
             
             // 의사 이름 가져오기
             const doctor = data.doctor || 'N/A';
             
-            // CC(Chief Complaint) 가져오기
-            let cc = 'N/A';
-            if (data.prescription && data.prescription.cc && data.prescription.cc.length > 0) {
-                cc = data.prescription.cc[0];
-            } else if (data.primaryComplaint) {
-                cc = data.primaryComplaint;
-            }
+            // Primary Complaint 가져오기 (이전 CC 처리 로직 제거)
+            const primaryComplaint = data.primaryComplaint || 'N/A';
             
             // Progress 상태 가져오기
             const progress = data.progress || 'N/A';
-            
-            console.log(`Adding row: Date=${date}, Doctor=${doctor}, CC=${cc}, Progress=${progress}`);
             
             tableRows += `
                 <tr>
                     <td>${date}</td>
                     <td>${doctor}</td>
-                    <td>${cc}</td>
+                    <td>${primaryComplaint}</td>
                     <td>${progress}</td>
                 </tr>
             `;
@@ -733,7 +753,6 @@ async function fetchPatientVisitHistory(patientId) {
         if (tableRows) {
             visitHistoryBody.innerHTML = tableRows;
         } else {
-            console.warn('No rows created from documents');
             visitHistoryBody.innerHTML = `
                 <tr>
                     <td colspan="4" class="no-history-message">No visit history data available.</td>

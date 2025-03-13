@@ -516,8 +516,7 @@
         .visit-history-divider {
             height: 1px;
             background-color: #ccc;
-            margin-top: 10px;
-            margin-bottom: 10px;
+            margin-top: 20px;
             width: 100%;
         }
 
@@ -529,7 +528,6 @@
             width: 100%;
             border: 1px solid #eee;
             border-radius: 4px;
-            margin-bottom: 10px;
         }
 
         /* 방문 기록 테이블 */
