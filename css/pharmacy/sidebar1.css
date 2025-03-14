@@ -61,6 +61,8 @@
             height: 20px;
             transition: opacity 0.3s ease;
         }
+
+        
         /*---------기본 아이콘 스타일(회색 상태)----------*/
         .menu-icon-default {
             opacity: 1;
@@ -83,16 +85,16 @@
 
         /*------------메뉴 항목 호버 시 스타일 ----------*/
         .menu-item:hover {
-            background-color: #dcf3fc;
+            background-color: #e6fff4;
             border-radius: 8px;
-            color: rgb(0, 102, 255); 
+            color: #139961; 
         }
 
         /*------------메뉴 항목 활성화 시 스타일 ----------*/
         .menu-item.active {
-            background-color: #dcf3fc;
+            background-color: #e6fff4;
             border-radius: 8px;
-            color: rgb(0, 102, 255);  /* 선택 시 파란색으로 변경 */
+            color: #139961;   /* 선택 시 파란색으로 변경 */
         }
 
         /* version-container: 버전 정보를 감싸는 컨테이너 */
@@ -117,7 +119,10 @@
         }
 
         /* Pharmacy 메뉴 아이콘 스타일 */
-
+        .menu-item-data .menu-icon {
+            width: 20px !important;
+            height: 16px !important;
+        }
 
         /*========================================================여기까지 사이드바1에 속하는 요소들들=========================================================*/
 

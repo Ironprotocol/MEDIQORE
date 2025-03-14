@@ -575,5 +575,5 @@
 /* Daily 버튼 hover 효과 */
 .data-filter-btn[data-type="daily"]:hover .daily-icon,
 .data-filter-btn[data-type="daily"].active .daily-icon {
-    content: url('../image/history_hover.png');
+    content: url('../../image/history_hover.png');
 }

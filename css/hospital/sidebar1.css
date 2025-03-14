@@ -61,6 +61,11 @@
             height: 20px;
             transition: opacity 0.3s ease;
         }
+        /* Desk 메뉴 아이콘 스타일 */
+.menu-item-desk .menu-icon {
+    width: 20px !important;
+    height: 26.7px !important;
+} 
         /*---------기본 아이콘 스타일(회색 상태)----------*/
         .menu-icon-default {
             opacity: 1;
@@ -114,6 +119,11 @@
             padding-left: 20px;
             font-size: 15px;
             color: #888888;
+        }
+
+        .menu-item-data .menu-icon {
+            width: 20px !important;
+            height: 16px !important;
         }
         /*========================================================여기까지 사이드바1에 속하는 요소들들=========================================================*/
 
