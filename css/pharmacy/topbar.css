@@ -14,6 +14,38 @@
     z-index: 1;  /* 상단 바를 sidebar2 위에 표시 */
 }
 
+/* 페이지 제목 스타일 */
+.page-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: rgb(110, 110, 124);
+    min-width: 100px;
+    margin-right: 10px;
+}
+
+/* 검색 폼 스타일 */
+.search-form {
+    flex-grow: 1;
+    max-width: 400px;
+    margin-right: 50px;
+}
+
+/* 검색 입력 필드 스타일 */
+.search-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid hsl(0, 0%, 85%);
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+/* 검색창 포커스 시 스타일 */
+.search-input:focus {
+    border-color: #139961;
+}
+
 /* 사용자 이메일 및 상태 아이콘 컨테이너 */
 .action-buttons {
     display: flex;
