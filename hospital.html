@@ -41,7 +41,7 @@
     <script type="module">
         import {app, auth, db, doc, getDoc, setDoc, collection, query, where, getDocs, updateDoc,  serverTimestamp, Timestamp,onSnapshot,orderBy } from './js/firebase-config.js';
         import {setupCloseButtons, setupLogoLogout, initializeStatusSelector, initializeZoomPrevention, displayUserName, initializeUserName, synchronizeUserState} from './js/hospital/common.js';
-        import {checkUserPermissions, initializeMenuEvents} from './js/hospital/desk-menu.js';
+        import {checkUserPermissions, initializeMenuEvents, initializeHomePage} from './js/hospital/desk-menu.js';
         import {initializePatientList} from './js/hospital/patient-list.js';
         import {initializeRoomManagement, handleRoomLogout} from './js/hospital/room.js';
         import {initializeSubmenuEvents, initializeSubmenuItemEvents } from './js/hospital/sidebar2.js';
@@ -145,7 +145,7 @@
                         window.location.href = 'main.html';
                     }
             initializeSubmenuEvents()
-            initializeSubmenuItemEvents(); // sidebar2 - submenu 클릭 이벤트 처리  
+            initializeSubmenuItemEvents(); // sidebar2 - submenu 클릭 이벤트 처리
             });        
             setupCloseButtons();           //닫기 버튼 기능    
             setupLogoLogout();             // 로고 클릭 이벤트 설정
@@ -156,6 +156,7 @@
             initializeInsuranceForm();
             initializeRegistrationForm();
             initializeMenuEvents();     // 메뉴 클릭 시 - sidebar1 메뉴 항목 조정
+            initializeHomePage();       // Home 페이지 초기화 (시작 시 Home 컨텐츠 표시)
 
             function updateDate() {
                 const today = new Date();

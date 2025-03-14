@@ -1,0 +1,147 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    background-image: linear-gradient(to bottom, #d7effd, white);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 300px;
+    height: 100%;
+}
+
+.loading-animation {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    margin: 0 auto;
+}
+
+.loading-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    width: 20px;
+    height: 20px;
+    animation: spin 3s infinite linear;
+    display: none; /* loading1 이미지 숨기기 */
+}
+
+.loading-block {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    z-index: 2;
+    top: 0;
+    left: 0;
+}
+
+/* 북서쪽 블록 애니메이션 */
+.loading-nw {
+    transform: translate(10px, 10px);
+    animation: rotate 3s infinite linear;
+}
+
+/* 북동쪽 블록 애니메이션 */
+.loading-ne {
+    transform: translate(60px, 10px);
+    animation: rotate 3s infinite linear;
+    animation-delay: -0.75s; /* 90도 회전된 상태에서 시작 */
+}
+
+/* 남서쪽 블록 애니메이션 */
+.loading-sw {
+    transform: translate(10px, 60px);
+    animation: rotate 3s infinite linear;
+    animation-delay: -2.25s; /* 270도 회전된 상태에서 시작 */
+}
+
+/* 회전 애니메이션 */
+@keyframes rotate {
+    0% {
+        transform: translate(0px, 0px); /* 북서쪽 위치 */
+    }
+    12.5% {
+        transform: translate(7.5px, 0px); /* 북서→북동 중간 */
+    }
+    25% {
+        transform: translate(25px, 0px); /* 북동쪽 위치 */
+    }
+    37.5% {
+        transform: translate(25px, 7.5px); /* 북동→남동 중간 */
+    }
+    50% {
+        transform: translate(25px, 25px); /* 남동쪽 위치 */
+    }
+    62.5% {
+        transform: translate(7.5px, 25px); /* 남동→남서 중간 */
+    }
+    75% {
+        transform: translate(0px, 25px); /* 남서쪽 위치 */
+    }
+    87.5% {
+        transform: translate(0px, 7.5px); /* 남서→북서 중간 */
+    }
+    100% {
+        transform: translate(0px, 0px); /* 북서쪽 위치로 돌아옴 */
+    }
+}
+
+/* 로딩 텍스트 스타일 */
+.loading-text {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    font-size: 20px;
+    font-weight: bold;
+    color: #120A57;
+    letter-spacing: 2px;
+}
+
+.loading-text span {
+    display: inline-block;
+    margin: 0 -.05em;
+    animation: loading-text 1.4s infinite alternate;
+}
+
+.loading-text span:nth-child(2) {
+    animation-delay: .1s;
+}
+
+.loading-text span:nth-child(3) {
+    animation-delay: .2s;
+}
+
+.loading-text span:nth-child(4) {
+    animation-delay: .3s;
+}
+
+.loading-text span:nth-child(5) {
+    animation-delay: .4s;
+}
+
+.loading-text span:nth-child(6) {
+    animation-delay: .5s;
+}
+
+.loading-text span:nth-child(7) {
+    animation-delay: .6s;
+}
+
+@keyframes loading-text {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}

@@ -163,3 +163,43 @@ export function initializeMenuEvents() {
         });
     });
 }
+
+// 페이지 로드 시 Home 메뉴 초기화 함수
+export function initializeHomePage() {
+    // Home 메뉴 활성화 (초기에 홈 메뉴가 보이도록)
+    document.addEventListener('DOMContentLoaded', function() {
+        // Home 컨텐츠 표시
+        const homeContent = document.getElementById('home-content');
+        if (homeContent) {
+            // 다른 콘텐츠 모두 숨기기
+            const contentContainers = document.querySelectorAll('.content-container, .content-container-2');
+            contentContainers.forEach(container => {
+                container.style.display = 'none';
+            });
+            
+            // Home 콘텐츠 표시
+            homeContent.style.display = 'block';
+            
+            // 메인 콘텐츠 영역 표시
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent) {
+                mainContent.style.display = 'flex';
+            }
+            
+            // 처방전 콘텐츠 숨기기
+            const prescriptionContent = document.querySelector('.main-content-prescription');
+            if (prescriptionContent) {
+                prescriptionContent.style.display = 'none';
+            }
+            
+            // Home 메뉴 항목에 active 클래스 추가
+            const menuItems = document.querySelectorAll('.menu-item');
+            menuItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.textContent.trim().toLowerCase() === 'home') {
+                    item.classList.add('active');
+                }
+            });
+        }
+    });
+}

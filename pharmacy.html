@@ -9,14 +9,20 @@
     <link rel="stylesheet" href="css/pharmacy/topbar.css">
     <link rel="stylesheet" href="css/pharmacy/common.css">
     <link rel="stylesheet" href="css/pharmacy/pharmacy.css">
+    <script src="js/pharmacy/pharmacy_menu.js"></script>
 </head>
 <style>
-    body {
-        margin: 0;
-        padding: 0;
-        height: 100vh;
-        background-color: #30E026;
-    }
+ body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            font-family: 'Noto Sans KR', sans-serif;  /* 기본 글씨체 설정 */
+     	    background-color: #30E026;
+            user-select: none;  /* 텍스트 선택 비활성화 */
+            -webkit-user-select: none;  /* Safari용 */
+            -moz-user-select: none;  /* Firefox용 */
+            -ms-user-select: none;  /* IE용 */
+        }
 </style>
 <body>
     <!-- 왼쪽 사이드바 (sidebar1) -->
@@ -25,12 +31,12 @@
             <img src="image/text_logo.png" alt="MEDIQORE Logo" class="logo-image">
         </div>
         <div class="menu-container">
-            <div class="menu-item">
+            <div class="menu-item" id="home-menu">
                 <img src="image/home_black.png" alt="Home" class="menu-icon menu-icon-default">
                 <img src="image/home.png" alt="Home" class="menu-icon menu-icon-active">
                 Home
             </div>
-            <div class="menu-item">
+            <div class="menu-item" id="prepare-menu">
                 <img src="image/pharmacy_black.png" alt="prepare" class="menu-icon menu-icon-default pharmacy-icon-special">
                 <img src="image/pharmacy.png" alt="prepare" class="menu-icon menu-icon-active pharmacy-icon-special">
                 Prepare
@@ -48,6 +54,26 @@
 
     <!-- 메인 콘텐츠 영역 -->
     <div class="main-content">
+        <!-- Home 컨테이너 추가 -->
+        <div id="home-content" class="content-container home-container">
+            <div class="content-header">
+
+            </div>
+            <div class="content-body">
+                <!-- Home 컨텐츠 내용 -->
+            </div>
+        </div>
+        
+        <!-- Prepare(pharmacy) 컨테이너 -->
+        <div id="prepare-content" class="content-container pharmacy-container">
+            <div class="content-header">
+                <div class="content-title">Pharmacy Preparation</div>
+                <button class="close-button">Close</button>
+            </div>
+            <div class="content-body">
+                <!-- Pharmacy 컨텐츠 내용 -->
+            </div>
+        </div>
     </div>
 </body>
 </html>

@@ -10,3 +10,23 @@
     padding : 10px;/**/
     box-sizing: border-box;
 }
+
+.content-container {
+    background-color: white;
+    border-radius: 8px;
+    height: calc(100%); /* 상하 마진 각 10px 고려 */
+    position: relative;
+    display: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    width: calc(100%); /* 좌우 마진 각 10px 고려 */
+}
+
+.content-container.home-container {
+    background-color: white;
+    border-radius: 8px;
+    height: calc(100%); /* 상하 마진 각 10px 고려 */
+    position: relative;
+    display: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    width: calc(100%); /* 좌우 마진 각 10px 고려 */
+}
