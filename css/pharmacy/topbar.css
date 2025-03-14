@@ -13,3 +13,40 @@
     gap: 0;  /* 기본 gap 제거 */
     z-index: 1;  /* 상단 바를 sidebar2 위에 표시 */
 }
+
+/* 사용자 이메일 및 상태 아이콘 컨테이너 */
+.action-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-left: auto;
+    gap: 15px;
+}
+
+/* 사용자 이메일 스타일 */
+.user-email {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    text-align: right;
+}
+
+/* 상태 아이콘 컨테이너 */
+.status-selector {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+/* 현재 상태 컨테이너 */
+.current-status {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+/* 상태 아이콘 스타일 */
+.status-icon {
+    width: 16px;
+    height: 16px;
+}

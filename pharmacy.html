@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="css/pharmacy/topbar.css">
     <link rel="stylesheet" href="css/pharmacy/common.css">
     <link rel="stylesheet" href="css/pharmacy/pharmacy.css">
-    <script src="js/pharmacy/pharmacy_menu.js"></script>
+    <script src="js/pharmacy/menu_p.js"></script>
 </head>
 <style>
  body {
@@ -40,12 +40,37 @@
                 <img src="image/pharmacy_black.png" alt="prepare" class="menu-icon menu-icon-default pharmacy-icon-special">
                 <img src="image/pharmacy.png" alt="prepare" class="menu-icon menu-icon-active pharmacy-icon-special">
                 Prepare
-            </div>    
+            </div>   
+            
+            <div class="menu-item" id="data-menu">
+                <img src="image/data_black.png" alt="data" class="menu-icon menu-icon-default">
+                <img src="image/data.png" alt="data" class="menu-icon menu-icon-active">
+                Data
+            </div> 
+
         </div>
     </div>
 
     <!-- 상단 메뉴바 (topbar) -->
     <div class="top-bar">
+        <div class="action-buttons">
+            <span class="user-email"></span>
+            <div class="status-selector">
+                <div class="current-status">
+                    <img src="image/login.png" alt="Status" class="status-icon">
+                </div>
+                <div class="status-dropdown">
+                    <div class="status-option" data-status="end">
+                        <img src="image/logout.png" alt="End Work" class="status-icon">
+                        <span>End</span>
+                    </div>
+                    <div class="status-option" data-status="break">
+                        <img src="image/break.png" alt="Break" class="status-icon">
+                        <span>Break</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
  
     <!-- 오른쪽 사이드바 (sidebar2) -->
@@ -67,13 +92,32 @@
         <!-- Prepare(pharmacy) 컨테이너 -->
         <div id="prepare-content" class="content-container pharmacy-container">
             <div class="content-header">
-                <div class="content-title">Pharmacy Preparation</div>
-                <button class="close-button">Close</button>
+
             </div>
             <div class="content-body">
                 <!-- Pharmacy 컨텐츠 내용 -->
             </div>
         </div>
+
+
+        <div id="data-content" class="content-container data-container">
+            <div class="content-header">
+
+            </div>
+            <div class="content-body">
+          
+            </div>
+        </div>
+
     </div>
+    <script type="module">
+        import { auth } from './js/firebase-config.js';
+        import { initializeTopBar } from './js/pharmacy/pharmacy_topbar.js';
+        
+        // 페이지 로드 시 topbar 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTopBar();
+        });
+    </script>
 </body>
 </html>
