@@ -36,6 +36,7 @@
     display: flex;
     align-items: center;
     position: relative;
+    cursor: pointer;
 }
 
 /* 현재 상태 컨테이너 */
@@ -49,4 +50,43 @@
 .status-icon {
     width: 16px;
     height: 16px;
+    object-fit: contain;
+}
+
+/* 드롭다운 메뉴 */
+.status-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 1000;
+    min-width: 100px;
+    margin-top: 5px;
+    padding: 4px 0;
+    display: none;
+}
+
+/* 드롭다운 메뉴 아이템 */
+.status-option {
+    display: flex;
+    align-items: center;
+    padding: 6px 10px;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.status-option:hover {
+    background-color: #f8f9fa;
+    color: rgb(0, 102, 255);
+}
+
+/* hover 시 아이콘에도 약간의 변화 주기 */
+.status-option:hover .status-icon {
+    transform: scale(1.1);
+    transition: transform 0.3s ease;
 }
