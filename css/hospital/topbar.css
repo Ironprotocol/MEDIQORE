@@ -112,11 +112,11 @@
         .update-icon {
             width: 20px;
             height: 22px;
-            transition: all 0.2s ease;
+            transition: transform 0.6s ease-in-out;
         }
 
-        #update-button:hover .update-icon {
-            content: url('../image/update_hover.png');
+        #refresh-button:hover .update-icon {
+            transform: rotate(180deg);
         }
         
         /* 로딩 스피너 스타일 */
