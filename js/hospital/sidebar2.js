@@ -11,17 +11,17 @@ export function initializeSubmenuEvents() {
             
             // 모든 컨테이너 숨기기
             document.querySelector('.patient-list-container').style.display = 'none';
-            document.querySelector('.rsvd-list-container').style.display = 'none';
-            document.querySelector('.visit-list-container').style.display = 'none';
+            document.querySelector('.done-list-container').style.display = 'none';
+            document.querySelector('.memo-list-container').style.display = 'none';
             
             // 선택된 메뉴에 따라 해당 컨테이너만 표시
             const menuText = this.textContent.trim();
-            if (menuText === 'Waiting') {
+            if (menuText === 'Examine') {
                 document.querySelector('.patient-list-container').style.display = 'block';
-            } else if (menuText === 'RSVD') {
-                document.querySelector('.rsvd-list-container').style.display = 'block';
-            } else if (menuText === 'Visit') {
-                document.querySelector('.visit-list-container').style.display = 'block';
+            } else if (menuText === 'Done') {
+                document.querySelector('.done-list-container').style.display = 'block';
+            } else if (menuText === 'Memo') {
+                document.querySelector('.memo-list-container').style.display = 'block';
             }
         });
     });

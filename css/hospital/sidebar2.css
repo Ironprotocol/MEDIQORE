@@ -194,16 +194,16 @@
         }
 
                 /* sidebar2의 컨테이너들 */
-        /* RSVD 컨테이너 */
-        .rsvd-list-container {
+        /* Done 컨테이너 */
+        .done-list-container {
             flex-grow: 1;
             overflow-y: auto;
             padding: 20px;
             display: none;  /* 초기에는 숨김 */
         }
 
-        /* Visit 컨테이너 */
-        .visit-list-container {
+        /* Memo 컨테이너 */
+        .memo-list-container {
             flex-grow: 1;
             overflow-y: auto;
             padding: 20px;
