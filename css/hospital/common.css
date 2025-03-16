@@ -220,7 +220,7 @@
             overflow-y: auto;  /* 내용이 많을 경우 스크롤 */
             /* 스크롤바 스타일 - Firefox용 */
             scrollbar-width: thin;
-            scrollbar-color: #0B7EFF #f0f0f0;
+            scrollbar-color: #9dcbff #D3E4FF;
         }
 
         /* WebKit 브라우저용 스크롤바 스타일 (Chrome, Safari, Edge) */

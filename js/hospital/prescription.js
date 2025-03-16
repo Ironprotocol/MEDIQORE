@@ -2,6 +2,7 @@ import { auth, db, doc, getDoc, setDoc, collection, getDocs, serverTimestamp, up
 import { initializePrescriptionHistory } from './prescriptHistory.js';
 import { initializeCanvas, clearCanvas, enableDrawing, clearSVG, disableDrawing } from './prescription_canvas.js';
 import { printPrescription } from './prescription_print.js';
+import { initializeImageAttachment, loadPatientImage } from './prescription_attachimage.js';
 
 // Prescription 컨테이너 초기화
 export function initializePrescription() {
@@ -13,22 +14,11 @@ export function initializePrescription() {
 
     let currentPatientId = null;
     let currentRegisterDate = null;
+    let imageManager = null; // 이미지 관리 객체
     
     // 이미지 캐시 변수는 prescription_canvas.js에서 관리함
     
-    // Close 버튼 추가
-    const closeButton = document.createElement('button');
-    closeButton.className = 'close-button';
-    document.querySelector('.content-header-prescription').appendChild(closeButton);
 
-    // Close 버튼 클릭 이벤트
-    closeButton.addEventListener('click', () => {
-        prescriptionBody.style.display = 'none';
-        prescriptionBody2.style.display = 'none';
-        prescriptionFooter.style.display = 'none';
-        patientSelectWrapper.style.display = 'flex';
-        document.querySelector('#prescription-content').style.display = 'none';
-    });
 
     // 처방전 내용 초기화 함수 추가
     async function clearPrescriptionForm() {
@@ -151,6 +141,14 @@ export function initializePrescription() {
         
         // 처방전 히스토리 초기화
         initializePrescriptionHistory(patientId);
+
+        // 이미지 첨부 기능 초기화
+        imageManager = initializeImageAttachment(patientId, registerDate);
+        
+        // 이미지 리셋 - 처음에는 빈 상태로 시작
+        if (imageManager) {
+            imageManager.resetImage();
+        }
         
         // UI가 생성된 후에 비활성화 처리
         requestAnimationFrame(() => {
@@ -302,6 +300,12 @@ export function initializePrescription() {
             const { getSVGPathsData } = await import('./prescription_canvas.js');
             const svgPathsData = getSVGPathsData();
             
+            // 이미지 첨부 기능에서 임시 이미지 가져오기
+            let pictureImages = null;
+            if (window.imageManager) {
+                pictureImages = window.imageManager.getTemporaryImages();
+            }
+            
             // 1. register.date 문서의 progress 업데이트
             await updateDoc(doc(db, 'hospitals', hospitalName, 'patient', currentPatientId, 'register.date', currentRegisterDate), {
                 progress: 'payment'
@@ -353,19 +357,10 @@ export function initializePrescription() {
                 }
             }
 
-            // 기존 문서에 prescription 데이터 추가하기 전에 추가
-            // 하지만 새로운 처방전 저장 시에는 형식 통일 필요
-            const now = new Date();
-            const dateId = `${now.toLocaleDateString('en-GB', {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric'
-            }).replace(/ /g, '.')}_${now.getHours().toString().padStart(2,'0')}${now.getMinutes().toString().padStart(2,'0')}${now.getSeconds().toString().padStart(2,'0')}`;
-
             // 기존 문서에 prescription 데이터 추가
             const prescriptionRef = doc(db, 'hospitals', hospitalName, 'patient', currentPatientId, 'register.date', currentRegisterDate);
             
-            await updateDoc(prescriptionRef, {
+            const updateData = {
                 prescription: {
                     symptoms,
                     location,
@@ -376,7 +371,15 @@ export function initializePrescription() {
                 },
                 chartImage: svgPathsData, // Canvas 이미지 대신 SVG 경로 데이터 저장
                 progress: 'payment'
-            });
+            };
+            
+            // 이미지가 있는 경우에만 pictureImage 필드 추가
+            if (pictureImages) {
+                updateData.pictureImage = pictureImages;
+            }
+            
+            // 모든 데이터 함께 업데이트
+            await updateDoc(prescriptionRef, updateData);
 
             // 저장 성공 후 History UI 즉시 업데이트
             await initializePrescriptionHistory(currentPatientId);
@@ -394,6 +397,12 @@ export function initializePrescription() {
             document.querySelectorAll('.cc-item').forEach(item => item.remove());
             document.querySelectorAll('.medicine-item').forEach(item => item.remove());
             
+            // 이미지 초기화 및 첨부 버튼 비활성화
+            if (window.imageManager) {
+                window.imageManager.resetImage();
+                window.imageManager.disableAttachButton();
+            }
+            
             // SVG와 Canvas 초기화 - prescription_canvas.js의 함수 사용
             const canvas = document.querySelector('.tooth-chart-canvas');
             if (canvas) {
@@ -401,6 +410,8 @@ export function initializePrescription() {
                 clearCanvas(canvas);
                 clearSVG();
                 initializeCanvas(currentPatientId, currentRegisterDate);
+                // SVG 그리기 활성화
+                enableDrawing();
             }
 
         } catch (error) {
@@ -692,6 +703,19 @@ export function initializePrescription() {
             });
         }
 
+        // 이미지 표시
+        if (imageManager) {
+            // 저장된 이미지 불러오기
+            const savedImageUrl = await loadPatientImage(patientId, registerDate);
+            if (savedImageUrl) {
+                imageManager.displayImages(savedImageUrl);
+            } else {
+                imageManager.resetImage();
+            }
+            // 첨부 버튼 비활성화 (히스토리 조회 시)
+            imageManager.disableAttachButton();
+        }
+
         // 모든 입력 필드와 버튼 비활성화
         document.querySelectorAll('.cc-search-input, .medicine-search-input, .symptoms-input, .location-input, .treatment-details-input').forEach(element => {
             element.disabled = true;
@@ -758,6 +782,12 @@ export function initializePrescription() {
             document.querySelector('.symptoms-input').value = '';
             document.querySelector('.location-input').value = '';
             document.querySelector('.treatment-details-input').value = '';
+            
+            // 이미지 초기화 및 첨부 버튼 활성화
+            if (imageManager) {
+                imageManager.resetImage();
+                imageManager.enableAttachButton();
+            }
             
             // SVG와 Canvas 초기화 - prescription_canvas.js의 함수 사용
             const canvas = document.querySelector('.tooth-chart-canvas');
