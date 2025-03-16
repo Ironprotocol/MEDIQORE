@@ -161,55 +161,87 @@ function updatePaginationControls() {
     // 페이지네이션 컨트롤 초기화
     paginationContainer.innerHTML = '';
     
-    // 이전 버튼
-    if (currentPage > 1) {
-        const prevButton = document.createElement('button');
-        prevButton.className = 'prescription-pagination-btn';
-        prevButton.textContent = '<';
-        prevButton.addEventListener('click', () => {
-            currentPage--;
-            displayHistoryItems();
-            updatePaginationControls();
-        });
-        paginationContainer.appendChild(prevButton);
+    // 이전 버튼 - 항상 표시
+    const prevButton = document.createElement('button');
+    prevButton.className = 'prescription-pagination-btn';
+    prevButton.textContent = '<';
+    prevButton.disabled = currentPage <= 1; // 첫 페이지면 비활성화
+    prevButton.style.visibility = currentPage <= 1 ? 'hidden' : 'visible'; // 첫 페이지면 숨김
+    prevButton.addEventListener('click', () => {
+        currentPage--;
+        displayHistoryItems();
+        updatePaginationControls();
+    });
+    paginationContainer.appendChild(prevButton);
+    
+    // 숫자 버튼을 위한 슬롯 생성 (3개의 고정 슬롯)
+    const numSlots = 3;
+    const slots = [];
+    
+    // 슬롯 위치 계산
+    let startPage = 1;
+    if (totalPages <= numSlots) {
+        // 총 페이지가 슬롯 수보다 적거나 같으면 1부터 시작
+        startPage = 1;
+    } else {
+        // 현재 페이지가 중앙에 오도록 조정
+        startPage = Math.max(1, Math.min(currentPage - Math.floor(numSlots / 2), totalPages - numSlots + 1));
     }
     
-    // 페이지 번호 버튼 (최대 3개만 표시)
-    let startPage = Math.max(1, currentPage - 1);
-    let endPage = Math.min(startPage + 2, totalPages);
-    
-    // 3개 버튼이 안 되는 경우 조정
-    if (endPage - startPage < 2) {
-        startPage = Math.max(1, endPage - 2);
-    }
-    
-    for (let i = startPage; i <= endPage; i++) {
+    // 슬롯에 페이지 버튼 생성
+    for (let i = 0; i < numSlots; i++) {
+        const pageNum = startPage + i;
         const pageButton = document.createElement('button');
         pageButton.className = 'prescription-pagination-btn';
-        if (i === currentPage) {
-            pageButton.classList.add('active');
+        
+        if (pageNum <= totalPages) {
+            pageButton.textContent = pageNum;
+            pageButton.style.visibility = 'visible';
+            
+            if (pageNum === currentPage) {
+                pageButton.classList.add('active');
+            }
+            
+            pageButton.addEventListener('click', () => {
+                currentPage = pageNum;
+                displayHistoryItems();
+                updatePaginationControls();
+            });
+        } else {
+            // 총 페이지 수를 넘어가는 슬롯은 빈 슬롯으로 처리
+            pageButton.textContent = '';
+            pageButton.style.visibility = 'hidden';
+            pageButton.disabled = true;
         }
-        pageButton.textContent = i;
-        pageButton.addEventListener('click', () => {
-            currentPage = i;
-            displayHistoryItems();
-            updatePaginationControls();
-        });
+        
         paginationContainer.appendChild(pageButton);
+        slots.push(pageButton);
     }
     
-    // 다음 버튼
-    if (currentPage < totalPages) {
-        const nextButton = document.createElement('button');
-        nextButton.className = 'prescription-pagination-btn';
-        nextButton.textContent = '>';
-        nextButton.addEventListener('click', () => {
-            currentPage++;
-            displayHistoryItems();
-            updatePaginationControls();
-        });
-        paginationContainer.appendChild(nextButton);
-    }
+    // 다음 버튼 - 항상 표시
+    const nextButton = document.createElement('button');
+    nextButton.className = 'prescription-pagination-btn';
+    nextButton.textContent = '>';
+    nextButton.disabled = currentPage >= totalPages; // 마지막 페이지면 비활성화
+    nextButton.style.visibility = currentPage >= totalPages ? 'hidden' : 'visible'; // 마지막 페이지면 숨김
+    nextButton.addEventListener('click', () => {
+        currentPage++;
+        displayHistoryItems();
+        updatePaginationControls();
+    });
+    paginationContainer.appendChild(nextButton);
+    
+    // 스타일 조정
+    paginationContainer.style.display = 'flex';
+    paginationContainer.style.alignItems = 'center';
+    paginationContainer.style.justifyContent = 'center';
+    
+    // 버튼 사이 간격 조정
+    const buttons = paginationContainer.querySelectorAll('.prescription-pagination-btn');
+    buttons.forEach(btn => {
+        btn.style.margin = '0 0px'; // 마진을 5px에서 2px로 줄임
+        btn.style.minWidth = '10px'; // 최소 너비도 줄임
+    });
 }
 
 function calculateDaysBefore(dateStr) {

@@ -260,6 +260,36 @@ export function initializeRegistrationForm() {
             // 병원명 추출
             const hospitalName = user.email.split('@')[0].split('.')[0];
             
+            // 환자 ID 생성 (미리 생성)
+            const patientId = `${patientName}.${idNumber}`;
+            
+            // NEW: 현재 날짜 형식 생성
+            const today = new Date();
+            const currentDate = today.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            }).replace(/ /g, '.');
+            
+            // NEW: 현재 활성화된 환자 목록 확인 (dates 컬렉션)
+            const activeLists = ['waiting', 'in-progress', 'diagnosis'];
+            
+            // NEW: 환자가 이미 활성 목록에 있는지 확인
+            for (const status of activeLists) {
+                try {
+                    const activeRef = doc(db, 'hospitals', hospitalName, 'dates', currentDate, status, patientId);
+                    const activeDoc = await getDoc(activeRef);
+                    
+                    if (activeDoc.exists()) {
+                        const progress = activeDoc.data().progress || status;
+                        alert(`This patient is already in the system with status '${progress}'.`);
+                        return;
+                    }
+                } catch (err) {
+                    console.error(`Error checking ${status} status:`, err);
+                }
+            }
+            
             // 입력된 ID로 이미 등록된 환자가 있는지 확인
             const patientsRef = collection(db, 'hospitals', hospitalName, 'patient');
             const q = query(patientsRef, where('info.idNumber', '==', idNumber));
@@ -320,7 +350,8 @@ export function initializeRegistrationForm() {
             }
 
             // 환자 문서 ID 생성 (이름.ID번호)
-            const patientId = `${patientName}.${idNumber}`;
+            // 위에서 이미 생성했으므로 주석 처리
+            // const patientId = `${patientName}.${idNumber}`;
             const patientRef = doc(db, 'hospitals', hospitalName, 'patient', patientId);
 
             // 환자 문서 존재 여부 확인
@@ -377,12 +408,13 @@ export function initializeRegistrationForm() {
             });
 
             // 날짜 형식 수정 및 waiting 경로 추가
-            const today = new Date();
-            const currentDate = today.toLocaleDateString('en-GB', {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric'
-            }).replace(/ /g, '.');
+            // 위에서 이미 currentDate를 생성했으므로 주석 처리
+            // const today = new Date();
+            // const currentDate = today.toLocaleDateString('en-GB', {
+            //     day: '2-digit',
+            //     month: 'short',
+            //     year: 'numeric'
+            // }).replace(/ /g, '.');
 
             // dates 컬렉션에 데이터 저장
             const datesRef = doc(

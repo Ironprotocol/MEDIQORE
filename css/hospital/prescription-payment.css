@@ -2,11 +2,13 @@
 
 /* 초기 메시지 스타일 */
 .payment-message {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    color: #666;
+    text-align: center;
+    padding: 20px;
+    color: #888;
+}
+
+.payment-message p {
+    font-size: 12px;
 }
 
 /* 처방전 상세 정보 컨테이너 */

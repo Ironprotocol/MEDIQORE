@@ -417,7 +417,7 @@ async function createPatientElement(hospitalName, patientData, patientId, type, 
         if (confirm('Are you sure you want to delete this patient?')) {
             // 두 번째 확인 창 - 커스텀 모달 사용
             const confirmed = await showWarningModal(
-                'When deleting a registered patient, you will need to re-register them in the patient list.',
+                'you will need to re-register them in the patient list.',
                 'Warning'
             );
             
@@ -663,12 +663,14 @@ function showWarningModal(message, title = 'Warning') {
         titleElement.style.textAlign = 'center';
         titleElement.style.margin = '0 0 20px 0';
         titleElement.style.fontWeight = 'bold';
+        titleElement.style.fontSize = '14px';
 
         // 메시지 생성
         const messageElement = document.createElement('p');
         messageElement.textContent = message;
         messageElement.style.textAlign = 'center';
         messageElement.style.margin = '0 0 20px 0';
+        messageElement.style.fontSize = '14px';
 
         // 버튼 컨테이너
         const buttonContainer = document.createElement('div');

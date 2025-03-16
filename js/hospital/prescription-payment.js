@@ -39,7 +39,7 @@ export function initializePrescriptionPayment() {
 function showInitialMessage(container) {
     container.innerHTML = `
         <div class="payment-message">
-            <p>Select a patient from the list to view prescription details.</p>
+            <p>No prescription details found. Please select a patient from the list.</p>
         </div>
     `;
 }
