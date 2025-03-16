@@ -52,6 +52,7 @@ export function initializeImageAttachment(currentPatientId, currentRegisterDate)
     thumbnailContainer.style.overflow = 'hidden';
     thumbnailContainer.style.backgroundColor = '#f5f5f5';
     thumbnailContainer.style.borderRadius = '4px';
+    thumbnailContainer.style.border = '1px solid #ccc';
     thumbnailContainer.innerHTML = '<div style="text-align: center; color: #666;"></div>';
     
     // 안전하게 컨테이너에 추가
@@ -394,11 +395,17 @@ export function initializeImageAttachment(currentPatientId, currentRegisterDate)
             attachImageBtn.disabled = false;
             attachImageBtn.style.opacity = '1';
             attachImageBtn.style.cursor = 'pointer';
+            
+            // 썸네일 컨테이너 배경색을 흰색으로 변경
+            thumbnailContainer.style.backgroundColor = '#fff';
         },
         disableAttachButton: () => {
             attachImageBtn.disabled = true;
             attachImageBtn.style.opacity = '0.5';
             attachImageBtn.style.cursor = 'not-allowed';
+            
+            // 썸네일 컨테이너 배경색을 원래대로 복원
+            thumbnailContainer.style.backgroundColor = '#f5f5f5';
         },
         getTemporaryImages: () => {
             return tempImages.length > 0 ? [...tempImages] : null;
