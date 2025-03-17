@@ -31,6 +31,194 @@ async function initializeOrderSetBrowser() {
     const orderSetFooter = document.createElement('div');
     orderSetFooter.className = 'order-set-footer';
     
+    // Apply 버튼 추가
+    const applyButton = document.createElement('button');
+    applyButton.className = 'order-set-apply-btn';
+    applyButton.textContent = 'Apply';
+    
+    // Apply 버튼에 클릭 이벤트 등록
+    applyButton.addEventListener('click', async () => {
+        try {
+            // 처방전 활성화 상태 확인 (환자 선택 메시지가 없고 New Chart가 활성화된 상태)
+            const patientSelectWrapper = document.querySelector('.patient-select-wrapper');
+            const isActive = !patientSelectWrapper || patientSelectWrapper.style.display === 'none';
+            
+            // 처방전이 비활성화 상태이면 버튼도 비활성화
+            if (!isActive) {
+                return;
+            }
+            
+            // 선택된 OrderSet 항목 확인
+            const selectedItem = document.querySelector('.order-set-item.selected');
+            if (!selectedItem) {
+                alert('Please select an Order Set first.');
+                return;
+            }
+            
+            // 선택된 OrderSet의 ID 가져오기
+            const orderSetId = selectedItem.getAttribute('data-order-set-id');
+            
+            // 현재 사용자 정보 가져오기
+            const user = window.auth.currentUser;
+            if (!user) {
+                console.error('No user is signed in');
+                return;
+            }
+            
+            // 이메일에서 병원명 추출
+            const userEmail = user.email;
+            const hospitalName = userEmail.split('.')[0];
+            
+            // Firestore에서 선택된 OrderSet 데이터 가져오기
+            const docRef = doc(window.db, `hospitals/${hospitalName}/staff/${userEmail}/OrderSet`, orderSetId);
+            const docSnap = await getDoc(docRef);
+            
+            if (!docSnap.exists()) {
+                console.error('Order Set not found');
+                return;
+            }
+            
+            const orderSetData = docSnap.data();
+            
+            // CC 항목 추가
+            if (orderSetData.cc && orderSetData.cc.length > 0) {
+                // 기존 CC 항목 추가 함수 참조
+                const addCCFunc = window.addCCItem || window.initializeCCSearch?.addCCItem;
+                
+                if (typeof addCCFunc === 'function') {
+                    // 기존 함수 사용
+                    orderSetData.cc.forEach(cc => addCCFunc(cc));
+                } else {
+                    // 대체 구현: 직접 DOM에 CC 항목 추가
+                    const ccContainer = document.querySelector('.cc-items-container');
+                    if (ccContainer) {
+                        orderSetData.cc.forEach(cc => {
+                            const ccItem = document.createElement('div');
+                            ccItem.className = 'cc-item';
+                            ccItem.innerHTML = `
+                                <img src="image/cc.png" alt="CC Icon">
+                                <div class="cc-item-text">${cc}</div>
+                                <div class="cc-item-remove">&times;</div>
+                            `;
+                            
+                            // 삭제 버튼 이벤트 리스너
+                            ccItem.querySelector('.cc-item-remove').addEventListener('click', function(event) {
+                                event.stopPropagation();
+                                ccItem.remove();
+                            });
+                            
+                            ccContainer.appendChild(ccItem);
+                        });
+                    }
+                }
+            }
+            
+            // Medicines 항목 추가
+            if (orderSetData.medicines && orderSetData.medicines.length > 0) {
+                // 기존 Medicine 항목 추가 함수 참조
+                const addMedicineFunc = window.addMedicineItem || window.initializeMedicineSearch?.addMedicineItem;
+                
+                if (typeof addMedicineFunc === 'function') {
+                    // 기존 함수 사용
+                    orderSetData.medicines.forEach(medicine => addMedicineFunc(medicine));
+                } else {
+                    // 대체 구현: 직접 DOM에 Medicine 항목 추가
+                    const medicineContainer = document.querySelector('.medicine-items-container');
+                    if (medicineContainer) {
+                        orderSetData.medicines.forEach(medicine => {
+                            // medicine이 문자열인 경우 (이전 형식)
+                            const medicineText = typeof medicine === 'string' ? medicine : medicine.name;
+                            
+                            const medicineItem = document.createElement('div');
+                            medicineItem.className = 'medicine-item';
+                            medicineItem.innerHTML = `
+                                <img src="image/medicine.png" alt="Medicine Icon">
+                                <div class="medicine-item-text">${medicineText}</div>
+                                <div class="medicine-controls">
+                                    <div class="medicine-input-group">
+                                        <input type="text" class="medicine-input dose-input" placeholder="Dose">
+                                    </div>
+                                    <div class="medicine-input-group">
+                                        <input type="text" class="medicine-input frequency-input" placeholder="Time">
+                                    </div>
+                                    <div class="medicine-input-group">
+                                        <input type="text" class="medicine-input duration-input" placeholder="Dura">
+                                    </div>
+                                </div>
+                                <div class="medicine-item-remove">&times;</div>
+                            `;
+                            
+                            // 삭제 버튼 이벤트 리스너
+                            medicineItem.querySelector('.medicine-item-remove').addEventListener('click', function(event) {
+                                event.stopPropagation();
+                                medicineItem.remove();
+                            });
+                            
+                            medicineContainer.appendChild(medicineItem);
+                        });
+                    }
+                }
+            }
+            
+            // Apply 성공 메시지
+            alert(`Order Set "${orderSetId}" has been applied.`);
+            
+        } catch (error) {
+            console.error('Error applying Order Set:', error);
+            alert('Failed to apply Order Set. Please try again.');
+        }
+    });
+    
+    // 처방전 상태 변화 감지 및 버튼 상태 업데이트
+    function updateApplyButtonState() {
+        // 처방전 활성화 상태 확인
+        // 1. 환자가 선택되었는지 확인 (patient-select-wrapper가 숨겨져 있는지)
+        const patientSelectWrapper = document.querySelector('.patient-select-wrapper');
+        const patientSelected = !patientSelectWrapper || patientSelectWrapper.style.display === 'none';
+        
+        // 2. 입력 필드가 활성화되어 있는지 확인 (New Chart 버튼이 클릭된 상태)
+        const inputFields = document.querySelectorAll('.cc-search-input, .medicine-search-input, .symptoms-input');
+        const inputsEnabled = inputFields.length > 0 && Array.from(inputFields).some(field => !field.disabled);
+        
+        // 두 조건이 모두 충족되어야 처방전이 활성화된 상태
+        const isActive = patientSelected && inputsEnabled;
+        
+        // 버튼 상태 업데이트
+        if (isActive) {
+            applyButton.disabled = false;
+            applyButton.classList.remove('disabled');
+        } else {
+            applyButton.disabled = true;
+            applyButton.classList.add('disabled');
+        }
+    }
+    
+    // 초기 버튼 상태 설정 및 MutationObserver로 변화 감지
+    updateApplyButtonState();
+    
+    // 입력 필드의 disabled 속성 변화도 감지
+    const observerConfig = { attributes: true, attributeFilter: ['disabled', 'style'] };
+    const inputFieldsToObserve = document.querySelectorAll('.cc-search-input, .medicine-search-input, .symptoms-input');
+    
+    inputFieldsToObserve.forEach(field => {
+        const observer = new MutationObserver(updateApplyButtonState);
+        observer.observe(field, observerConfig);
+    });
+    
+    // MutationObserver 설정
+    const patientSelectObserver = new MutationObserver(updateApplyButtonState);
+    
+    // 환자 선택 메시지 요소 감시
+    const patientSelectWrapper = document.querySelector('.patient-select-wrapper');
+    if (patientSelectWrapper) {
+        patientSelectObserver.observe(patientSelectWrapper, { 
+            attributes: true, 
+            attributeFilter: ['style'] 
+        });
+    }
+    
+    orderSetFooter.appendChild(applyButton);
+    
     // 컨테이너를 prescription-right-bottom-area에 추가
     const rightBottomArea = document.querySelector('.prescription-right-bottom-area');
     if (rightBottomArea) {
@@ -77,6 +265,28 @@ async function initializeOrderSetBrowser() {
         document.addEventListener('click', function(event) {
             if (event.target !== searchInput && !dropdownContainer.contains(event.target)) {
                 dropdownContainer.style.display = 'none';
+            }
+        });
+        
+        // Order Set 선택 해제를 위한 클릭 이벤트 리스너 추가
+        document.addEventListener('click', function(event) {
+            // 클릭한 요소가 order-set-item이나 order-set-content-item인지 확인
+            const isOrderSetItem = event.target.closest('.order-set-item');
+            const isOrderSetContentItem = event.target.closest('.order-set-content-item');
+            const isOrderSetContainer = event.target.closest('.order-set-list-container') || 
+                                        event.target.closest('.order-set-content-container');
+            
+            // 클릭한 요소가 OrderSet 항목이나 컨테이너가 아니면 선택 상태 해제
+            if (!isOrderSetItem && !isOrderSetContentItem && !isOrderSetContainer) {
+                document.querySelectorAll('.order-set-item').forEach(item => {
+                    item.classList.remove('selected');
+                });
+                
+                // OrderSet 내용 컨테이너도 초기화
+                const contentContainer = document.querySelector('.order-set-content-container');
+                if (contentContainer) {
+                    contentContainer.innerHTML = '';
+                }
             }
         });
         
@@ -799,6 +1009,39 @@ function addOrderSetStyles() {
             padding: 0;
             z-index: 1;
             box-sizing: border-box; /* 테두리를 높이에 포함시킴 */
+            display: flex; /* 버튼 배치를 위한 flex 설정 */
+            justify-content: flex-end; /* 버튼 오른쪽 정렬 */
+            align-items: center; /* 세로 중앙 정렬 */
+            padding-right: 15px; /* 우측 여백 */
+        }
+        
+        /* Apply 버튼 스타일 */
+        .order-set-apply-btn {
+            padding: 8px 16px;
+            background-color: rgb(0, 102, 255);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            height: 33px;
+            width: 80px; /* Delete/Save 버튼과 동일한 너비 */
+            font-size: 12px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Apply 버튼 hover 효과 */
+        .order-set-apply-btn:hover {
+            background-color: rgb(0, 82, 204);
+        }
+        
+        /* 비활성화된 Apply 버튼 스타일 */
+        .order-set-apply-btn.disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            opacity: 0.7;
         }
     `;
     
