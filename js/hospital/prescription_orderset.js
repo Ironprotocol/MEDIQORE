@@ -27,6 +27,10 @@ async function initializeOrderSetBrowser() {
     const orderSetContentContainer = document.createElement('div');
     orderSetContentContainer.className = 'order-set-content-container';
     
+    // OrderSet footer 영역 생성
+    const orderSetFooter = document.createElement('div');
+    orderSetFooter.className = 'order-set-footer';
+    
     // 컨테이너를 prescription-right-bottom-area에 추가
     const rightBottomArea = document.querySelector('.prescription-right-bottom-area');
     if (rightBottomArea) {
@@ -76,9 +80,25 @@ async function initializeOrderSetBrowser() {
             }
         });
         
+        // 컨테이너 높이와 footer를 정확히 계산하여 설정
+        const rightBottomHeight = rightBottomArea.clientHeight;
+        const footerHeight = 45; // footer 높이
+        
+        // 목록과 컨텐츠 컨테이너 높이 조정
+        orderSetListContainer.style.height = `calc(100% - 145px)`;
+        orderSetContentContainer.style.height = `calc(100% - 145px)`;
+        
+        // Footer 정확한 위치 설정
+        orderSetFooter.style.position = 'absolute';
+        orderSetFooter.style.bottom = '0';
+        orderSetFooter.style.height = '51px';
+        
         // OrderSet 목록 컨테이너와 내용 컨테이너 추가
         rightBottomArea.appendChild(orderSetListContainer);
         rightBottomArea.appendChild(orderSetContentContainer);
+        
+        // Footer 영역 추가
+        rightBottomArea.appendChild(orderSetFooter);
         
         // OrderSet 목록 로드 및 표시
         loadOrderSets();
@@ -691,19 +711,21 @@ function addOrderSetStyles() {
             top: 90px; /* 가로선 아래부터 시작 */
             left: 5px; /* 왼쪽 여백 */
             width: calc(30% - 10px); /* 세로선 위치까지의 너비 (여백 고려) */
-            height: calc(100% - 95px); /* 컨테이너 하단까지 (여백 고려) */
+            height: calc(100% - 140px); /* footer 영역을 고려하여 높이 조정 */
             overflow-y: auto;
             padding-right: 5px;
+            z-index: 1;
         }
         
         .order-set-content-container {
             position: absolute;
-            top: 85px; /* 가로선 아래부터 시작 */
+            top: 90px; /* 가로선 아래부터 시작 */
             left: calc(30% + 5px); /* 세로선 위치 이후부터 시작 */
             width: calc(70% - 15px); /* 남은 공간 너비 (여백 고려) */
-            height: calc(100% - 95px); /* 컨테이너 하단까지 (여백 고려) */
+            height: calc(100% - 140px); /* footer 영역을 고려하여 높이 조정 */
             overflow-y: auto;
             padding-left: 5px;
+            z-index: 1;
         }
         
         .order-set-item {
@@ -724,7 +746,6 @@ function addOrderSetStyles() {
         
         .order-set-item.selected {
             background-color: #e7eeff;
-            font-weight: bold;
         }
         
         .no-order-sets {
@@ -764,6 +785,20 @@ function addOrderSetStyles() {
             border: 1px solid #eee;
             border-radius: 3px;
             font-size: 10px;
+        }
+        
+        /* OrderSet footer 영역 스타일 */
+        .order-set-footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            border-top: 1px solid #ccc; /* 위쪽 테두리 추가 */
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+            z-index: 1;
+            box-sizing: border-box; /* 테두리를 높이에 포함시킴 */
         }
     `;
     
