@@ -1,0 +1,601 @@
+// prescription_orderset.js - 처방전 즐겨찾기(Order set) 관련 기능
+
+import { doc, setDoc, collection, getDocs, query, orderBy, getDoc } from '../firebase-config.js';
+
+// Order set 즐겨찾기 기능 초기화
+export function initializeOrderSet() {
+    // 즐겨찾기 버튼 이벤트 리스너 등록
+    const favoriteBtn = document.querySelector('.prescription-favorite-btn');
+    if (favoriteBtn) {
+        favoriteBtn.addEventListener('click', openOrderSetModal);
+    }
+
+    // 모달 창 생성
+    createOrderSetModal();
+    
+    // OrderSet 목록 및 내용 표시 영역 초기화
+    initializeOrderSetBrowser();
+}
+
+// OrderSet 목록 및 내용 표시 영역 초기화
+async function initializeOrderSetBrowser() {
+    // OrderSet 목록 컨테이너 생성 (왼쪽 패널)
+    const orderSetListContainer = document.createElement('div');
+    orderSetListContainer.className = 'order-set-list-container';
+    
+    // OrderSet 내용 컨테이너 생성 (오른쪽 패널)
+    const orderSetContentContainer = document.createElement('div');
+    orderSetContentContainer.className = 'order-set-content-container';
+    
+    // 컨테이너를 prescription-right-bottom-area에 추가
+    const rightBottomArea = document.querySelector('.prescription-right-bottom-area');
+    if (rightBottomArea) {
+        rightBottomArea.appendChild(orderSetListContainer);
+        rightBottomArea.appendChild(orderSetContentContainer);
+        
+        // OrderSet 목록 로드 및 표시
+        loadOrderSets();
+    }
+}
+
+// Firebase에서 OrderSet 목록 가져오기
+async function loadOrderSets() {
+    try {
+        // 현재 사용자 정보 가져오기
+        const user = window.auth.currentUser;
+        if (!user) {
+            console.error('No user is signed in');
+            return;
+        }
+        
+        const userEmail = user.email;
+        const orderSetsRef = collection(window.db, `hospitals/mediqoredental/staff/${userEmail}/OrderSet`);
+        
+        // 생성일 기준 내림차순 정렬 (최신순)
+        const q = query(orderSetsRef, orderBy('createdAt', 'desc'));
+        const querySnapshot = await getDocs(q);
+        
+        const orderSets = [];
+        querySnapshot.forEach(doc => {
+            orderSets.push({
+                id: doc.id,
+                ...doc.data()
+            });
+        });
+        
+        // OrderSet 목록 표시
+        displayOrderSetList(orderSets);
+        
+    } catch (error) {
+        console.error('Error loading OrderSets:', error);
+    }
+}
+
+// OrderSet 목록 표시
+function displayOrderSetList(orderSets) {
+    const listContainer = document.querySelector('.order-set-list-container');
+    if (!listContainer) return;
+    
+    // 컨테이너 초기화
+    listContainer.innerHTML = '';
+    
+    if (orderSets.length === 0) {
+        listContainer.innerHTML = '<div class="no-order-sets">No saved Order Sets</div>';
+        return;
+    }
+    
+    // OrderSet 아이템 생성
+    orderSets.forEach(orderSet => {
+        const orderSetItem = document.createElement('div');
+        orderSetItem.className = 'order-set-item';
+        orderSetItem.textContent = orderSet.id;
+        orderSetItem.setAttribute('data-order-set-id', orderSet.id);
+        
+        // 클릭 이벤트: 해당 OrderSet의 내용을 표시
+        orderSetItem.addEventListener('click', () => {
+            // 선택된 OrderSet 하이라이트
+            document.querySelectorAll('.order-set-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            orderSetItem.classList.add('selected');
+            
+            // OrderSet 내용 표시
+            displayOrderSetContent(orderSet);
+        });
+        
+        listContainer.appendChild(orderSetItem);
+    });
+}
+
+// 선택된 OrderSet의 내용 표시
+function displayOrderSetContent(orderSet) {
+    const contentContainer = document.querySelector('.order-set-content-container');
+    if (!contentContainer) return;
+    
+    // 컨테이너 초기화
+    contentContainer.innerHTML = '';
+    
+    // CC 섹션 생성
+    const ccSection = document.createElement('div');
+    ccSection.className = 'order-set-section';
+    
+    const ccHeader = document.createElement('div');
+    ccHeader.className = 'order-set-section-header';
+    ccHeader.textContent = 'CC';
+    
+    const ccDivider = document.createElement('div');
+    ccDivider.className = 'order-set-divider';
+    
+    const ccContent = document.createElement('div');
+    ccContent.className = 'order-set-section-content';
+    
+    // CC 항목 추가
+    if (orderSet.cc && orderSet.cc.length > 0) {
+        orderSet.cc.forEach(item => {
+            const ccItem = document.createElement('div');
+            ccItem.className = 'order-set-content-item';
+            ccItem.textContent = item;
+            ccContent.appendChild(ccItem);
+        });
+    } else {
+        ccContent.innerHTML = '<div class="no-items">No CC items</div>';
+    }
+    
+    // Medicines 섹션 생성
+    const medicinesSection = document.createElement('div');
+    medicinesSection.className = 'order-set-section';
+    
+    const medicinesHeader = document.createElement('div');
+    medicinesHeader.className = 'order-set-section-header';
+    medicinesHeader.textContent = 'Medicines';
+    
+    const medicinesDivider = document.createElement('div');
+    medicinesDivider.className = 'order-set-divider';
+    
+    const medicinesContent = document.createElement('div');
+    medicinesContent.className = 'order-set-section-content';
+    
+    // Medicines 항목 추가
+    if (orderSet.medicines && orderSet.medicines.length > 0) {
+        orderSet.medicines.forEach(item => {
+            const medicineItem = document.createElement('div');
+            medicineItem.className = 'order-set-content-item';
+            medicineItem.textContent = item;
+            medicinesContent.appendChild(medicineItem);
+        });
+    } else {
+        medicinesContent.innerHTML = '<div class="no-items">No medicine items</div>';
+    }
+    
+    // 섹션 구성 완료 및 컨테이너에 추가
+    ccSection.appendChild(ccHeader);
+    ccSection.appendChild(ccDivider);
+    ccSection.appendChild(ccContent);
+    
+    medicinesSection.appendChild(medicinesHeader);
+    medicinesSection.appendChild(medicinesDivider);
+    medicinesSection.appendChild(medicinesContent);
+    
+    contentContainer.appendChild(ccSection);
+    contentContainer.appendChild(medicinesSection);
+}
+
+// 모달 창 HTML 생성
+function createOrderSetModal() {
+    // 이미 모달이 존재하면 생성하지 않음
+    if (document.getElementById('order-set-modal')) {
+        return;
+    }
+
+    const modalHTML = `
+        <div id="order-set-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Save as Order Set</h3>
+                    <span class="close-modal">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="order-set-name">Order Set Name</label>
+                        <input type="text" id="order-set-name" class="form-input" placeholder="Enter order set name">
+                    </div>
+                    
+                    <div class="order-set-items">
+                        <h4>CC Items</h4>
+                        <div id="order-set-cc-items" class="order-set-item-list">
+                            <!-- CC 항목들이 여기에 동적으로 추가됨 -->
+                        </div>
+                        
+                        <h4>Medicine Items</h4>
+                        <div id="order-set-medicine-items" class="order-set-item-list">
+                            <!-- Medicine 항목들이 여기에 동적으로 추가됨 -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="order-save-btn" class="btn btn-primary">Order Save</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // 모달 HTML을 body에 추가
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // 모달 닫기 버튼 이벤트 리스너 등록
+    const closeBtn = document.querySelector('#order-set-modal .close-modal');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeOrderSetModal);
+    }
+
+    // Order Save 버튼 이벤트 리스너 등록
+    const saveBtn = document.getElementById('order-save-btn');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', saveOrderSet);
+    }
+
+    // 모달 외부 클릭 시 닫히도록 설정
+    const modal = document.getElementById('order-set-modal');
+    window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            closeOrderSetModal();
+        }
+    });
+}
+
+// 모달 창 열기
+function openOrderSetModal() {
+    // 현재 처방전의 CC와 Medicine 항목 가져오기
+    const ccItems = getCCItems();
+    const medicineItems = getMedicineItems();
+
+    // 모달에 항목들 표시
+    displayOrderSetItems(ccItems, medicineItems);
+
+    // 모달 표시
+    const modal = document.getElementById('order-set-modal');
+    if (modal) {
+        modal.style.display = 'block';
+    }
+}
+
+// 모달 창 닫기
+function closeOrderSetModal() {
+    const modal = document.getElementById('order-set-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+
+    // 입력 필드 초기화
+    const nameInput = document.getElementById('order-set-name');
+    if (nameInput) {
+        nameInput.value = '';
+    }
+}
+
+// 현재 처방전의 CC 항목들 가져오기
+function getCCItems() {
+    const ccItems = [];
+    const ccElements = document.querySelectorAll('.cc-item');
+    
+    ccElements.forEach(item => {
+        const text = item.querySelector('.cc-item-text').textContent.trim();
+        ccItems.push(text);
+    });
+    
+    return ccItems;
+}
+
+// 현재 처방전의 Medicine 항목들 가져오기
+function getMedicineItems() {
+    const medicineItems = [];
+    const medicineElements = document.querySelectorAll('.medicine-item');
+    
+    medicineElements.forEach(item => {
+        const text = item.querySelector('.medicine-item-text').textContent.trim();
+        medicineItems.push(text);
+    });
+    
+    return medicineItems;
+}
+
+// 모달에 CC와 Medicine 항목 표시
+function displayOrderSetItems(ccItems, medicineItems) {
+    // CC 항목 표시
+    const ccContainer = document.getElementById('order-set-cc-items');
+    if (ccContainer) {
+        ccContainer.innerHTML = '';
+        
+        if (ccItems.length === 0) {
+            ccContainer.innerHTML = '<p class="no-items">No CC items</p>';
+        } else {
+            ccItems.forEach(item => {
+                ccContainer.innerHTML += `<div class="order-set-item">${item}</div>`;
+            });
+        }
+    }
+    
+    // Medicine 항목 표시
+    const medicineContainer = document.getElementById('order-set-medicine-items');
+    if (medicineContainer) {
+        medicineContainer.innerHTML = '';
+        
+        if (medicineItems.length === 0) {
+            medicineContainer.innerHTML = '<p class="no-items">No medicine items</p>';
+        } else {
+            medicineItems.forEach(item => {
+                medicineContainer.innerHTML += `<div class="order-set-item">${item}</div>`;
+            });
+        }
+    }
+}
+
+// Order Set 저장
+async function saveOrderSet() {
+    // Order Set 이름 가져오기
+    const orderSetName = document.getElementById('order-set-name').value.trim();
+    
+    // 이름이 비어있는지 확인
+    if (!orderSetName) {
+        alert('Please set the order name');
+        return;
+    }
+    
+    try {
+        // 현재 사용자 정보 가져오기
+        const user = window.auth.currentUser;
+        if (!user) {
+            console.error('No user is signed in');
+            return;
+        }
+        
+        // CC와 Medicine 항목 가져오기
+        const ccItems = getCCItems();
+        const medicineItems = getMedicineItems();
+        
+        // Firestore 경로 생성
+        const userEmail = user.email;
+        const docRef = doc(window.db, `hospitals/mediqoredental/staff/${userEmail}/OrderSet`, orderSetName);
+        
+        // Firestore에 데이터 저장
+        await setDoc(docRef, {
+            cc: ccItems,
+            medicines: medicineItems,
+            createdAt: new Date()
+        });
+        
+        // 성공 메시지 표시
+        alert(`Order set "${orderSetName}" has been saved successfully.`);
+        
+        // 목록 갱신
+        loadOrderSets();
+        
+        // 모달 닫기
+        closeOrderSetModal();
+        
+    } catch (error) {
+        console.error('Error saving order set:', error);
+        alert('Failed to save order set. Please try again.');
+    }
+}
+
+// Order set 관련 CSS 스타일 추가
+function addOrderSetStyles() {
+    // 이미 스타일이 추가되어 있는지 확인
+    if (document.getElementById('order-set-styles')) {
+        return;
+    }
+    
+    const styleElement = document.createElement('style');
+    styleElement.id = 'order-set-styles';
+    styleElement.textContent = `
+        /* Order Set 모달 스타일 */
+        #order-set-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        #order-set-modal .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 500px;
+            max-width: 80%;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        #order-set-modal .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        
+        #order-set-modal .modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #333;
+        }
+        
+        #order-set-modal .close-modal {
+            font-size: 24px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+        }
+        
+        #order-set-modal .close-modal:hover {
+            color: #666;
+        }
+        
+        #order-set-modal .form-group {
+            margin-bottom: 15px;
+        }
+        
+        #order-set-modal label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 14px;
+            color: #555;
+        }
+        
+        #order-set-modal .form-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        #order-set-modal h4 {
+            margin: 15px 0 5px;
+            font-size: 14px;
+            color: #555;
+        }
+        
+        #order-set-modal .order-set-item-list {
+            border: 1px solid #eee;
+            border-radius: 4px;
+            padding: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+        }
+        
+        #order-set-modal .order-set-item {
+            padding: 5px;
+            margin-bottom: 5px;
+            background-color: white;
+            border: 1px solid #eee;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+        
+        #order-set-modal .no-items {
+            color: #999;
+            font-style: italic;
+            font-size: 13px;
+        }
+        
+        #order-set-modal .modal-footer {
+            margin-top: 20px;
+            text-align: right;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+        
+        #order-set-modal .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        #order-set-modal .btn-primary {
+            background-color: #4a6fdc;
+            color: white;
+        }
+        
+        #order-set-modal .btn-primary:hover {
+            background-color: #3a5fc9;
+        }
+        
+        /* OrderSet 브라우저 스타일 */
+        .order-set-list-container {
+            position: absolute;
+            top: 90px; /* 가로선 아래부터 시작 */
+            left: 5px; /* 왼쪽 여백 */
+            width: calc(30% - 10px); /* 세로선 위치까지의 너비 (여백 고려) */
+            height: calc(100% - 95px); /* 컨테이너 하단까지 (여백 고려) */
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        
+        .order-set-content-container {
+            position: absolute;
+            top: 85px; /* 가로선 아래부터 시작 */
+            left: calc(30% + 5px); /* 세로선 위치 이후부터 시작 */
+            width: calc(70% - 15px); /* 남은 공간 너비 (여백 고려) */
+            height: calc(100% - 95px); /* 컨테이너 하단까지 (여백 고려) */
+            overflow-y: auto;
+            padding-left: 5px;
+        }
+        
+        .order-set-item {
+            padding: 8px 10px;
+            margin-bottom: 5px;
+            background-color: #f8f9fa;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+        
+        .order-set-item:hover {
+            background-color: #eef1f7;
+            border-color: #dde;
+        }
+        
+        .order-set-item.selected {
+            background-color: #e7eeff;
+            font-weight: bold;
+        }
+        
+        .no-order-sets {
+            color: #999;
+            font-style: italic;
+            font-size: 12px;
+            padding: 10px;
+            text-align: center;
+        }
+        
+        .order-set-section {
+            margin-bottom: 15px;
+        }
+        
+        .order-set-section-header {
+            font-size: 12px;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 5px;
+            margin-top : 10px;
+        }
+        
+        .order-set-divider {
+            height: 1px;
+            background-color: #ccc;
+            margin-bottom: 10px;
+        }
+        
+        .order-set-section-content {
+            padding: 0 5px;
+        }
+        
+        .order-set-content-item {
+            padding: 5px;
+            margin-bottom: 5px;
+            background-color: white;
+            border: 1px solid #eee;
+            border-radius: 3px;
+            font-size: 10px;
+        }
+    `;
+    
+    document.head.appendChild(styleElement);
+}
+
+// 페이지 로드 시 스타일 추가
+document.addEventListener('DOMContentLoaded', addOrderSetStyles);

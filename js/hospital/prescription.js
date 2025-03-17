@@ -3,6 +3,7 @@ import { initializePrescriptionHistory } from './prescriptHistory.js';
 import { initializeCanvas, clearCanvas, enableDrawing, clearSVG, disableDrawing } from './prescription_canvas.js';
 import { printPrescription } from './prescription_print.js';
 import { initializeImageAttachment, loadPatientImage } from './prescription_attachimage.js';
+import { initializeOrderSet } from './prescription_orderset.js';
 
 // Prescription 컨테이너 초기화
 export function initializePrescription() {
@@ -877,6 +878,9 @@ export function initializePrescription() {
             alert('Failed to initialize new chart');
         }
     });
+
+    // Order set 기능 초기화
+    initializeOrderSet();
 }
 
 // 현재 room 이름 업데이트 함수

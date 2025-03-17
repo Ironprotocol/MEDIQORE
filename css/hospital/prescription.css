@@ -875,3 +875,35 @@
     background-color: #ccc;
 }
 
+/* 오더셋 영역 세로선 (T자 모양 만들기) */
+.prescription-right-bottom-area::before {
+    content: '';
+    position: absolute;
+    top: 85px; /* 가로선과 같은 위치에서 시작 */
+    left: 30%; /* 왼쪽에서 30% 지점 */
+    width: 1px;
+    height: calc(100% - 85px); /* 컨테이너 끝까지 */
+    background-color: #ccc;
+}
+
+/* 즐겨찾기 버튼 스타일 */
+.prescription-favorite-btn {
+    position: absolute;
+    top: 10px; /* 상단에서 10px 여백 */
+    right: 15px; /* 우측에서 15px 여백 */
+    width: 20px;
+    height: 20px;
+    background: url('../../image/pin_black.png') no-repeat center;
+    background-size: contain; /* 이미지 크기에 맞게 조정 */
+    border: none;
+    cursor: pointer;
+    transition: background-image 0.3s ease;
+    padding: 0;
+    background-color: transparent;
+}
+
+.prescription-favorite-btn:hover,
+.prescription-favorite-btn.active {
+    background-image: url('../../image/pin.png');
+}
+
