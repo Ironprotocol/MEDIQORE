@@ -103,6 +103,9 @@ async function handleUpdateButtonClick(event) {
             clickedButton.innerHTML = originalContent;
             clickedButton.disabled = false;
         }
+        
+        // 페이지 새로고침 추가
+        window.location.reload();
     }
 }
 
