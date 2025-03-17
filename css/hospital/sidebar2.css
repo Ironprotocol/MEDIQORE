@@ -227,7 +227,7 @@
         }
 
         /* Memo 컨테이너 */
-        .memo-list-container {
+        .chat-list-container {
             flex-grow: 1;
             overflow-y: auto;
             padding: 20px;

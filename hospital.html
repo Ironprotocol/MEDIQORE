@@ -84,8 +84,8 @@
                       <button class="action-button" id="refresh-button">
                           <img src="image/update.png" alt="Update" title="Update" class="update-icon">
                       </button>
-                      <button class="action-button">
-                          <div class="action-button-placeholder" title="알림"></div>
+                      <button class="action-button" id="chat-button">
+                          <img src="image/chat_black.png" alt="Chat" title="Chat" class="chat-icon" style="width: 20px; height: 15.78px;">
                       </button>
                       <span class="user-name"></span>
                       <div class="status-selector">
@@ -109,6 +109,18 @@
             initializeNewPatientButton(); // New patient 버튼 초기화
             initializeUserName();       //common.js - 우측 상단 의사 이름 초기화
             initializeStatusSelector(); //common.js - 우측 상단 의사 상태 초기화
+
+            // chat 버튼에 마우스 오버/아웃 이벤트 추가
+            const chatButton = document.getElementById('chat-button');
+            if (chatButton) {
+                const chatIcon = chatButton.querySelector('.chat-icon');
+                chatButton.addEventListener('mouseover', () => {
+                    chatIcon.src = 'image/chat.png';
+                });
+                chatButton.addEventListener('mouseout', () => {
+                    chatIcon.src = 'image/chat_black.png';
+                });
+            }
 
             let roomUnsubscribe = null;
 
@@ -245,8 +257,8 @@
             <button class="action-button" id="refresh-button">
                 <img src="image/update.png" alt="Update" title="Update" class="update-icon">
             </button>
-            <button class="action-button">
-                <div class="action-button-placeholder" title="알림"></div>
+            <button class="action-button" id="chat-button">
+                <img src="image/chat_black.png" alt="Chat" title="Chat" class="chat-icon" style="width: 20px; height: 15.78px;">
             </button>
             <span class="user-name"></span>
             <div class="status-selector">
@@ -271,7 +283,7 @@
         <div class="submenu-container">
             <div class="submenu-item active">Examine</div>
             <div class="submenu-item">Done</div>
-            <div class="submenu-item">Memo</div>
+            <div class="submenu-item">Chat</div>
         </div>
 
         <div class="patient-list-container">
@@ -284,8 +296,8 @@
         </div>
 
         <!-- Memo 컨테이너 -->
-        <div class="memo-list-container">
-            <!-- Memo 목록이 여기에 추가될 것임 -->
+        <div class="chat-list-container">
+            <!-- chat 목록이 여기에 추가될 것임 -->
         </div>
 
         <div class="bottom-container">

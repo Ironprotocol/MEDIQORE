@@ -12,7 +12,7 @@ export function initializeSubmenuEvents() {
             // 모든 컨테이너 숨기기
             document.querySelector('.patient-list-container').style.display = 'none';
             document.querySelector('.done-list-container').style.display = 'none';
-            document.querySelector('.memo-list-container').style.display = 'none';
+            document.querySelector('.chat-list-container').style.display = 'none';
             
             // 선택된 메뉴에 따라 해당 컨테이너만 표시
             const menuText = this.textContent.trim();
@@ -20,8 +20,8 @@ export function initializeSubmenuEvents() {
                 document.querySelector('.patient-list-container').style.display = 'block';
             } else if (menuText === 'Done') {
                 document.querySelector('.done-list-container').style.display = 'block';
-            } else if (menuText === 'Memo') {
-                document.querySelector('.memo-list-container').style.display = 'block';
+            } else if (menuText === 'Chat') {
+                document.querySelector('.chat-list-container').style.display = 'block';
             }
         });
     });
