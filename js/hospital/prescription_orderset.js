@@ -30,12 +30,181 @@ async function initializeOrderSetBrowser() {
     // 컨테이너를 prescription-right-bottom-area에 추가
     const rightBottomArea = document.querySelector('.prescription-right-bottom-area');
     if (rightBottomArea) {
+        // 기존 검색창 찾기
+        const searchInput = document.querySelector('.order-set-search-input');
+        
+        // 드롭다운 컨테이너 생성
+        const dropdownContainer = document.createElement('div');
+        dropdownContainer.className = 'order-set-search-dropdown';
+        dropdownContainer.style.display = 'none';
+        dropdownContainer.style.position = 'absolute';
+        dropdownContainer.style.zIndex = '1001';
+        dropdownContainer.style.maxHeight = '200px';
+        dropdownContainer.style.overflowY = 'auto';
+        dropdownContainer.style.backgroundColor = 'white';
+        dropdownContainer.style.border = '1px solid #ddd';
+        dropdownContainer.style.borderRadius = '4px';
+        dropdownContainer.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+        
+        // 드롭다운 위치 설정
+        const searchRect = searchInput.getBoundingClientRect();
+        const rightBottomRect = rightBottomArea.getBoundingClientRect();
+        dropdownContainer.style.top = (searchRect.bottom - rightBottomRect.top + 2) + 'px';
+        dropdownContainer.style.left = (searchRect.left - rightBottomRect.left) + 'px';
+        dropdownContainer.style.width = searchInput.offsetWidth + 'px';
+        
+        // 드롭다운을 right-bottom-area에 추가
+        rightBottomArea.appendChild(dropdownContainer);
+        
+        // 검색창에 이벤트 리스너 등록
+        searchInput.addEventListener('input', function(event) {
+            // 드롭다운 위치 업데이트
+            const updatedSearchRect = searchInput.getBoundingClientRect();
+            const updatedRightBottomRect = rightBottomArea.getBoundingClientRect();
+            dropdownContainer.style.top = (updatedSearchRect.bottom - updatedRightBottomRect.top + 2) + 'px';
+            dropdownContainer.style.left = (updatedSearchRect.left - updatedRightBottomRect.left) + 'px';
+            dropdownContainer.style.width = searchInput.offsetWidth + 'px';
+            
+            // 검색 처리
+            handleOrderSetSearch(event);
+        });
+        
+        // 외부 클릭 시 드롭다운 닫기
+        document.addEventListener('click', function(event) {
+            if (event.target !== searchInput && !dropdownContainer.contains(event.target)) {
+                dropdownContainer.style.display = 'none';
+            }
+        });
+        
+        // OrderSet 목록 컨테이너와 내용 컨테이너 추가
         rightBottomArea.appendChild(orderSetListContainer);
         rightBottomArea.appendChild(orderSetContentContainer);
         
         // OrderSet 목록 로드 및 표시
         loadOrderSets();
     }
+}
+
+// OrderSet 검색 처리
+async function handleOrderSetSearch(event) {
+    const searchInput = event.target;
+    const searchTerm = searchInput.value.trim().toLowerCase();
+    const dropdownContainer = document.querySelector('.order-set-search-dropdown');
+    
+    // 검색어가 없을 경우 드롭다운 숨기기
+    if (searchTerm === '') {
+        dropdownContainer.style.display = 'none';
+        return;
+    }
+    
+    // 드롭다운 표시
+    dropdownContainer.style.display = 'block';
+    
+    // OrderSet 검색
+    const searchResults = await searchOrderSets(searchTerm);
+    displayOrderSetSearchResults(searchResults, dropdownContainer);
+}
+
+// OrderSet 검색
+async function searchOrderSets(searchTerm) {
+    try {
+        // 현재 사용자 정보 가져오기
+        const user = window.auth.currentUser;
+        if (!user) {
+            console.error('No user is signed in');
+            return [];
+        }
+        
+        const userEmail = user.email;
+        // 이메일에서 병원명 추출 (예: mediqoredental.doctor.001@mediqore.com -> mediqoredental)
+        const hospitalName = userEmail.split('.')[0];
+        const orderSetsRef = collection(window.db, `hospitals/${hospitalName}/staff/${userEmail}/OrderSet`);
+        
+        // 모든 OrderSet 가져오기
+        const q = query(orderSetsRef, orderBy('createdAt', 'desc'));
+        const querySnapshot = await getDocs(q);
+        
+        const orderSets = [];
+        querySnapshot.forEach(doc => {
+            // 검색어와 일치하는 OrderSet만 필터링
+            if (doc.id.toLowerCase().includes(searchTerm)) {
+                orderSets.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
+            }
+        });
+        
+        return orderSets;
+        
+    } catch (error) {
+        console.error('Error searching OrderSets:', error);
+        return [];
+    }
+}
+
+// 검색 결과 표시
+function displayOrderSetSearchResults(orderSets, dropdownContainer) {
+    // 드롭다운 초기화
+    dropdownContainer.innerHTML = '';
+    
+    if (orderSets.length === 0) {
+        const noResultsItem = document.createElement('div');
+        noResultsItem.className = 'order-set-search-item';
+        noResultsItem.textContent = 'No results found';
+        noResultsItem.style.padding = '8px 10px';
+        noResultsItem.style.color = '#999';
+        noResultsItem.style.fontStyle = 'italic';
+        noResultsItem.style.fontSize = '12px';
+        dropdownContainer.appendChild(noResultsItem);
+        return;
+    }
+    
+    // 검색 결과 항목 추가
+    orderSets.forEach(orderSet => {
+        const searchResultItem = document.createElement('div');
+        searchResultItem.className = 'order-set-search-item';
+        searchResultItem.textContent = orderSet.id;
+        searchResultItem.style.padding = '8px 10px';
+        searchResultItem.style.cursor = 'pointer';
+        searchResultItem.style.borderBottom = '1px solid #eee';
+        searchResultItem.style.fontSize = '12px';
+        
+        // 마우스 오버 효과
+        searchResultItem.addEventListener('mouseover', () => {
+            searchResultItem.style.backgroundColor = '#f0f0f0';
+        });
+        
+        searchResultItem.addEventListener('mouseout', () => {
+            searchResultItem.style.backgroundColor = 'white';
+        });
+        
+        // 클릭 이벤트: 해당 OrderSet 선택
+        searchResultItem.addEventListener('click', () => {
+            // 드롭다운 닫기
+            dropdownContainer.style.display = 'none';
+            
+            // OrderSet 목록에서 해당 항목 선택
+            const orderSetItems = document.querySelectorAll('.order-set-item');
+            orderSetItems.forEach(item => {
+                if (item.getAttribute('data-order-set-id') === orderSet.id) {
+                    // 선택된 OrderSet 하이라이트
+                    document.querySelectorAll('.order-set-item').forEach(i => {
+                        i.classList.remove('selected');
+                    });
+                    item.classList.add('selected');
+                    
+                    // 스크롤하여 선택된 항목 보이게 하기
+                    item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    
+                    // OrderSet 내용 표시
+                    displayOrderSetContent(orderSet);
+                }
+            });
+        });
+        
+        dropdownContainer.appendChild(searchResultItem);
+    });
 }
 
 // Firebase에서 OrderSet 목록 가져오기
@@ -49,7 +218,9 @@ async function loadOrderSets() {
         }
         
         const userEmail = user.email;
-        const orderSetsRef = collection(window.db, `hospitals/mediqoredental/staff/${userEmail}/OrderSet`);
+        // 이메일에서 병원명 추출 (예: mediqoredental.doctor.001@mediqore.com -> mediqoredental)
+        const hospitalName = userEmail.split('.')[0];
+        const orderSetsRef = collection(window.db, `hospitals/${hospitalName}/staff/${userEmail}/OrderSet`);
         
         // 생성일 기준 내림차순 정렬 (최신순)
         const q = query(orderSetsRef, orderBy('createdAt', 'desc'));
@@ -355,7 +526,9 @@ async function saveOrderSet() {
         
         // Firestore 경로 생성
         const userEmail = user.email;
-        const docRef = doc(window.db, `hospitals/mediqoredental/staff/${userEmail}/OrderSet`, orderSetName);
+        // 이메일에서 병원명 추출 (예: mediqoredental.doctor.001@mediqore.com -> mediqoredental)
+        const hospitalName = userEmail.split('.')[0];
+        const docRef = doc(window.db, `hospitals/${hospitalName}/staff/${userEmail}/OrderSet`, orderSetName);
         
         // Firestore에 데이터 저장
         await setDoc(docRef, {
