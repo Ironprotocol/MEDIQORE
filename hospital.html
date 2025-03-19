@@ -82,7 +82,7 @@
             if (actionButtons) {
                   actionButtons.innerHTML = `
                       <button class="action-button" id="refresh-button">
-                          <img src="image/update.png" alt="Update" title="Update" class="update-icon">
+                          <img src="image/update.png" alt="Update" title="Refresh" class="update-icon">
                       </button>
                       <button class="action-button" id="chat-button">
                           <img src="image/chat_black.png" alt="Chat" title="Chat" class="chat-icon" style="width: 25px; height: 19.725px;">
@@ -241,7 +241,7 @@
         </div>
         <div class="version-container">
             <div class="divider"></div>
-            <div class="version-info">v.0.1 test</div>
+            <div class="version-info">v.0.5 test</div>
         </div>
     </div>
     <div class="top-bar">
@@ -249,13 +249,13 @@
         <div class="search-form">
             <input type="text" class="search-input" placeholder="Patient Search">
         </div>
-        <button class="new-patient-btn">
-            New Patient
-            <img src="image/new_patient.png" alt="New Patient Icon">
+        <button class="new-patient-btn" title = 'Add a new patient'>
+            New Patient <span class="plus-sign">+</span>
+
         </button>
         <div class="action-buttons">
             <button class="action-button" id="refresh-button">
-                <img src="image/update.png" alt="Update" title="Update" class="update-icon">
+                <img src="image/update.png" alt="Update" title="Refresh" class="update-icon">
             </button>
             <button class="action-button" id="chat-button">
                 <img src="image/chat_black.png" alt="Chat" title="Chat" class="chat-icon" style="width: 20px; height: 15.78px;">
@@ -335,14 +335,14 @@
                         </div>
                         <div class="prescription-center-bottom">
                             <div class="prescription-section-title">Diagnosis & Prescription</div>
-                            <button class="prescription-favorite-btn" title="Add to favorites"></button>
+                            <button class="prescription-favorite-btn" title="Add to order set"></button>
                         </div>
                     </div>
                          <!-- 오른쪽 컨테이너 (4번) -->
                          <div class="content-body-prescription2">
                             <div class="prescription-right-top-area">
                                 <div class="prescription-section-title">Image</div>
-                                <button class="attach-image-btn"></button>
+                                <button class="attach-image-btn" title="Add to image"></button>
                             </div>
                             <div class="prescription-right-bottom-area">
                                 <div class="prescription-section-title">Order set</div>
@@ -352,7 +352,7 @@
                 </div>
             </div>
             <div class="content-footer-prescription" style="display: none;">
-                <button class="new-chart-btn">
+                <button class="new-chart-btn"  title = "Open a new chart">
                     <img src="image/new_chart.png" alt="New Chart Icon">
                     New Chart
                 </button>

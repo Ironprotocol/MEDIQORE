@@ -747,7 +747,7 @@
 /* Delete 버튼 스타일 */
 .delete-btn {
     position: absolute;
-    right: 330px;
+    right: 325px;
     width: 25px;
     height: 26.3px;
     border: none;

@@ -182,6 +182,7 @@ export function initializePrescription() {
     // 프린터 버튼 생성
     const printBtn = document.createElement('button');
     printBtn.className = 'print-btn-prescription';
+    printBtn.title = 'Print this chart'
     document.querySelector('.content-footer-prescription').appendChild(printBtn);
     
     // 프린트 버튼 클릭 이벤트 추가
@@ -197,10 +198,12 @@ export function initializePrescription() {
     deleteBtn.className = 'delete-btn';
     deleteBtn.disabled = true;
     deleteBtn.classList.add('disabled');
+    deleteBtn.title = "Delete current chart";
     
     // Save 버튼 추가 (프린터 버튼 왼쪽에)
     const saveBtn = document.createElement('button');
     saveBtn.className = 'save-btn';
+    saveBtn.title = "Save this chart";
     document.querySelector('.content-footer-prescription').insertBefore(saveBtn, printBtn);
     document.querySelector('.content-footer-prescription').insertBefore(deleteBtn, saveBtn);
 
@@ -230,6 +233,7 @@ export function initializePrescription() {
     const sendBtn = document.createElement('button');
     sendBtn.className = 'send-btn';
     sendBtn.textContent = 'Send';
+    sendBtn.title = 'Send this chart to dsek'
     document.querySelector('.content-footer-prescription').appendChild(sendBtn);
 
     // Save 버튼 클릭 이벤트 추가

@@ -55,7 +55,7 @@
             border: none;
             border-radius: 20px;
             height: 34px;
-            width: 140px;
+            width: 130px;
             font-size: 12px;
             cursor: pointer;
             transition: background-color 0.3s ease;
@@ -65,9 +65,9 @@
             gap: 10px;  /* 아이콘과 텍스트 사이 간격 */
         }
 
-        .new-patient-btn img {
-            width: 15px;  /* 아이콘 크기 */
-            height: 15px;
+        .new-patient-btn .plus-sign {
+            font-size: 20px;
+            line-height: 1;
         }
 
         /* new-patient-btn: 신규환자 버튼 hover */

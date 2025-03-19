@@ -386,7 +386,7 @@ function addControlButtons() {
     const controlsDiv = document.createElement('div');
     controlsDiv.className = 'chart-controls';
     controlsDiv.innerHTML = `
-        <button class="undo-btn">Undo</button>
+        <button class="undo-btn" title="Undo"></button>
     `;
     
     const container = document.querySelector('.prescription-center-top');
