@@ -195,14 +195,12 @@ export function initializePrescription() {
     // Delete 버튼 추가 (Save 버튼 왼쪽에)
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'delete-btn';
-    deleteBtn.textContent = 'Delete';
     deleteBtn.disabled = true;
     deleteBtn.classList.add('disabled');
     
     // Save 버튼 추가 (프린터 버튼 왼쪽에)
     const saveBtn = document.createElement('button');
     saveBtn.className = 'save-btn';
-    saveBtn.textContent = 'Save';
     document.querySelector('.content-footer-prescription').insertBefore(saveBtn, printBtn);
     document.querySelector('.content-footer-prescription').insertBefore(deleteBtn, saveBtn);
 

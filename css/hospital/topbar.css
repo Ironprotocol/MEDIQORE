@@ -50,12 +50,11 @@
 
         /* new-patient-btn: 신규환자 버튼 */
         .new-patient-btn {
-            padding: 8px 16px;
             background-color: rgb(0, 102, 255);
             color: white;
             border: none;
-            border-radius: 6px;
-            height: 33px;
+            border-radius: 20px;
+            height: 34px;
             width: 140px;
             font-size: 12px;
             cursor: pointer;
@@ -67,8 +66,8 @@
         }
 
         .new-patient-btn img {
-            width: 25px;  /* 아이콘 크기 */
-            height: 25px;
+            width: 15px;  /* 아이콘 크기 */
+            height: 15px;
         }
 
         /* new-patient-btn: 신규환자 버튼 hover */

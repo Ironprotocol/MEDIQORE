@@ -204,12 +204,14 @@ function handleCellClick(hour, minute, column) {
             <button class="tooltip-close">×</button>
         </div>
         <form class="tooltip-form">
+            <label>ID Card</label>
+            <input type="text" class="tooltip-id-number">
+
+
             <label>Name</label>
             <input type="text" class="tooltip-name">
             
-            <label>ID Card / Passport Number</label>
-            <input type="text" class="tooltip-id-number">
-            
+
             <label>Gender</label>
             <div class="tooltip-gender-select">
                 <select class="tooltip-gender">

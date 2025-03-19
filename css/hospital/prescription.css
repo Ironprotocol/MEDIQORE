@@ -363,18 +363,18 @@
 .print-btn-prescription {
     position: absolute;
     right: 220px;  /* desk-select(100px) + Send 버튼(80px) + 간격(40px) */
-    width: 35px;
-    height: 35px;
+    width: 30px;
+    height: 30px;
     border: none;
     cursor: pointer;
     background: url('../../image/printer.png') no-repeat center;
-    background-size: 35px;  /* 내부 이미지 크기 */
+    background-size: 30px;  /* 내부 이미지 크기 */
     transition: background-image 0.3s ease;
 }
 
 .print-btn-prescription:hover {
     background: url('../../image/printer_hover.png') no-repeat center;
-    background-size: 35px;
+    background-size: 30px;
 }
 
 .cc-search-container {
@@ -678,7 +678,7 @@
 }
 
 .prescript-history-record .record-date {
-    font-size: 14px;
+    font-size: 12px;
     font-weight: bold;
     color: #000;
 }
@@ -688,15 +688,14 @@
 }
 
 .prescript-history-record .record-doctor {
-    font-size: 14px;
-    font-weight: bold;
+    font-size: 12px;
     color: #666;
     margin-top: 5px;
 }
 
 .prescript-history-record .record-cc {
     font-size: 12px;
-    color: #666;
+    color: #000;
     margin-top: 5px;
 }
 
@@ -725,42 +724,47 @@
 .save-btn {
     position: absolute;
     right: 275px;
-    width: 80px;
-    height: 33px;
+    width: 25px;
+    height: 25px;
     border: none;
-    border-radius: 6px;
-    background-color: rgb(0, 102, 255);
-    color: white;
-    font-size: 12px;
+    border-radius: 0;
+    background: url('../../image/save_black.png') no-repeat center;
+    background-size: contain;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-image 0.3s ease;
+    padding: 0;
 }
 
 .save-btn:hover {
-    background-color: rgb(0, 82, 204);
+    background-image: url('../../image/save.png');
+}
+
+.save-btn.disabled {
+    background-image: url('../../image/save_black.png');
+    cursor: not-allowed;
 }
 
 /* Delete 버튼 스타일 */
 .delete-btn {
     position: absolute;
-    right: 365px;
-    width: 80px;
-    height: 33px;
+    right: 330px;
+    width: 25px;
+    height: 26.3px;
     border: none;
-    border-radius: 6px;
-    background-color: #ff3333;
-    color: white;
-    font-size: 12px;
+    border-radius: 0;
+    background: url('../../image/delete_black.png') no-repeat center;
+    background-size: contain;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-image 0.3s ease;
+    padding: 0;
 }
 
 .delete-btn:hover {
-    background-color: #cc0000;
+    background-image: url('../../image/delete.png');
 }
 
 .delete-btn.disabled {
-    background-color: #ffcccc;
+    background-image: url('../../image/delete_black.png');
     cursor: not-allowed;
 }
 

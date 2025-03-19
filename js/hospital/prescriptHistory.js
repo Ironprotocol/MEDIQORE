@@ -38,14 +38,13 @@ export async function initializePrescriptionHistory(patientId) {
         if (data.prescription) {  // prescription 필드가 있는 경우만 표시
             const prescriptionDate = doc.id.split('_')[0];  // YYYY.MM.DD 형식
             const daysBefore = calculateDaysBefore(prescriptionDate);
-            const ccList = data.prescription.cc.join(', ');
 
             // 히스토리 아이템 데이터 저장
             allHistoryItems.push({
                 html: `
                     <div class="record-date">${prescriptionDate} <span>(${daysBefore})</span></div>
                     <div class="record-doctor">Doctor : ${data.doctor || 'Unknown'}</div>
-                    <div class="record-cc">CC : ${ccList}</div>
+                    <div class="record-cc">CC : ${data.prescription.cc[0] || 'None'}</div>
                 `,
                 data: {
                     prescriptionData: data.prescription,
@@ -255,3 +254,4 @@ function calculateDaysBefore(dateStr) {
 }
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
