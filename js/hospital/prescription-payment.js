@@ -246,7 +246,7 @@ async function loadPrescriptionDetails(patientId, container) {
             
             <!-- 하단 고정 Footer -->
             <div class="prescription-footer">
-                <button class="print-btn-payment"></button>
+                <button class="print-btn-payment" title = 'Print this prescription'></button>
                 <button class="payment-complete-btn">
                     Complete Payment
                 </button>

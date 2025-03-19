@@ -168,10 +168,10 @@ export function initializePrescription() {
                 // SVG 그리기 비활성화 함수 호출
                 disableDrawing();
             }
+            
+            // 처방전 비활성화 상태에서 버튼 상태 업데이트
+            updateButtonStates(true);
         });
-        
-        // 초기 상태는 저장되지 않은 상태로 설정
-        updateButtonStates(false);
     });
 
     // 처방전 히스토리 선택 이벤트 처리 - 폼 초기화 기능만 포함

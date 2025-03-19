@@ -34,6 +34,7 @@ async function initializeOrderSetBrowser() {
     // Apply 버튼 추가
     const applyButton = document.createElement('button');
     applyButton.className = 'order-set-apply-btn';
+    applyButton.title = 'Apply order set to prescription'
     applyButton.textContent = 'Apply';
     
     // Apply 버튼에 클릭 이벤트 등록

@@ -137,12 +137,12 @@
 
 /* 프린트 버튼 */
 .print-btn-payment {
-    width: 35px;
-    height: 35px;
+    width: 30px;
+    height: 30px;
     border: none;
     cursor: pointer;
     background: url('../../image/printer.png') no-repeat center;
-    background-size: 35px;
+    background-size: 30px;
     margin-right: 20px;
     transition: background-image 0.3s ease;
 }
@@ -150,7 +150,7 @@
 /* 프린트 버튼 hover 효과 */
 .print-btn-payment:hover {
     background: url('../../image/printer_hover.png') no-repeat center;
-    background-size: 35px;
+    background-size: 30px;
 }
 
 /* 결제 완료 버튼 */
