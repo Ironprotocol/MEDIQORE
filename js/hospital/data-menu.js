@@ -102,7 +102,6 @@ export function initializeDataMenu() {
             // 창 크기 변경 이벤트 리스너 추가
             window.addEventListener('resize', handleResize);
         } else {
-            console.log('User not authenticated. Data loading deferred.');
             // 로그아웃 시 구독 해제
             unsubscribeCurrentListener();
             
@@ -194,7 +193,6 @@ function unsubscribeCurrentListener() {
 async function loadData() {
     try {
         if (!auth.currentUser) {
-            console.log('User not authenticated. Cannot load data.');
             return;
         }
         
@@ -272,7 +270,6 @@ function loadPatientDataRealtime(hospitalName) {
             // 현재 페이지 데이터 표시
             displayPatientData(patients);
             
-            console.log('Patient data updated in real-time');
         }, (error) => {
             console.error('Error in patient snapshot listener:', error);
             patientTableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px; color: red;">Error loading patient data. Please try again.</td></tr>';
@@ -315,7 +312,6 @@ function loadStaffDataRealtime(hospitalName) {
             // 현재 페이지 데이터 표시
             displayStaffData(staffMembers);
             
-            console.log('Staff data updated in real-time');
         }, (error) => {
             console.error('Error in staff snapshot listener:', error);
             staffTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px; color: red;">Error loading staff data. Please try again.</td></tr>';
@@ -587,7 +583,6 @@ async function editPatientDetails(patientId) {
         await openEditPatientModal(patientId, async () => {
             // 편집 완료 후 콜백: Daily 필터가 활성화된 경우 데이터 다시 로드
             if (isDaily && currentDate) {
-                console.log('Patient edited in Daily view, reloading data...');
                 const hospitalName = auth.currentUser.email.split('@')[0].split('.')[0];
                 await loadDailyPatientData(hospitalName, currentDate);
             }
@@ -853,8 +848,6 @@ function renderCalendar(month, year) {
             
             // 달력 닫기
             document.getElementById('daily-calendar-container').style.display = 'none';
-            
-            console.log(`Selected date: ${selectedDate}`);
         });
     });
 }
@@ -871,8 +864,6 @@ async function loadDailyPatientData(hospitalName, dateStr) {
     }
     
     try {
-        console.log(`Loading daily patient data for hospital: ${hospitalName}, date: ${dateStr}`);
-        
         // dates 컬렉션 참조 (payment, waiting, reservation, complete 통합)
         const paymentRef = collection(db, 'hospitals', hospitalName, 'dates', dateStr, 'payment');
         const waitingRef = collection(db, 'hospitals', hospitalName, 'dates', dateStr, 'waiting');
@@ -887,15 +878,12 @@ async function loadDailyPatientData(hospitalName, dateStr) {
             getDocs(completeRef)
         ]);
         
-        console.log(`Got ${paymentDocs.size} payment, ${waitingDocs.size} waiting, ${reservationDocs.size} reservation, ${completeDocs.size} complete docs`);
-        
         // 환자 ID 목록 생성 (중복 제거)
         const patientIds = new Set();
         
         // 각 컬렉션에서 환자 ID 추출 - 문서 ID 전체를 사용
         paymentDocs.forEach(doc => {
             patientIds.add(doc.id);
-            console.log(`Added patient ID from payment: ${doc.id}`);
         });
         
         waitingDocs.forEach(doc => {
@@ -910,8 +898,6 @@ async function loadDailyPatientData(hospitalName, dateStr) {
             patientIds.add(doc.id);
         });
         
-        console.log(`Found ${patientIds.size} unique patients for date: ${dateStr}`);
-        
         if (patientIds.size === 0) {
             patientTableBody.innerHTML = '<tr><td colspan="8" class="no-data-message">No patient records found for this date</td></tr>';
             return;
@@ -920,12 +906,10 @@ async function loadDailyPatientData(hospitalName, dateStr) {
         // 환자 상세 정보 가져오기
         const patientDataPromises = Array.from(patientIds).map(async (patientId) => {
             try {
-                console.log(`Fetching patient data for ID: ${patientId}`);
                 const patientRef = doc(db, 'hospitals', hospitalName, 'patient', patientId);
                 const patientDoc = await getDoc(patientRef);
                 
                 if (patientDoc.exists()) {
-                    console.log(`Found patient document for ID: ${patientId}`);
                     if (patientDoc.data().info) {
                         return {
                             id: patientDoc.id,
@@ -958,8 +942,6 @@ async function loadDailyPatientData(hospitalName, dateStr) {
         
         // 현재 페이지 데이터 표시
         displayPatientData(patientsData);
-        
-        console.log(`Loaded ${patientsData.length} patients for date: ${dateStr}`);
         
     } catch (error) {
         console.error('Error loading daily patient data:', error);
@@ -1080,7 +1062,6 @@ export async function cleanupAllData() {
         
         return true; // 성공적으로 완료됨
     } catch (error) {
-        console.error('Error in cleanupAllData:', error);
         return false; // 오류 발생
     }
 } 

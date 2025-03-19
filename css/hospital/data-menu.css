@@ -174,10 +174,14 @@
     font-size: 12px;
 }
 
-.loading-message {
-    text-align: center;
-    padding: 20px;
-    font-size: 12px;
+/* 로딩 메시지 스타일 */
+.loading-message,
+#patient-data-body td[style*="text-align: center; padding: 20px"],
+#staff-data-body td[style*="text-align: center; padding: 20px"],
+td[style*="text-align: center; padding: 20px"] {
+    text-align: center !important;
+    padding: 20px !important;
+    font-size: 12px !important;
 }
 
 /* 데이터 테이블 컨테이너 스타일 */
