@@ -771,8 +771,8 @@ export function initializePrescription() {
             } else {
                 imageManager.resetImage();
             }
-            // 첨부 버튼 활성화
-            imageManager.enableAttachButton();
+            // 첨부 버튼 비활성화
+            imageManager.disableAttachButton();
         }
 
         // 모든 입력 필드와 버튼 비활성화
