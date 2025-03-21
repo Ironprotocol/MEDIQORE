@@ -387,8 +387,12 @@ export function initializePrescription() {
             // 저장 성공 후 History UI 즉시 업데이트
             await initializePrescriptionHistory(currentPatientId);
             
-            // 저장 성공 후 버튼 상태 업데이트
-            updateButtonStates(true);
+            // Order Set Apply 버튼 비활성화
+            const applyButton = document.querySelector('.order-set-apply-btn');
+            if (applyButton) {
+                applyButton.disabled = true;
+                applyButton.classList.add('disabled');
+            }
             
             // 저장 성공 메시지
             alert('Prescription saved successfully!');
@@ -409,12 +413,64 @@ export function initializePrescription() {
             // SVG와 Canvas 초기화 - prescription_canvas.js의 함수 사용
             const canvas = document.querySelector('.tooth-chart-canvas');
             if (canvas) {
-                const { clearCanvas, clearSVG, initializeCanvas } = await import('./prescription_canvas.js');
+                const { clearCanvas, clearSVG, initializeCanvas, disableDrawing } = await import('./prescription_canvas.js');
                 clearCanvas(canvas);
                 clearSVG();
                 initializeCanvas(currentPatientId, currentRegisterDate);
-                // SVG 그리기 활성화
-                enableDrawing();
+                // SVG 그리기 비활성화로 변경
+                disableDrawing();
+                
+                // Canvas 포인터 이벤트 비활성화
+                canvas.style.pointerEvents = 'none';
+                
+                // SVG 포인터 이벤트 비활성화
+                const svgElement = document.querySelector('.tooth-chart-svg');
+                if (svgElement) {
+                    svgElement.style.pointerEvents = 'none';
+                }
+            }
+            
+            // 모든 입력 필드 비활성화
+            document.querySelectorAll('.cc-search-input, .medicine-search-input, .symptoms-input, .location-input, .treatment-details-input').forEach(element => {
+                element.disabled = true;
+            });
+            
+            // 첨부 버튼 비활성화
+            if (imageManager) {
+                imageManager.disableAttachButton();
+            }
+            
+            // 명시적으로 모든 버튼들을 초기 상태로 비활성화
+            saveBtn.disabled = true;
+            saveBtn.classList.add('disabled');
+            
+            if (sendBtn) {
+                sendBtn.disabled = true;
+                sendBtn.classList.add('disabled');
+            }
+            
+            if (deleteBtn) {
+                deleteBtn.disabled = true;
+                deleteBtn.classList.add('disabled');
+            }
+            
+            if (printBtn) {
+                printBtn.disabled = true;
+                printBtn.classList.add('disabled');
+            }
+            
+            // favorite 버튼 비활성화
+            const favoriteBtn = document.querySelector('.prescription-favorite-btn');
+            if (favoriteBtn) {
+                favoriteBtn.disabled = true;
+                favoriteBtn.classList.add('disabled');
+            }
+            
+            // undo 버튼 비활성화
+            const undoBtn = document.querySelector('.undo-btn');
+            if (undoBtn) {
+                undoBtn.disabled = true;
+                undoBtn.classList.add('disabled');
             }
 
         } catch (error) {
@@ -715,8 +771,8 @@ export function initializePrescription() {
             } else {
                 imageManager.resetImage();
             }
-            // 첨부 버튼 비활성화 (히스토리 조회 시)
-            imageManager.disableAttachButton();
+            // 첨부 버튼 활성화
+            imageManager.enableAttachButton();
         }
 
         // 모든 입력 필드와 버튼 비활성화
@@ -762,8 +818,38 @@ export function initializePrescription() {
             }
         }
         
-        // 버튼 상태 업데이트 - 이미 저장된 처방전이므로 Save 버튼 비활성화, Send 버튼 활성화
-        updateButtonStates(true);
+        // 명시적으로 특정 버튼들 활성화
+        const deleteBtn = document.querySelector('.delete-btn');
+        const printBtn = document.querySelector('.print-btn-prescription');
+        const sendBtn = document.querySelector('.send-btn');
+        const favoriteBtn = document.querySelector('.prescription-favorite-btn');
+        
+        if (deleteBtn) {
+            deleteBtn.disabled = false;
+            deleteBtn.classList.remove('disabled');
+        }
+        
+        if (printBtn) {
+            printBtn.disabled = false;
+            printBtn.classList.remove('disabled');
+        }
+        
+        if (sendBtn) {
+            sendBtn.disabled = false;
+            sendBtn.classList.remove('disabled');
+        }
+        
+        if (favoriteBtn) {
+            favoriteBtn.disabled = false;
+            favoriteBtn.classList.remove('disabled');
+        }
+        
+        // Save 버튼은 비활성화 (이미 저장된 처방전이므로)
+        const saveBtn = document.querySelector('.save-btn');
+        if (saveBtn) {
+            saveBtn.disabled = true;
+            saveBtn.classList.add('disabled');
+        }
     });
 
     // New Chart 버튼 클릭 시 초기화할 때는 다시 활성화
@@ -808,6 +894,20 @@ export function initializePrescription() {
                 element.disabled = false;
             });
             canvas.style.pointerEvents = 'auto';
+            
+            // favorite 버튼 활성화
+            const favoriteBtn = document.querySelector('.prescription-favorite-btn');
+            if (favoriteBtn) {
+                favoriteBtn.disabled = false;
+                favoriteBtn.classList.remove('disabled');
+            }
+            
+            // undo 버튼 활성화
+            const undoBtn = document.querySelector('.undo-btn');
+            if (undoBtn) {
+                undoBtn.disabled = false;
+                undoBtn.classList.remove('disabled');
+            }
             
             // 버튼 상태 업데이트 - Save 버튼 활성화, Send 버튼 비활성화
             updateButtonStates(false);
@@ -1201,26 +1301,72 @@ function updateButtonStates(isSaved) {
     const saveBtn = document.querySelector('.save-btn');
     const sendBtn = document.querySelector('.send-btn');
     const deleteBtn = document.querySelector('.delete-btn');
+    const printBtn = document.querySelector('.print-btn-prescription');
     
-    if (isSaved) {
+    // 초기값 상태 확인 (환자 선택 후 New Chart 버튼을 누르기 전 상태)
+    const isInitialState = document.querySelector('.symptoms-input')?.disabled === true;
+    
+    if (isInitialState) {
+        // 초기값 상태일 때 모든 버튼 비활성화
+        deleteBtn.disabled = true;
+        deleteBtn.classList.add('disabled');
+        
+        printBtn.disabled = true;
+        printBtn.classList.add('disabled');
+        
+        // 다른 버튼들의 상태도 업데이트
+        saveBtn.disabled = true;
+        saveBtn.classList.add('disabled');
+        
+        sendBtn.disabled = true;
+        sendBtn.classList.add('disabled');
+        
+        // favorite 버튼 비활성화
+        const favoriteBtn = document.querySelector('.prescription-favorite-btn');
+        if (favoriteBtn) {
+            favoriteBtn.disabled = true;
+            favoriteBtn.classList.add('disabled');
+        }
+        
+        // undo 버튼 비활성화
+        const undoBtn = document.querySelector('.undo-btn');
+        if (undoBtn) {
+            undoBtn.disabled = true;
+            undoBtn.classList.add('disabled');
+        }
+    }
+    else if (isSaved) {
         // 저장된 처방전인 경우
         saveBtn.disabled = true;
         saveBtn.classList.add('disabled');
+
+        printBtn.disabled = false;
+        printBtn.classList.remove('disabled');
         
         sendBtn.disabled = false;
         sendBtn.classList.remove('disabled');
         
         deleteBtn.disabled = false;
         deleteBtn.classList.remove('disabled');
-    } else {
+    } 
+    else {
         // 저장되지 않은 처방전인 경우
         saveBtn.disabled = false;
         saveBtn.classList.remove('disabled');
         
+        printBtn.disabled = false;
+        printBtn.classList.remove('disabled');
+
         sendBtn.disabled = true;
         sendBtn.classList.add('disabled');
         
         deleteBtn.disabled = true;
         deleteBtn.classList.add('disabled');
     }
+    
+    // 처방전 상태 변경 이벤트 발생
+    const prescriptionStateEvent = new CustomEvent('prescriptionStateChanged', {
+        detail: { isSaved: isSaved }
+    });
+    document.dispatchEvent(prescriptionStateEvent);
 }

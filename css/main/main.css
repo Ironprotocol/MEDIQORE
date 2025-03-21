@@ -40,11 +40,6 @@ body {
     object-fit: contain;
 }
 
-.logo-text {
-    font-weight: 700;
-    font-size: 16px;
-    color: rgb(0, 102, 255);
-}
 
 /* Footer 스타일 */
 .main-footer {

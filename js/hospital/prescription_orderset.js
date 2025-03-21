@@ -181,8 +181,13 @@ async function initializeOrderSetBrowser() {
         const inputFields = document.querySelectorAll('.cc-search-input, .medicine-search-input, .symptoms-input');
         const inputsEnabled = inputFields.length > 0 && Array.from(inputFields).some(field => !field.disabled);
         
-        // 두 조건이 모두 충족되어야 처방전이 활성화된 상태
-        const isActive = patientSelected && inputsEnabled;
+        // 3. 저장 여부 확인 (Save 버튼이 비활성화되어 있으면 이미 저장된 상태)
+        const saveBtn = document.querySelector('.save-btn');
+        const isSaved = saveBtn && (saveBtn.disabled || saveBtn.classList.contains('disabled'));
+        
+        // 위 조건들을 모두 고려하여 활성화 여부 결정
+        // 환자가 선택되고, 입력 필드가 활성화되어 있고, 아직 저장되지 않은 상태여야 함
+        const isActive = patientSelected && inputsEnabled && !isSaved;
         
         // 버튼 상태 업데이트
         if (isActive) {
@@ -197,14 +202,33 @@ async function initializeOrderSetBrowser() {
     // 초기 버튼 상태 설정 및 MutationObserver로 변화 감지
     updateApplyButtonState();
     
+    // 처방전 상태 변경 이벤트 리스너 추가
+    document.addEventListener('prescriptionStateChanged', (e) => {
+        const { isSaved } = e.detail;
+        if (isSaved) {
+            applyButton.disabled = true;
+            applyButton.classList.add('disabled');
+        } else {
+            // 저장되지 않은 경우 다른 조건을 다시 확인
+            updateApplyButtonState();
+        }
+    });
+    
     // 입력 필드의 disabled 속성 변화도 감지
-    const observerConfig = { attributes: true, attributeFilter: ['disabled', 'style'] };
+    const observerConfig = { attributes: true, attributeFilter: ['disabled', 'style', 'class'] };
     const inputFieldsToObserve = document.querySelectorAll('.cc-search-input, .medicine-search-input, .symptoms-input');
     
     inputFieldsToObserve.forEach(field => {
         const observer = new MutationObserver(updateApplyButtonState);
         observer.observe(field, observerConfig);
     });
+    
+    // Save 버튼 상태 변화도 감지
+    const saveBtn = document.querySelector('.save-btn');
+    if (saveBtn) {
+        const saveBtnObserver = new MutationObserver(updateApplyButtonState);
+        saveBtnObserver.observe(saveBtn, observerConfig);
+    }
     
     // MutationObserver 설정
     const patientSelectObserver = new MutationObserver(updateApplyButtonState);

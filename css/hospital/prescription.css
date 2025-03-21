@@ -370,9 +370,15 @@
     transition: background-image 0.3s ease;
 }
 
-.print-btn-prescription:hover {
-    background: url('../../image/printer_hover.png') no-repeat center;
-    background-size: 30px;
+.print-btn-prescription:hover:not(.disabled) {
+    background-image: url('../../image/printer_hover.png');
+}
+
+.print-btn-prescription.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-image: url('../../image/printer.png') !important;
+    background-color: transparent !important;
 }
 
 .cc-search-container {
@@ -753,17 +759,20 @@
     background: url('../../image/delete_black.png') no-repeat center;
     background-size: contain;
     cursor: pointer;
-    transition: background-image 0.3s ease;
+    transition: background-color 0.3s, background-image 0.3s ease;
     padding: 0;
 }
 
-.delete-btn:hover {
+.delete-btn:hover:not(.disabled) {
     background-image: url('../../image/delete.png');
 }
 
+/* Delete 버튼 비활성화 스타일 */
 .delete-btn.disabled {
-    background-image: url('../../image/delete_black.png');
+    opacity: 0.5;
     cursor: not-allowed;
+    background-image: url('../../image/delete_black.png') !important;
+    background-color: transparent !important;
 }
 
 /* Send 버튼 스타일 수정 */
@@ -905,8 +914,48 @@
     background-color: transparent;
 }
 
-.prescription-favorite-btn:hover,
-.prescription-favorite-btn.active {
+.prescription-favorite-btn:hover:not(.disabled),
+.prescription-favorite-btn.active:not(.disabled) {
     background-image: url('../../image/pin.png');
+}
+
+/* 즐겨찾기 버튼 비활성화 스타일 */
+.prescription-favorite-btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-image: url('../../image/pin_black.png') !important;
+    background-color: transparent !important;
+}
+
+/* 차트 컨트롤 버튼 */
+.chart-controls {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    display: flex;
+    gap: 5px;
+}
+
+.undo-btn {
+    width: 20px;
+    height: 20px;
+    background: url('../../image/undo_black.png') no-repeat center;
+    background-size: contain;
+    border: none;
+    cursor: pointer;
+    transition: background-image 0.3s ease;
+    padding: 0;
+    background-color: transparent;
+}
+
+.undo-btn:hover:not(.disabled) {
+    background-image: url('../../image/undo.png');
+}
+
+.undo-btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-image: url('../../image/undo_black.png') !important;
+    background-color: transparent !important;
 }
 
