@@ -1,6 +1,7 @@
 import { auth, db, doc, getDoc, deleteDoc, collection, query, where, getDocs } from '../firebase-config.js';
 import { printPrescription } from './prescription-payment_print.js';
 import { generateQRCodes } from './qrcode.js';
+import { showPaymentModal } from './pay.js';
 
 // Prescription Payment 컨테이너 초기화
 export function initializePrescriptionPayment() {
@@ -261,7 +262,36 @@ async function loadPrescriptionDetails(patientId, container) {
         // 결제 완료 버튼 이벤트 리스너 추가
         const paymentCompleteBtn = container.querySelector('.payment-complete-btn');
         if (paymentCompleteBtn) {
-            paymentCompleteBtn.addEventListener('click', () => completePayment(patientId));
+            paymentCompleteBtn.addEventListener('click', () => {
+                // 가격 정보 (실제로는 처방 내용에 따라 다양하게 계산됨)
+                const calculatePrice = (prescriptionData) => {
+                    let price = 0;
+                    
+                    // CC 항목 개수에 따른 가격 추가
+                    if (prescriptionData.cc && Array.isArray(prescriptionData.cc)) {
+                        price += prescriptionData.cc.length * 5000;
+                    }
+                    
+                    // 약 항목 개수에 따른 가격 추가
+                    if (prescriptionData.medicines && Array.isArray(prescriptionData.medicines)) {
+                        // 각 약에 따른 가격 계산 (복용 기간, 용량 등 고려)
+                        prescriptionData.medicines.forEach(medicine => {
+                            const days = parseInt(medicine.days) || 1;
+                            price += days * 2000;
+                        });
+                    }
+                    
+                    // 기본 진료비
+                    price += 20000;
+                    
+                    return price;
+                };
+                
+                const totalPrice = calculatePrice(prescriptionData);
+                
+                // 결제 모달 표시
+                showPaymentModal(patientId, formattedDate, totalPrice);
+            });
         }
         
         // 프린트 버튼 이벤트 리스너 추가

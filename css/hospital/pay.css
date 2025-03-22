@@ -1,0 +1,305 @@
+/* 결제 모달 스타일 */
+.payment-modal-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    font-family: 'Noto Sans KR', sans-serif;
+}
+
+.payment-modal {
+    width: 450px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+/* 모달 헤더 */
+.payment-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e1e1e1;
+    background-color: #f9f9f9;
+}
+
+.payment-modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+.payment-modal-close {
+    background: none;
+    border: none;
+    font-size: 22px;
+    color: #666;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.payment-modal-close:hover {
+    color: #333;
+}
+
+/* 모달 내용 */
+.payment-modal-body {
+    padding: 20px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.payment-amount {
+    background-color: #f5f9ff;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.payment-amount h4 {
+    margin: 0 0 10px 0;
+    color: #555;
+    font-size: 14px;
+}
+
+.payment-amount-value {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #0052CC;
+}
+
+/* 결제 방법 선택 */
+.payment-method-selection {
+    margin-bottom: 20px;
+}
+
+.payment-method-selection h4 {
+    margin: 0 0 10px 0;
+    color: #555;
+    font-size: 14px;
+}
+
+.payment-method-options {
+    display: flex;
+    gap: 10px;
+}
+
+.payment-method-btn {
+    flex: 1;
+    padding: 12px;
+    background-color: #f1f1f1;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.payment-method-btn:hover {
+    background-color: #e5e5e5;
+}
+
+.payment-method-btn.selected {
+    background-color: #0052CC;
+    color: white;
+    border-color: #0052CC;
+}
+
+/* 결제 방법 세부 정보 */
+.payment-method-details {
+    background-color: #f9f9f9;
+    border-radius: 6px;
+    padding: 15px;
+    margin-top: 15px;
+}
+
+/* 카드 결제 */
+.card-payment-simulate {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.card-payment-simulate p {
+    margin: 0;
+    font-size: 14px;
+    color: #555;
+}
+
+.card-number-input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.card-company-select {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.card-payment-process {
+    padding: 10px;
+    background-color: #0052CC;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.card-payment-process:hover {
+    background-color: #003d99;
+}
+
+/* 카드 결제 진행 상태 */
+.card-payment-status {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.card-payment-loader {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(0, 82, 204, 0.3);
+    border-radius: 50%;
+    border-top-color: #0052CC;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.card-payment-status-text {
+    margin: 0;
+    font-size: 14px;
+    color: #555;
+}
+
+/* 현금 결제 */
+.cash-payment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.cash-amount-input-group, .cash-change-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.cash-amount-input-group label, .cash-change-group label {
+    font-size: 14px;
+    color: #555;
+}
+
+.cash-amount-input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.cash-change-amount {
+    font-size: 16px;
+    font-weight: 600;
+    color: #0052CC;
+    margin: 0;
+}
+
+.cash-payment-process {
+    padding: 10px;
+    background-color: #0052CC;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.cash-payment-process:hover {
+    background-color: #003d99;
+}
+
+/* 모달 푸터 */
+.payment-modal-footer {
+    padding: 16px 20px;
+    border-top: 1px solid #e1e1e1;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.payment-cancel-btn {
+    padding: 8px 16px;
+    background-color: #f1f1f1;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.payment-cancel-btn:hover {
+    background-color: #e5e5e5;
+}
+
+/* 결제 성공 화면 */
+.payment-success {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.payment-success-icon {
+    width: 60px;
+    height: 60px;
+    background-color: #36B37E;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 32px;
+    margin: 0 auto 20px;
+}
+
+.payment-success h3 {
+    margin: 0 0 20px 0;
+    color: #36B37E;
+    font-size: 20px;
+}
+
+.payment-success-details {
+    text-align: left;
+    background-color: #f9f9f9;
+    border-radius: 6px;
+    padding: 15px;
+    margin: 0 auto;
+    max-width: 80%;
+}
+
+.payment-success-details p {
+    margin: 8px 0;
+    font-size: 14px;
+    color: #555;
+}
