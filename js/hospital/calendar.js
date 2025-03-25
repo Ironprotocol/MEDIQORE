@@ -135,7 +135,7 @@ export class CustomCalendar {
     };
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// 스케줄러 초기화 함수 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 스케줄러 초기화 함수 수정
 export function initializeScheduler() {
     const currentDate = new Date();
     
@@ -146,9 +146,7 @@ export function initializeScheduler() {
     // 예약 입력 폼 이벤트 리스너 설정
     const saveReservationBtn = document.getElementById('save-reservation');
     const resetBtn = document.querySelector('.reservation-input-title .reset-btn');
-    const idCheckBtn = document.querySelector('.id-check-btn');
-    const primaryComplaintSelect = document.getElementById('primary-complaint');
-    const otherComplaintTextarea = document.getElementById('other-complaint');
+    const idCheckBtn = document.querySelector('.reservation-id-check-btn');
     
     if (saveReservationBtn) {
         saveReservationBtn.addEventListener('click', handleReservationSave);
@@ -161,19 +159,6 @@ export function initializeScheduler() {
     // ID Check 버튼 이벤트 리스너
     if (idCheckBtn) {
         idCheckBtn.addEventListener('click', handleIdCheck);
-    }
-    
-    // Primary Complaint 선택 이벤트 리스너
-    if (primaryComplaintSelect) {
-        primaryComplaintSelect.addEventListener('change', function() {
-            if (this.value === 'other') {
-                otherComplaintTextarea.style.display = 'block';
-                otherComplaintTextarea.setAttribute('required', 'required');
-            } else {
-                otherComplaintTextarea.style.display = 'none';
-                otherComplaintTextarea.removeAttribute('required');
-            }
-        });
     }
     
     // 달력 초기화
@@ -204,11 +189,6 @@ async function handleIdCheck() {
     try {
         // 현재 로그인한 사용자의 병원 정보
         const user = auth.currentUser;
-        if (!user) {
-            alert('Login required');
-            return;
-        }
-        
         const [hospitalName] = user.email.split('@')[0].split('.');
         
         // 환자 정보 조회
@@ -221,34 +201,123 @@ async function handleIdCheck() {
             return;
         }
         
-        // 환자 정보 가져와서 폼에 채우기
-        const patientData = querySnapshot.docs[0].data();
-        document.getElementById('patient-name').value = patientData.info.patientName || '';
-        document.getElementById('patient-phone').value = patientData.info.phoneNumber || '';
+        // 환자 정보 가져오기
+        const patientDoc = querySnapshot.docs[0];
+        const patientData = patientDoc.data().info;
         
-        alert('Patient information loaded successfully');
+        // 환자 문서 ID 저장 (나중에 예약 저장에 사용)
+        sessionStorage.setItem('currentPatientDocId', patientDoc.id);
+        
+        // 환자 정보 모달 표시
+        showPatientInfoModal(patientData);
         
     } catch (error) {
         console.error('Error checking patient ID:', error);
-        alert('Error checking patient ID');
+        alert('Error checking patient ID: ' + error.message);
     }
+}
+
+// 환자 정보 모달 표시 함수
+function showPatientInfoModal(patientData) {
+    const modal = document.getElementById('patient-check-modal');
+    const infoContainer = modal.querySelector('.rsv-patient-info-container');
+    
+    // 환자 정보 HTML 생성
+    infoContainer.innerHTML = '';
+    
+    // 이름 정보
+    addInfoItem(infoContainer, 'Name', patientData.patientName || 'No information');
+    
+    // ID 번호 정보
+    addInfoItem(infoContainer, 'ID Number', patientData.idNumber || 'No information');
+    
+    // 전화번호 정보
+    addInfoItem(infoContainer, 'Phone', patientData.phoneNumber || 'No information');
+    
+    // 생년월일 정보
+    let birthDateStr = 'No information';
+    if (patientData.birthDate) {
+        const birthDate = patientData.birthDate.toDate ? patientData.birthDate.toDate() : new Date(patientData.birthDate);
+        birthDateStr = birthDate.toLocaleDateString();
+    }
+    addInfoItem(infoContainer, 'Date of Birth', birthDateStr);
+    
+    // 성별 정보
+    addInfoItem(infoContainer, 'Gender', patientData.gender || 'No information');
+    
+    // 주소 정보
+    addInfoItem(infoContainer, 'Address', patientData.address || 'No information');
+    
+    // 보험 정보
+    let insuranceInfo = 'No information';
+    if (patientData.insurance && patientData.insurance.provider && patientData.insurance.cardNumber) {
+        insuranceInfo = `${patientData.insurance.provider} / ${patientData.insurance.cardNumber}`;
+    }
+    addInfoItem(infoContainer, 'Insurance', insuranceInfo);
+    
+    // 모달 표시
+    modal.style.display = 'block';
+    
+    // 모달 이벤트 리스너 설정
+    setupModalEventListeners(patientData);
+}
+
+// 정보 항목 추가 함수
+function addInfoItem(container, label, value) {
+    const item = document.createElement('div');
+    item.className = 'rsv-info-item';
+    
+    const labelEl = document.createElement('div');
+    labelEl.className = 'rsv-info-label';
+    labelEl.textContent = label;
+    
+    const valueEl = document.createElement('div');
+    valueEl.className = 'rsv-info-value';
+    valueEl.textContent = value;
+    
+    item.appendChild(labelEl);
+    item.appendChild(valueEl);
+    container.appendChild(item);
+}
+
+// 모달 이벤트 리스너 설정 함수
+function setupModalEventListeners(patientData) {
+    const modal = document.getElementById('patient-check-modal');
+    const closeBtn = modal.querySelector('.rsv-close-btn');
+    const insertBtn = document.getElementById('rsv-insert-info-btn');
+    
+    // 닫기 버튼 이벤트
+    closeBtn.onclick = function() {
+        modal.style.display = 'none';
+    };
+    
+    // 정보 입력 버튼 이벤트
+    insertBtn.onclick = function() {
+        document.getElementById('patient-id').value = patientData.idNumber || '';
+        document.getElementById('patient-name').value = patientData.patientName || '';
+        document.getElementById('patient-phone').value = patientData.phoneNumber || '';
+        modal.style.display = 'none';
+    };
+    
+    // 모달 외부 클릭 시 닫기
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    };
 }
 
 // 예약 저장 핸들러
 async function handleReservationSave() {
     // 폼 데이터 가져오기
-    const patientId = document.getElementById('patient-id').value.trim();
+    const patientIdNumber = document.getElementById('patient-id').value.trim();
     const patientName = document.getElementById('patient-name').value.trim();
     const time = document.getElementById('reservation-time').value;
     const patientPhone = document.getElementById('patient-phone').value.trim();
-    const primaryComplaint = document.getElementById('primary-complaint').value;
-    const otherComplaint = document.getElementById('other-complaint').value.trim();
-    
-    // 최종 complaint 값 결정
-    const finalComplaint = primaryComplaint === 'other' ? otherComplaint : primaryComplaint;
+    const primaryComplaint = document.getElementById('primary-complaint').value.trim();
     
     // 유효성 검사
-    if (!patientId) {
+    if (!patientIdNumber) {
         alert('Please enter ID Card / Passport number');
         return;
     }
@@ -268,15 +337,23 @@ async function handleReservationSave() {
         return;
     }
     
-    if (!finalComplaint) {
-        alert('Please select or specify primary complaint');
+    if (!primaryComplaint) {
+        alert('Please enter primary complaint');
         return;
     }
     
     try {
         // 현재 선택된 날짜 가져오기
         const currentDate = document.querySelector('.scheduler-header .current-date').textContent;
-        const dateObj = parseDate(currentDate);
+        
+        // 날짜 및 시간 파싱
+        const [day, month, year] = currentDate.split('.');
+        const monthIndex = months.indexOf(month);
+        const [hour, minute] = time.split(':');
+        
+        // 예약 시간 포함한 날짜 객체 생성
+        const rsvdDateTime = new Date(parseInt(year), monthIndex, parseInt(day));
+        rsvdDateTime.setHours(parseInt(hour), parseInt(minute), 0, 0);
         
         // 현재 로그인한 사용자의 병원 정보
         const user = auth.currentUser;
@@ -287,31 +364,43 @@ async function handleReservationSave() {
         
         const [hospitalName] = user.email.split('@')[0].split('.');
         
-        // 예약 정보 생성
-        const reservationData = {
-            date: dateObj,
-            time,
-            patientId,
-            patientName,
-            patientPhone,
-            primaryComplaint: finalComplaint,
-            createdAt: serverTimestamp(),
-            hospitalName
-        };
+        // 환자 정보 조회
+        const patientRef = collection(db, 'hospitals', hospitalName, 'patient');
+        const q = query(patientRef, where('info.idNumber', '==', patientIdNumber));
+        const querySnapshot = await getDocs(q);
         
-        // 예약 정보 저장
-        const reservationsRef = collection(db, 'reservations');
-        await setDoc(doc(reservationsRef), reservationData);
+        if (querySnapshot.empty) {
+            alert('Patient not found. Please check the ID number or register the patient first.');
+            return;
+        }
         
-        // 환자 예약 기록 저장
+        // 환자 문서 가져오기
+        const patientDoc = querySnapshot.docs[0];
+        const patientDocId = patientDoc.id;
+        const patientData = patientDoc.data().info;
+        
+        // 1. 환자별 예약 기록 저장 - register.date 서브컬렉션에 저장
         const registerDateId = `${currentDate.replace(/\./g, '_')}_${time.replace(':', '')}`;
-        const registerDateRef = doc(db, 'hospitals', hospitalName, 'patient', patientId, 'register.date', registerDateId);
+        const registerDateRef = doc(db, 'hospitals', hospitalName, 'patient', patientDocId, 'register.date', registerDateId);
         await setDoc(registerDateRef, {
             timestamp: serverTimestamp(),
-            primaryComplaint: finalComplaint,
+            primaryComplaint: primaryComplaint,
             doctor: null,
             progress: 'reservation',
-            rsvdTime: time
+            rsvdTime: time,
+            gender: patientData.gender || null
+        });
+        
+        // 2. 병원 날짜별 예약 목록 저장 - dates/{날짜}/reservation 컬렉션에 저장
+        const reservationRef = doc(db, 'hospitals', hospitalName, 'dates', currentDate, 'reservation', patientDocId);
+        await setDoc(reservationRef, {
+            timestamp: serverTimestamp(),
+            primaryComplaint: primaryComplaint,
+            doctor: null,
+            rsvdTime: Timestamp.fromDate(rsvdDateTime),
+            gender: patientData.gender || null,
+            patientName: patientData.patientName || patientName,
+            idNumber: patientData.idNumber || patientIdNumber
         });
         
         // 저장 성공 메시지
@@ -321,13 +410,14 @@ async function handleReservationSave() {
         clearReservationForm();
         
         // 예약 목록 업데이트
-        updateSchedulerReservations(currentDate);
+        await Promise.all([
+            updateCalendarReservations(hospitalName),
+            updateSchedulerReservations(currentDate)
+        ]);
         
-        // 달력에 예약 수 업데이트
-        updateCalendarReservations(hospitalName);
     } catch (error) {
         console.error('Error saving reservation:', error);
-        alert('Error saving reservation');
+        alert('Error saving reservation: ' + error.message);
     }
 }
 
@@ -339,9 +429,8 @@ function clearReservationForm() {
     document.getElementById('patient-phone').value = '';
     document.getElementById('primary-complaint').value = '';
     
-    const otherComplaint = document.getElementById('other-complaint');
-    otherComplaint.value = '';
-    otherComplaint.style.display = 'none';
+    // 세션 스토리지 비우기
+    sessionStorage.removeItem('currentPatientDocId');
 }
 
 // 문자열 형태의 날짜를 Date 객체로 변환
@@ -355,183 +444,77 @@ function parseDate(dateStr) {
     return new Date(year, monthIndex, day);
 }
 
-// 스케줄러 예약 정보 업데이트 함수 수정
+// 스케줄러 예약 정보 업데이트 함수
 export async function updateSchedulerReservations(currentDate) {
+    // 예약 정보 표시 영역 가져오기
     const reservedItemsContainer = document.querySelector('.reserved-items-container');
     if (!reservedItemsContainer) return;
     
-    // 기존 예약 항목 모두 제거
+    // 컨테이너 초기화
     reservedItemsContainer.innerHTML = '';
     
+    const user = auth.currentUser;
+    if (!user) return;
+    
+    const [hospitalName] = user.email.split('@')[0].split('.');
+    
     try {
-        // 날짜 파싱
-        const dateObj = parseDate(currentDate);
-        const year = dateObj.getFullYear();
-        const month = dateObj.getMonth();
-        const day = dateObj.getDate();
+        // 해당 날짜의 예약 정보 조회
+        const reservationRef = collection(db, 'hospitals', hospitalName, 'dates', currentDate, 'reservation');
+        const snapshot = await getDocs(reservationRef);
         
-        // 시작 시간과 종료 시간 설정 (해당 날짜의 00:00:00부터 23:59:59까지)
-        const startDate = new Date(year, month, day, 0, 0, 0);
-        const endDate = new Date(year, month, day, 23, 59, 59);
-        
-        // 현재 로그인한 사용자의 병원 정보
-        const user = auth.currentUser;
-        if (!user) return;
-        
-        const [hospitalName] = user.email.split('@')[0].split('.');
-        
-        // Firestore에서 해당 날짜의 예약 정보 가져오기
-        const reservationsRef = collection(db, 'reservations');
-        const q = query(
-            reservationsRef,
-            where('hospitalName', '==', hospitalName),
-            where('date', '>=', startDate),
-            where('date', '<=', endDate)
-        );
-        
-        const querySnapshot = await getDocs(q);
-        
-        // 예약이 없는 경우 메시지 표시
-        if (querySnapshot.empty) {
-            const noReservationsMsg = document.createElement('div');
-            noReservationsMsg.className = 'no-reservations-message';
-            noReservationsMsg.textContent = '이 날짜에 예약된 환자가 없습니다.';
-            reservedItemsContainer.appendChild(noReservationsMsg);
+        if (snapshot.empty) {
+            // 예약이 없는 경우 메시지 표시
+            reservedItemsContainer.innerHTML = '<div class="no-reservations">No reservations for this date</div>';
             return;
         }
         
-        // 예약 정보를 시간 순으로 정렬
+        // 예약 정보를 시간순으로 정렬할 배열
         const reservations = [];
-        querySnapshot.forEach(doc => {
-            reservations.push({
-                id: doc.id,
-                ...doc.data()
-            });
-        });
         
-        // 시간 순으로 정렬
+        // 각 예약에 대해 정보 수집
+        for (const doc of snapshot.docs) {
+            const reservationData = doc.data();
+            const patientId = doc.id;
+            
+            // 시간 포맷팅
+            const rsvdTime = reservationData.rsvdTime.toDate();
+            const formattedTime = `${rsvdTime.getHours().toString().padStart(2, '0')}:${rsvdTime.getMinutes().toString().padStart(2, '0')}`;
+            
+            // 예약 정보 저장
+            reservations.push({
+                time: formattedTime,
+                patientId: reservationData.idNumber || patientId,
+                patientName: reservationData.patientName || 'Unknown',
+                primaryComplaint: reservationData.primaryComplaint || 'Not specified'
+            });
+        }
+        
+        // 시간순으로 정렬
         reservations.sort((a, b) => {
             return a.time.localeCompare(b.time);
         });
         
-        // 예약 항목 생성 및 표시
+        // 예약 정보 표시
         reservations.forEach(reservation => {
             const reservedItem = document.createElement('div');
             reservedItem.className = 'reserved-item';
+            
             reservedItem.innerHTML = `
                 <div class="time">${reservation.time}</div>
                 <div class="patient-info">
                     <div class="patient-name">${reservation.patientName}</div>
                     <div class="appointment-type">${reservation.primaryComplaint}</div>
-                </div>
-                <div class="actions">
-                    <button class="edit-reservation" data-id="${reservation.id}">수정</button>
-                    <button class="delete-reservation" data-id="${reservation.id}">취소</button>
+                    <div class="patient-id">${reservation.patientId}</div>
                 </div>
             `;
             
             reservedItemsContainer.appendChild(reservedItem);
         });
         
-        // 수정 및 취소 버튼 이벤트 리스너 추가
-        document.querySelectorAll('.edit-reservation').forEach(button => {
-            button.addEventListener('click', e => handleEditReservation(e.target.dataset.id));
-        });
-        
-        document.querySelectorAll('.delete-reservation').forEach(button => {
-            button.addEventListener('click', e => handleDeleteReservation(e.target.dataset.id));
-        });
-        
     } catch (error) {
-        console.error('예약 정보 로드 중 오류 발생:', error);
-        const errorMsg = document.createElement('div');
-        errorMsg.className = 'error-message';
-        errorMsg.textContent = '예약 정보를 불러오는 중 오류가 발생했습니다.';
-        reservedItemsContainer.appendChild(errorMsg);
-    }
-}
-
-// 예약 수정 핸들러
-async function handleEditReservation(reservationId) {
-    try {
-        // Firestore에서 예약 정보 가져오기
-        const reservationDoc = await getDoc(doc(db, 'reservations', reservationId));
-        
-        if (!reservationDoc.exists()) {
-            alert('Reservation not found');
-            return;
-        }
-        
-        const reservationData = reservationDoc.data();
-        
-        // 폼에 정보 채우기
-        document.getElementById('patient-id').value = reservationData.patientId || '';
-        document.getElementById('patient-name').value = reservationData.patientName || '';
-        document.getElementById('reservation-time').value = reservationData.time || '';
-        document.getElementById('patient-phone').value = reservationData.patientPhone || '';
-        
-        // Primary Complaint 처리
-        const primaryComplaint = reservationData.primaryComplaint || '';
-        const primaryComplaintSelect = document.getElementById('primary-complaint');
-        const otherComplaintTextarea = document.getElementById('other-complaint');
-        
-        // Primary Complaint이 선택 목록에 있는지 확인
-        const complaintsOptions = Array.from(primaryComplaintSelect.options).map(option => option.value);
-        
-        if (complaintsOptions.includes(primaryComplaint)) {
-            primaryComplaintSelect.value = primaryComplaint;
-            otherComplaintTextarea.style.display = 'none';
-        } else if (primaryComplaint) {
-            // 없으면 "other"로 설정
-            primaryComplaintSelect.value = 'other';
-            otherComplaintTextarea.style.display = 'block';
-            otherComplaintTextarea.value = primaryComplaint;
-        } else {
-            primaryComplaintSelect.value = '';
-            otherComplaintTextarea.style.display = 'none';
-        }
-        
-        // 편집 중인 예약 ID 저장 (나중에 업데이트를 위해)
-        document.getElementById('save-reservation').dataset.editId = reservationId;
-        
-        // 버튼 텍스트 변경
-        document.getElementById('save-reservation').textContent = 'Update';
-        
-    } catch (error) {
-        console.error('Error loading reservation data:', error);
-        alert('Error loading reservation data');
-    }
-}
-
-// 예약 취소(삭제) 핸들러
-async function handleDeleteReservation(reservationId) {
-    if (!confirm('정말로 이 예약을 취소하시겠습니까?')) {
-        return;
-    }
-    
-    try {
-        // Firestore에서 예약 삭제
-        await deleteDoc(doc(db, 'reservations', reservationId));
-        
-        // 삭제 성공 메시지
-        alert('예약이 성공적으로 취소되었습니다.');
-        
-        // 현재 날짜 가져오기
-        const currentDate = document.querySelector('.scheduler-header .current-date').textContent;
-        
-        // 예약 목록 업데이트
-        updateSchedulerReservations(currentDate);
-        
-        // 달력에 예약 수 업데이트
-        const user = auth.currentUser;
-        if (user) {
-            const [hospitalName] = user.email.split('@')[0].split('.');
-            updateCalendarReservations(hospitalName);
-        }
-        
-    } catch (error) {
-        console.error('예약 취소 중 오류 발생:', error);
-        alert('예약 취소 중 오류가 발생했습니다.');
+        console.error('Error updating scheduler reservations:', error);
+        reservedItemsContainer.innerHTML = '<div class="error-message">Error loading reservations</div>';
     }
 }
 

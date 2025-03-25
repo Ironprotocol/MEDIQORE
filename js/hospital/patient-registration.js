@@ -475,8 +475,12 @@ async function checkPatientId() {
         const user = auth.currentUser;
         if (!user) return;
         
-        const idNumber = document.getElementById('idNumber').value.trim();
-        if (!idNumber) {
+        const idNumberInput = document.getElementById('idNumber');
+        const idNumber = idNumberInput ? idNumberInput.value.trim() : '';
+        
+        console.log('ID Number:', idNumber); // 디버깅용 로그
+        
+        if (!idNumber || idNumber === '') {
             alert('Please enter an ID Card or Passport number.');
             return;
         }

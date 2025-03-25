@@ -600,8 +600,7 @@
             </div>
             <div class="content-footer">
                 <button class="register-btn">
-                    <img src="image/register.png" alt="Register Icon">
-                    Register
+                    Register <span class="plus-sign">+</span>
                 </button>
             </div>
         </div>
@@ -687,7 +686,7 @@
                                 <label for="patient-id">ID Card / Passport number</label>
                                 <div class="id-input-wrapper">
                                     <input type="text" id="patient-id" class="form-input" required>
-                                    <button type="button" class="id-check-btn">Check</button>
+                                    <button type="button" class="reservation-id-check-btn">Check</button>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -725,18 +724,7 @@
 
                             <div class="form-group">
                                 <label for="primary-complaint">Primary Complaint</label>
-                                <select id="primary-complaint" class="form-input" required>
-                                    <option value="">Select complaint</option>
-                                    <option value="toothache">Toothache</option>
-                                    <option value="cleaning">Cleaning</option>
-                                    <option value="cavity">Cavity</option>
-                                    <option value="extraction">Extraction</option>
-                                    <option value="implant">Implant</option>
-                                    <option value="denture">Denture</option>
-                                    <option value="orthodontics">Orthodontics</option>
-                                    <option value="other">Other</option>
-                                </select>
-                                <textarea id="other-complaint" class="form-input other-complaint" placeholder="Specify other complaint" style="display: none; margin-top: 10px;"></textarea>
+                                <input type="text" id="primary-complaint" class="form-input" placeholder="Enter patient complaint" required>
                             </div>
                             <div class="form-actions">
                                 <button type="button" id="save-reservation" class="btn btn-primary">RSVD <span class="plus-sign">+</span></button>
@@ -867,6 +855,24 @@
                         <div class="no-visits-message">No visit history found for this patient.</div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 예약 환자 정보 확인 모달 -->
+    <div id="patient-check-modal" class="rsv-patient-modal">
+        <div class="rsv-modal-content">
+            <div class="rsv-modal-header">
+                <h3>Patient Information</h3>
+                <span class="rsv-close-btn">&times;</span>
+            </div>
+            <div class="rsv-modal-body">
+                <div class="rsv-patient-info-container">
+                    <!-- 환자 정보가 여기에 동적으로 추가됩니다 -->
+                </div>
+            </div>
+            <div class="rsv-modal-footer">
+                <button id="rsv-insert-info-btn" class="btn btn-primary">Insert</button>
             </div>
         </div>
     </div>
