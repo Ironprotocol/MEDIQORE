@@ -1,6 +1,13 @@
 // 월 이름 배열을 전역으로 이동 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
+// Firebase 함수 import
+import {
+    app, auth, db, doc, getDoc, setDoc, collection, 
+    query, where, getDocs, updateDoc, deleteDoc,
+    serverTimestamp, Timestamp, onSnapshot, orderBy
+} from '../firebase-config.js';
+
 export class CustomCalendar {
     constructor() {
         this.date = new Date();
@@ -130,46 +137,49 @@ export class CustomCalendar {
 
 // 스케줄러 초기화 함수 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 export function initializeScheduler() {
-    const timeGrid = document.querySelector('.time-grid');
     const currentDate = new Date();
     
-    // 날짜 표시 형식 변경 - 점(.)을 추가 //2025-02-11 17:05
+    // 날짜 표시 형식 변경
     const formattedDate = `${currentDate.getDate().toString().padStart(2, '0')}.${months[currentDate.getMonth()]}.${currentDate.getFullYear()}`;
     document.querySelector('.scheduler-header .current-date').textContent = formattedDate;
     
-    // 시간대 생성 (8:00 ~ 15:00)
-    for (let hour = 8; hour <= 15; hour++) {
-        // 정시
-        const timeSlot = document.createElement('div');
-        timeSlot.className = 'time-slot';
-        timeSlot.textContent = `${hour.toString().padStart(2, '0')}:00`;
-        timeGrid.appendChild(timeSlot);
-        
-        // 5개의 셀 추가 (10개에서 변경)
-        for (let i = 0; i < 5; i++) {
-            const scheduleCell = document.createElement('div');
-            scheduleCell.className = 'schedule-cell';
-            scheduleCell.addEventListener('click', () => handleCellClick(hour, 0, i));
-            timeGrid.appendChild(scheduleCell);
-        }
-        
-        // 30분
-        if (hour < 15) {
-            const halfHourSlot = document.createElement('div');
-            halfHourSlot.className = 'time-slot half-hour';
-            halfHourSlot.textContent = `${hour.toString().padStart(2, '0')}:30`;
-            timeGrid.appendChild(halfHourSlot);
-            
-            // 30분대의 5개 셀 추가 (10개에서 변경)
-            for (let i = 0; i < 5; i++) {
-                const halfHourCell = document.createElement('div');
-                halfHourCell.className = 'schedule-cell';
-                halfHourCell.addEventListener('click', () => handleCellClick(hour, 30, i));
-                timeGrid.appendChild(halfHourCell);
-            }
-        }
+    // 예약 입력 폼 이벤트 리스너 설정
+    const saveReservationBtn = document.getElementById('save-reservation');
+    const clearReservationBtn = document.getElementById('clear-reservation');
+    const idCheckBtn = document.querySelector('.id-check-btn');
+    const primaryComplaintSelect = document.getElementById('primary-complaint');
+    const otherComplaintTextarea = document.getElementById('other-complaint');
+    
+    if (saveReservationBtn) {
+        saveReservationBtn.addEventListener('click', handleReservationSave);
     }
-    // auth 상태가 준비된 후 예약 정보 업데이트
+    
+    if (clearReservationBtn) {
+        clearReservationBtn.addEventListener('click', clearReservationForm);
+    }
+    
+    // ID Check 버튼 이벤트 리스너
+    if (idCheckBtn) {
+        idCheckBtn.addEventListener('click', handleIdCheck);
+    }
+    
+    // Primary Complaint 선택 이벤트 리스너
+    if (primaryComplaintSelect) {
+        primaryComplaintSelect.addEventListener('change', function() {
+            if (this.value === 'other') {
+                otherComplaintTextarea.style.display = 'block';
+                otherComplaintTextarea.setAttribute('required', 'required');
+            } else {
+                otherComplaintTextarea.style.display = 'none';
+                otherComplaintTextarea.removeAttribute('required');
+            }
+        });
+    }
+    
+    // 달력 초기화
+    const calendar = new CustomCalendar();
+    
+    // 현재 날짜의 예약 정보 로드
     if (auth.currentUser) {
         updateSchedulerReservations(formattedDate);
     } else {
@@ -182,272 +192,348 @@ export function initializeScheduler() {
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-function handleCellClick(hour, minute, column) {
-    // 기존 툴팁이 있다면 제거
-    const existingTooltip = document.querySelector('.schedule-tooltip');
-    if (existingTooltip) {
-        existingTooltip.remove();
-    }
-
-    // 현재 선택된 날짜 가져오기 (스케줄러 헤더에서)
-    const selectedDate = document.querySelector('.scheduler-header').textContent;
-
-    const tooltip = document.createElement('div');
-    tooltip.className = 'schedule-tooltip';
-    tooltip.innerHTML = `
-        <div class="tooltip-header">
-            <div class="tooltip-datetime">
-                <span class="tooltip-date">${selectedDate}</span>
-                <span class="tooltip-time">${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}</span>
-            </div>
-            <button class="tooltip-close">×</button>
-        </div>
-        <form class="tooltip-form">
-            <label>ID Card</label>
-            <input type="text" class="tooltip-id-number">
-
-
-            <label>Name</label>
-            <input type="text" class="tooltip-name">
-            
-
-            <label>Gender</label>
-            <div class="tooltip-gender-select">
-                <select class="tooltip-gender">
-                    <option value="">Select Gender</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                </select>
-            </div>
-            
-            <label>Birth Date</label>
-            <div class="date-select-group">
-                <div class="tooltip-birth-select">
-                    <div class="birth-selected">Day</div>
-                    <div class="birth-options">
-                        ${Array.from({length: 31}, (_, i) => i + 1)
-                            .map(day => `<div class="birth-option">${day}</div>`).join('')}
-                    </div>
-                </div>
-                <div class="tooltip-birth-select">
-                    <div class="birth-selected">Month</div>
-                    <div class="birth-options">
-                        ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-                            .map((month, i) => `<div class="birth-option" data-value="${i+1}">${month}</div>`).join('')}
-                    </div>
-                </div>
-                <div class="tooltip-birth-select">
-                    <div class="birth-selected">Year</div>
-                    <div class="birth-options">
-                        ${Array.from({length: 100}, (_, i) => new Date().getFullYear() - i)
-                            .map(year => `<div class="birth-option">${year}</div>`).join('')}
-                    </div>
-                </div>
-            </div>
-            
-            <label>Cell phone number</label>
-            <input type="tel" class="tooltip-phone">
-            
-            <label>Primary Complaint</label>
-            <div class="tooltip-complaint-select">
-                <select class="tooltip-complaint">
-                    <option value="">Select complaint</option>
-                    <option value="toothache">Toothache</option>
-                    <option value="cleaning">Cleaning</option>
-                    <option value="cavity">Cavity</option>
-                    <option value="extraction">Extraction</option>
-                    <option value="implant">Implant</option>
-                    <option value="denture">Denture</option>
-                    <option value="orthodontics">Orthodontics</option>
-                    <option value="other">Other</option>
-                </select>
-                <textarea class="tooltip-complaint-other" placeholder="Specify other complaints"></textarea>
-            </div>
-
-
-            <div class="tooltip-buttons">
-                <button class="tooltip-rsvd-btn">RSVD</button>
-            </div>
-        </form>
-    `;
-
-    document.body.appendChild(tooltip);
-
-    // Birth date 드롭다운 이벤트 설정
-    const birthSelects = tooltip.querySelectorAll('.tooltip-birth-select');
-    birthSelects.forEach(select => {
-        const selected = select.querySelector('.birth-selected');
-        const options = select.querySelector('.birth-options');
-        
-        // 초기 상태 명시적 설정
-        options.style.display = 'none';
-
-        // 드롭다운 토글
-        selected.addEventListener('click', (e) => {
-            // 다른 열린 드롭다운들 닫기
-            birthSelects.forEach(otherSelect => {
-                if (otherSelect !== select) {
-                    otherSelect.querySelector('.birth-options').style.display = 'none';
-                }
-            });
-            options.style.display = options.style.display === 'none' ? 'block' : 'none';
-            e.stopPropagation();
-        });
-
-        // 옵션 선택
-        options.addEventListener('click', (e) => {
-            if (e.target.classList.contains('birth-option')) {
-                selected.textContent = e.target.textContent;
-                options.style.display = 'none';
-                e.stopPropagation();
-            }
-        });
-    });
-
-    // 의사 목록 로드 및 드롭다운 설정
-  
-   // Primary Complaint 드롭다운 이벤트 추가
-   const complaintSelect = tooltip.querySelector('.tooltip-complaint');
-   const complaintOther = tooltip.querySelector('.tooltip-complaint-other');
-
-   complaintSelect.addEventListener('change', (e) => {
-       if (e.target.value === 'other') {
-           complaintOther.style.display = 'block';
-       } else {
-           complaintOther.style.display = 'none';
-       }
-   });
-    // RSVD 버튼 이벤트 리스너
-    const rsvdButton = tooltip.querySelector('.tooltip-rsvd-btn');
-    rsvdButton.addEventListener('click', async (e) => {
-        e.preventDefault();
-        try {
-            const name = tooltip.querySelector('.tooltip-name').value.trim();
-            const idNumber = tooltip.querySelector('.tooltip-id-number').value.trim();
-            const gender = tooltip.querySelector('.tooltip-gender').value;
-            const birthDay = tooltip.querySelector('.tooltip-birth-select:nth-child(1) .birth-selected').textContent;
-            const birthMonth = tooltip.querySelector('.tooltip-birth-select:nth-child(2) .birth-selected').textContent;
-            const birthYear = tooltip.querySelector('.tooltip-birth-select:nth-child(3) .birth-selected').textContent;
-            
-            // 필수값 체크에 ID 번호 추가
-            if (!name || !idNumber || birthDay === 'Day' || birthMonth === 'Month' || birthYear === 'Year') {
-                alert('Please enter name, ID number and birth date');
-                return;
-            }
-
-            const phoneNumber = tooltip.querySelector('.tooltip-phone').value || null;
-            const primaryComplaint = tooltip.querySelector('.tooltip-complaint').value;
-            const otherComplaint = tooltip.querySelector('.tooltip-complaint-other').value;
-            const finalComplaint = primaryComplaint === 'other' ? otherComplaint : primaryComplaint || null;
-            // 의사 정보 관련 코드 제거하고 항상 null로 설정
-            const selectedDoctor = null;
-
-            const user = auth.currentUser;
-            const [hospitalName] = user.email.split('@')[0].split('.');
-            console.log('[RSVD] Hospital Name:', hospitalName);
-            const patientId = `${name}.${idNumber}`;
-
-            // 1. 환자 기본 정보 저장
-            const birthDate = new Date(`${birthMonth} ${birthDay} ${birthYear}`);
-            const patientInfoRef = doc(db, 'hospitals', hospitalName, 'patient', patientId);
-            const existingPatient = await getDoc(patientInfoRef);
-
-            // 새 환자인 경우에만 기본 정보 저장
-            if (!existingPatient.exists()) {
-                await setDoc(patientInfoRef, {
-                    info: {
-                        patientName: name,
-                        idNumber: idNumber,
-                        gender: gender,
-                        birthDate: Timestamp.fromDate(birthDate),
-                        phoneNumber: phoneNumber,
-                        address: null,
-                        insurance: {
-                            status: null,
-                            provider: null,
-                            cardNumber: null
-                        }
-                    }
-                });
-            }
-
-            // 선택된 날짜와 시간 가져오기
-            const tooltipDate = tooltip.querySelector('.tooltip-date').textContent.trim().replace(/\s+/g, '.');
-            console.log('[RSVD] Selected Date:', tooltipDate);
-            const tooltipTime = tooltip.querySelector('.tooltip-time').textContent;
-            
-            // 2. 환자 예약 기록 저장
-            const registerDateId = `${tooltipDate}_${tooltipTime}00`;
-            const registerDateRef = doc(db, 'hospitals', hospitalName, 'patient', patientId, 'register.date', registerDateId);
-            await setDoc(registerDateRef, {
-                timestamp: serverTimestamp(),
-                primaryComplaint: finalComplaint,
-                doctor: selectedDoctor,
-                progress: 'reservation',
-                rsvdTime: tooltipTime,
-                gender: gender
-            });
-
-            // 3. 병원 날짜별 예약 목록 저장
-            const [day, month, year] = tooltipDate.split('.');
-            const monthIndex = months.indexOf(month);
-            const [hour, minute] = tooltipTime.split(':');
-
-            const rsvdDateTime = new Date(year, monthIndex, parseInt(day));
-            rsvdDateTime.setHours(parseInt(hour), parseInt(minute), 0, 0);
-
-            const reservationRef = doc(db, 'hospitals', hospitalName, 'dates', tooltipDate, 'reservation', patientId);
-            await setDoc(reservationRef, {
-                timestamp: serverTimestamp(),
-                primaryComplaint: finalComplaint,
-                doctor: selectedDoctor,
-                rsvdTime: Timestamp.fromDate(rsvdDateTime),
-                gender: gender
-            });
-
-            // Firebase 저장 후
-            console.log('[RSVD] Reservation saved successfully');
-
-            alert('Reservation completed successfully');
-            tooltip.remove();
-
-            console.log('[RSVD] Updating calendar and scheduler...');
-            await Promise.all([
-                updateCalendarReservations(hospitalName),
-                updateSchedulerReservations(tooltipDate)
-            ]);
-            console.log('[RSVD] Update completed');
-
-        } catch (error) {
-            console.error('Error making reservation:', error);
-            alert('Failed to make reservation: ' + error.message);
-        }
-    });
+// ID Check 핸들러
+async function handleIdCheck() {
+    const patientId = document.getElementById('patient-id').value.trim();
     
-    // 외부 클릭 시 드롭다운 닫기
-    document.addEventListener('click', (e) => {
-        // birth date 드롭다운들 닫기
-        if (!e.target.closest('.tooltip-birth-select')) {
-            const birthSelects = tooltip.querySelectorAll('.tooltip-birth-select');
-            birthSelects.forEach(select => {
-                select.querySelector('.birth-options').style.display = 'none';
-            });
+    if (!patientId) {
+        alert('Please enter ID Card / Passport number');
+        return;
+    }
+    
+    try {
+        // 현재 로그인한 사용자의 병원 정보
+        const user = auth.currentUser;
+        if (!user) {
+            alert('Login required');
+            return;
         }
         
-        // tooltip 자체 닫기
-        if (!tooltip.contains(e.target) && !e.target.classList.contains('schedule-cell')) {
-            tooltip.remove();
+        const [hospitalName] = user.email.split('@')[0].split('.');
+        
+        // 환자 정보 조회
+        const patientRef = collection(db, 'hospitals', hospitalName, 'patient');
+        const q = query(patientRef, where('info.idNumber', '==', patientId));
+        const querySnapshot = await getDocs(q);
+        
+        if (querySnapshot.empty) {
+            alert('Patient not found. Please check the ID number or register a new patient.');
+            return;
         }
-    });
-
-    // 닫기 버튼 이벤트
-    tooltip.querySelector('.tooltip-close').addEventListener('click', () => {
-        tooltip.remove();
-    });
+        
+        // 환자 정보 가져와서 폼에 채우기
+        const patientData = querySnapshot.docs[0].data();
+        document.getElementById('patient-name').value = patientData.info.patientName || '';
+        document.getElementById('patient-phone').value = patientData.info.phoneNumber || '';
+        
+        alert('Patient information loaded successfully');
+        
+    } catch (error) {
+        console.error('Error checking patient ID:', error);
+        alert('Error checking patient ID');
+    }
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// 예약 저장 핸들러
+async function handleReservationSave() {
+    // 폼 데이터 가져오기
+    const patientId = document.getElementById('patient-id').value.trim();
+    const patientName = document.getElementById('patient-name').value.trim();
+    const time = document.getElementById('reservation-time').value;
+    const patientPhone = document.getElementById('patient-phone').value.trim();
+    const primaryComplaint = document.getElementById('primary-complaint').value;
+    const otherComplaint = document.getElementById('other-complaint').value.trim();
+    
+    // 최종 complaint 값 결정
+    const finalComplaint = primaryComplaint === 'other' ? otherComplaint : primaryComplaint;
+    
+    // 유효성 검사
+    if (!patientId) {
+        alert('Please enter ID Card / Passport number');
+        return;
+    }
+    
+    if (!patientName) {
+        alert('Please enter patient name');
+        return;
+    }
+    
+    if (!time) {
+        alert('Please select appointment time');
+        return;
+    }
+    
+    if (!patientPhone) {
+        alert('Please enter phone number');
+        return;
+    }
+    
+    if (!finalComplaint) {
+        alert('Please select or specify primary complaint');
+        return;
+    }
+    
+    try {
+        // 현재 선택된 날짜 가져오기
+        const currentDate = document.querySelector('.scheduler-header .current-date').textContent;
+        const dateObj = parseDate(currentDate);
+        
+        // 현재 로그인한 사용자의 병원 정보
+        const user = auth.currentUser;
+        if (!user) {
+            alert('Login required');
+            return;
+        }
+        
+        const [hospitalName] = user.email.split('@')[0].split('.');
+        
+        // 예약 정보 생성
+        const reservationData = {
+            date: dateObj,
+            time,
+            patientId,
+            patientName,
+            patientPhone,
+            primaryComplaint: finalComplaint,
+            createdAt: serverTimestamp(),
+            hospitalName
+        };
+        
+        // 예약 정보 저장
+        const reservationsRef = collection(db, 'reservations');
+        await setDoc(doc(reservationsRef), reservationData);
+        
+        // 환자 예약 기록 저장
+        const registerDateId = `${currentDate.replace(/\./g, '_')}_${time.replace(':', '')}`;
+        const registerDateRef = doc(db, 'hospitals', hospitalName, 'patient', patientId, 'register.date', registerDateId);
+        await setDoc(registerDateRef, {
+            timestamp: serverTimestamp(),
+            primaryComplaint: finalComplaint,
+            doctor: null,
+            progress: 'reservation',
+            rsvdTime: time
+        });
+        
+        // 저장 성공 메시지
+        alert('Reservation saved successfully');
+        
+        // 폼 초기화
+        clearReservationForm();
+        
+        // 예약 목록 업데이트
+        updateSchedulerReservations(currentDate);
+        
+        // 달력에 예약 수 업데이트
+        updateCalendarReservations(hospitalName);
+    } catch (error) {
+        console.error('Error saving reservation:', error);
+        alert('Error saving reservation');
+    }
+}
+
+// 예약 폼 초기화
+function clearReservationForm() {
+    document.getElementById('patient-id').value = '';
+    document.getElementById('patient-name').value = '';
+    document.getElementById('reservation-time').value = '';
+    document.getElementById('patient-phone').value = '';
+    document.getElementById('primary-complaint').value = '';
+    
+    const otherComplaint = document.getElementById('other-complaint');
+    otherComplaint.value = '';
+    otherComplaint.style.display = 'none';
+}
+
+// 문자열 형태의 날짜를 Date 객체로 변환
+function parseDate(dateStr) {
+    // 형식: "DD.MMM.YYYY"
+    const parts = dateStr.split('.');
+    const day = parseInt(parts[0], 10);
+    const monthIndex = months.indexOf(parts[1]);
+    const year = parseInt(parts[2], 10);
+    
+    return new Date(year, monthIndex, day);
+}
+
+// 스케줄러 예약 정보 업데이트 함수 수정
+export async function updateSchedulerReservations(currentDate) {
+    const reservedItemsContainer = document.querySelector('.reserved-items-container');
+    if (!reservedItemsContainer) return;
+    
+    // 기존 예약 항목 모두 제거
+    reservedItemsContainer.innerHTML = '';
+    
+    try {
+        // 날짜 파싱
+        const dateObj = parseDate(currentDate);
+        const year = dateObj.getFullYear();
+        const month = dateObj.getMonth();
+        const day = dateObj.getDate();
+        
+        // 시작 시간과 종료 시간 설정 (해당 날짜의 00:00:00부터 23:59:59까지)
+        const startDate = new Date(year, month, day, 0, 0, 0);
+        const endDate = new Date(year, month, day, 23, 59, 59);
+        
+        // 현재 로그인한 사용자의 병원 정보
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        const [hospitalName] = user.email.split('@')[0].split('.');
+        
+        // Firestore에서 해당 날짜의 예약 정보 가져오기
+        const reservationsRef = collection(db, 'reservations');
+        const q = query(
+            reservationsRef,
+            where('hospitalName', '==', hospitalName),
+            where('date', '>=', startDate),
+            where('date', '<=', endDate)
+        );
+        
+        const querySnapshot = await getDocs(q);
+        
+        // 예약이 없는 경우 메시지 표시
+        if (querySnapshot.empty) {
+            const noReservationsMsg = document.createElement('div');
+            noReservationsMsg.className = 'no-reservations-message';
+            noReservationsMsg.textContent = '이 날짜에 예약된 환자가 없습니다.';
+            reservedItemsContainer.appendChild(noReservationsMsg);
+            return;
+        }
+        
+        // 예약 정보를 시간 순으로 정렬
+        const reservations = [];
+        querySnapshot.forEach(doc => {
+            reservations.push({
+                id: doc.id,
+                ...doc.data()
+            });
+        });
+        
+        // 시간 순으로 정렬
+        reservations.sort((a, b) => {
+            return a.time.localeCompare(b.time);
+        });
+        
+        // 예약 항목 생성 및 표시
+        reservations.forEach(reservation => {
+            const reservedItem = document.createElement('div');
+            reservedItem.className = 'reserved-item';
+            reservedItem.innerHTML = `
+                <div class="time">${reservation.time}</div>
+                <div class="patient-info">
+                    <div class="patient-name">${reservation.patientName}</div>
+                    <div class="appointment-type">${reservation.primaryComplaint}</div>
+                </div>
+                <div class="actions">
+                    <button class="edit-reservation" data-id="${reservation.id}">수정</button>
+                    <button class="delete-reservation" data-id="${reservation.id}">취소</button>
+                </div>
+            `;
+            
+            reservedItemsContainer.appendChild(reservedItem);
+        });
+        
+        // 수정 및 취소 버튼 이벤트 리스너 추가
+        document.querySelectorAll('.edit-reservation').forEach(button => {
+            button.addEventListener('click', e => handleEditReservation(e.target.dataset.id));
+        });
+        
+        document.querySelectorAll('.delete-reservation').forEach(button => {
+            button.addEventListener('click', e => handleDeleteReservation(e.target.dataset.id));
+        });
+        
+    } catch (error) {
+        console.error('예약 정보 로드 중 오류 발생:', error);
+        const errorMsg = document.createElement('div');
+        errorMsg.className = 'error-message';
+        errorMsg.textContent = '예약 정보를 불러오는 중 오류가 발생했습니다.';
+        reservedItemsContainer.appendChild(errorMsg);
+    }
+}
+
+// 예약 수정 핸들러
+async function handleEditReservation(reservationId) {
+    try {
+        // Firestore에서 예약 정보 가져오기
+        const reservationDoc = await getDoc(doc(db, 'reservations', reservationId));
+        
+        if (!reservationDoc.exists()) {
+            alert('Reservation not found');
+            return;
+        }
+        
+        const reservationData = reservationDoc.data();
+        
+        // 폼에 정보 채우기
+        document.getElementById('patient-id').value = reservationData.patientId || '';
+        document.getElementById('patient-name').value = reservationData.patientName || '';
+        document.getElementById('reservation-time').value = reservationData.time || '';
+        document.getElementById('patient-phone').value = reservationData.patientPhone || '';
+        
+        // Primary Complaint 처리
+        const primaryComplaint = reservationData.primaryComplaint || '';
+        const primaryComplaintSelect = document.getElementById('primary-complaint');
+        const otherComplaintTextarea = document.getElementById('other-complaint');
+        
+        // Primary Complaint이 선택 목록에 있는지 확인
+        const complaintsOptions = Array.from(primaryComplaintSelect.options).map(option => option.value);
+        
+        if (complaintsOptions.includes(primaryComplaint)) {
+            primaryComplaintSelect.value = primaryComplaint;
+            otherComplaintTextarea.style.display = 'none';
+        } else if (primaryComplaint) {
+            // 없으면 "other"로 설정
+            primaryComplaintSelect.value = 'other';
+            otherComplaintTextarea.style.display = 'block';
+            otherComplaintTextarea.value = primaryComplaint;
+        } else {
+            primaryComplaintSelect.value = '';
+            otherComplaintTextarea.style.display = 'none';
+        }
+        
+        // 편집 중인 예약 ID 저장 (나중에 업데이트를 위해)
+        document.getElementById('save-reservation').dataset.editId = reservationId;
+        
+        // 버튼 텍스트 변경
+        document.getElementById('save-reservation').textContent = 'Update';
+        
+    } catch (error) {
+        console.error('Error loading reservation data:', error);
+        alert('Error loading reservation data');
+    }
+}
+
+// 예약 취소(삭제) 핸들러
+async function handleDeleteReservation(reservationId) {
+    if (!confirm('정말로 이 예약을 취소하시겠습니까?')) {
+        return;
+    }
+    
+    try {
+        // Firestore에서 예약 삭제
+        await deleteDoc(doc(db, 'reservations', reservationId));
+        
+        // 삭제 성공 메시지
+        alert('예약이 성공적으로 취소되었습니다.');
+        
+        // 현재 날짜 가져오기
+        const currentDate = document.querySelector('.scheduler-header .current-date').textContent;
+        
+        // 예약 목록 업데이트
+        updateSchedulerReservations(currentDate);
+        
+        // 달력에 예약 수 업데이트
+        const user = auth.currentUser;
+        if (user) {
+            const [hospitalName] = user.email.split('@')[0].split('.');
+            updateCalendarReservations(hospitalName);
+        }
+        
+    } catch (error) {
+        console.error('예약 취소 중 오류 발생:', error);
+        alert('예약 취소 중 오류가 발생했습니다.');
+    }
+}
 
 async function updateCalendarReservations(hospitalName) {
     const dates = document.querySelectorAll('.date:not(.empty)');
@@ -474,51 +560,3 @@ async function updateCalendarReservations(hospitalName) {
         }
     });
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-export async function updateSchedulerReservations(currentDate) {
-    // 기존 예약 표시 제거
-    document.querySelectorAll('.schedule-cell').forEach(cell => {
-        cell.innerHTML = '';
-    });
-    
-    const user = auth.currentUser;
-    if (!user) return;
-    
-    const [hospitalName] = user.email.split('@')[0].split('.');
-    
-    // 해당 날짜의 예약 정보 조회
-    const reservationRef = collection(db, 'hospitals', hospitalName, 'dates', currentDate, 'reservation');
-    const snapshot = await getDocs(reservationRef);
-    
-    // 시간대별로 예약 정보 정리
-    const timeSlots = {};
-    snapshot.forEach(doc => {
-        const data = doc.data();
-        // Timestamp를 시간 문자열로 변환
-        const rsvdDateTime = data.rsvdTime.toDate();
-        const time = `${rsvdDateTime.getHours().toString().padStart(2, '0')}:${rsvdDateTime.getMinutes().toString().padStart(2, '0')}`;
-        
-        if (!timeSlots[time]) timeSlots[time] = [];
-        timeSlots[time].push(doc.id);
-    });
-    
-    // 스케줄러에 예약 표시
-    Object.entries(timeSlots).forEach(([time, patients]) => {
-        const [hour, minute] = time.split(':');
-        const rowIndex = (parseInt(hour) - 8) * 2 + (minute === '30' ? 1 : 0);
-        const cells = document.querySelectorAll(`.time-grid .schedule-cell`);
-        
-        patients.forEach((patientId, index) => {
-            const cellIndex = rowIndex * 5 + index;
-            if (cells[cellIndex]) {
-                const nameSpan = document.createElement('span');
-                nameSpan.className = 'patient-name-calendar';
-                nameSpan.textContent = `[${patientId}]`;
-                cells[cellIndex].appendChild(nameSpan);
-            }
-        });
-    });
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

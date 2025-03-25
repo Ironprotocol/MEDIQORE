@@ -9,8 +9,9 @@
             border-radius: 8px;
             display: flex;
             flex-direction: column;   /* 세로 방향으로 배치 변경 */
-            gap: 10px;              
+            gap: 0;  /* 10px에서 0으로 변경 */           
             box-sizing: border-box;
+            overflow: hidden; /* 자식 요소가 모서리를 침범하지 않도록 함 */
         }
 
         /* 새로운 상단 컨테이너 */
@@ -31,30 +32,141 @@
             gap: 10px;
             margin: 0;
             box-sizing: border-box;
+            overflow: hidden;
         }
 
-        /* 커스텀 달력 스타일 */
+        /* 커스텀 달력 스타일 - 이제 왼쪽에 위치 */
         .custom-calendar {
-            flex: 1;            /* Scheduler와 동일한 비율 */
-            width: 100%;        /* 너비 100% */
-            min-width: auto;    /* 최소 너비 제거 */
+            flex: 1.2;
+            width: 100%;
+            min-width: auto;
             height: 100%;
             background: white;
             border-radius: 8px;
-            padding: 10px;
+            padding: 5px;
+            margin: 5px;
             box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+        }
+
+
+        /* 예약 입력 공간 - 이제 중앙에 위치 */
+        .calendar-left-space {
+            flex: 0.6;
+            height: calc(100% - 25px); /* 상단 마진 10px 고려 */
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+            padding: 0;
+            margin-right: 5px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        /* 예약 입력 공간 제목 */
+        .reservation-input-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin: 10px 10px 0px 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        /* ID 입력 래퍼 스타일 */
+        .id-input-wrapper {
+            display: flex;
+            width: 100%;
             position: relative;
         }
 
-        /* 세로선 수정 */
-        .custom-calendar::after {
-            content: '';
-            position: absolute;
-            top: 0px;         /* 상단 패딩 영역까지 확장 */
-            right: -2px;
-            width: 1px;
-            height: calc(100%);  /* 상하 패딩 영역까지 포함 */
-            background-color: #e0e0e0;
+        .id-input-wrapper .form-input {
+            flex: 1;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .id-check-btn {
+            padding: 0 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-top-right-radius: 4px;
+            border-bottom-right-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background-color 0.3s;
+            height: 20px;
+        }
+
+        .id-check-btn:hover {
+            background-color: #0056b3;
+        }
+
+        /* 예약 폼 스타일 */
+        .reservation-form-container .form-group {
+            margin-bottom: 15px;
+        }
+
+        .reservation-form-container label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .reservation-form-container .form-input {
+            width: 100%;
+            padding: 8px 10px;
+            border-right: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .reservation-form-container select.form-input {
+            appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg fill="gray" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 20px;
+            padding-right: 30px;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 45px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+            font-size: 12px;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
         }
 
         /* 기존에 calendar-padding 변수가 없다면 추가 */
@@ -72,7 +184,7 @@
         }
 
         .month-year {
-            font-size: 20px;
+            font-size: 16px;
             font-weight: bold;
             position: absolute;  /* 부모 기준 절대 위치 */
             left: 50%;          /* 부모의 중앙에서 시작 */
@@ -114,6 +226,7 @@
             padding: 5px;
             border-bottom: 1px solid #e0e0e0;
             border-right: 1px solid #e0e0e0;
+            font-size: 14px;
         }
 
         /* 마지막 열의 오른쪽 테두리 제거 */
@@ -126,25 +239,28 @@
             height: 100%;
             display: flex;
             align-items: flex-start;
-            justify-content: center;
+            justify-content: flex-end;
             cursor: pointer;
             border-bottom: 1px solid #e0e0e0;
             border-right: 1px solid #e0e0e0;
             position: relative;
             padding: 4px;
-            font-size: 12px;
+            font-size: 14px;
+            box-sizing: border-box; /* 명시적으로 box-sizing 설정 */
         }
 
         /* 선택된 날짜 스타일 (hover 효과와 동일) */
         .date.selected {
             background: #dcf3fc;
             color: rgb(0, 102, 255);
+            box-sizing: border-box; /* 명시적으로 box-sizing 설정 */
         }
 
         /* hover 효과는 유지 (선택되지 않은 셀에만 적용) */
         .date:not(.selected):hover {
             background: #dcf3fc;
             color: rgb(0, 102, 255);
+            box-sizing: border-box; /* 명시적으로 box-sizing 설정 */
         }
 
         /* 빈 셀에는 selected 클래스와 hover 효과 적용하지 않음 */
@@ -156,16 +272,16 @@
             cursor: default;
         }
 
-        /* 날짜 아래 구분선 */
+        /* 날짜 아래 구분선 - 제거됨
         .date::after {
             content: '';
             position: absolute;
-            top: 22px;          /* 날짜 텍스트 아래 위치 조정 */
+            top: 22px;          
             left: 0;
             width: 100%;
             height: 1px;
             background-color: #e0e0e0;
-        }
+        } */
 
         /* 마지막 열의 오른쪽 테두리 제거 */
         .date:nth-child(7n) {
@@ -206,83 +322,119 @@
             background-color: rgb(0, 82, 204);
         }
 
-        /* 일간 스케줄러 스타일 - 높이 조정 */
+        /* 일간 스케줄러 스타일 - 오른쪽 위치 유지 */
         .daily-scheduler {
             flex: 1;
             width: 100%;
             min-width: auto;
             max-width: none;
             margin: 0;
+            margin-top: 10px;
+            margin-left: 0; /* 왼쪽 여백 제거 */
+            margin-right : 10px;
             border: 1px solid #e0e0e0;
             border-radius: 8px;
-            overflow: auto; /* 내용이 넘칠 경우 스크롤 표시 */
-            height: 100%; /* 최대 높이 제한 제거하고 컨테이너에 맞춤 */
+            overflow: auto;
+            height: calc(100% - 25px);
             box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
         }
 
         .scheduler-header {
             padding: 15px;
             border-bottom: 1px solid #e0e0e0;
             font-weight: bold;
-        }
-
-        /* 시간 그리드 수정 */
-        .time-grid {
-            display: grid;
-            grid-template-columns: 80px repeat(5, 1fr);
-            width: 100%;
-            border-right: 1px solid #e0e0e0;  /* 전체 그리드 우측 테두리 추가 */
-        }
-
-        /* 시간 슬롯 높이 조정 */
-        .time-slot {
-            padding: 2px;
-            border-bottom: 1px solid #e0e0e0;
-            border-right: 1px solid #e0e0e0;
-            font-size: 12px;
             text-align: center;
-            height: 40px;
-            line-height: 40px;
         }
 
-        /* 스케줄 셀 스타일 수정 */
-        .schedule-cell {
-            padding: 2px;
-            border-bottom: 1px solid #e0e0e0;
-            border-right: 1px solid #e0e0e0;
-            height: 40px;
-            cursor: pointer;
-            transition: background-color 0.2s;
+        /* 스케줄러 콘텐츠 영역 - 빈 공간 */
+        .scheduler-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            overflow: auto;
         }
 
-        /* 각 행의 마지막 셀 우측 테두리 제거 */
-        .schedule-cell:nth-child(6n) {  /* 5개 셀 + 1개 time-slot = 6n */
-            border-right: none;
+        /* 시간 그리드 숨김 처리 */
+        .time-grid {
+            display: none;
         }
 
-        .schedule-cell:hover {
-            background-color: #dcf3fc;
+        /* 예약된 항목을 표시할 영역 */
+        .reserved-items-container {
+            width: 100%;
+            height: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        /* 예약 항목 스타일 */
+        .reserved-item {
+            background-color: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .reserved-item .time {
+            font-weight: bold;
+            min-width: 60px;
+        }
+
+        .reserved-item .patient-info {
+            flex: 1;
+            padding: 0 10px;
+        }
+
+        .reserved-item .patient-name {
+            font-weight: bold;
+        }
+
+        .reserved-item .appointment-type {
+            color: #666;
+            font-size: 12px;
+        }
+
+        /* 기존 셀 관련 스타일 제거 또는 숨김 */
+        .time-slot, .schedule-cell {
+            display: none;
         }
 
         .reservation-count {
             position: absolute;
-            top: 2px;
-            right: 2px;
-            background-color: #007bff;
-            color: white;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #0052CC;
+            font-size: 16px;
+            font-weight: bold;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
         }
 
         .patient-name-calendar {
             font-size: 12px;
             color: #007bff;
-            margin-right: 4px;
+            margin: 0;
+            display: block;
+            text-align: center;
+            width: 100%;
+        }
+
+        /* 예약 입력 공간 내부 컨테이너 추가 */
+        .reservation-form-container {
+            width: 100%;
+            height: calc(100% - 40px); /* 타이틀 영역 고려하여 높이 조정 */
+            padding: 10px 10px 0px 10px;
+            overflow-y: auto; /* 내용이 넘칠 경우 스크롤 */
+            box-sizing: border-box;
         }
 
 

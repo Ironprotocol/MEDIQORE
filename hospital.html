@@ -668,12 +668,78 @@
                         </div>
                     </div>
                     
+                    <div class="calendar-left-space">
+                        <div class="reservation-input-title">Enter reservation info</div>
+                        <div class="reservation-form-container">
+                            <!-- 예약 입력 폼 -->
+                            <div class="form-group">
+                                <label for="patient-id">ID Card / Passport number</label>
+                                <div class="id-input-wrapper">
+                                    <input type="text" id="patient-id" class="form-input" required>
+                                    <button type="button" class="id-check-btn">Check</button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="patient-name">Name</label>
+                                <input type="text" id="patient-name" class="form-input" placeholder="Enter patient name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="reservation-time">Time Selection</label>
+                                <select id="reservation-time" class="form-input">
+                                    <option value="">Select time</option>
+                                    <option value="09:00">09:00</option>
+                                    <option value="09:30">09:30</option>
+                                    <option value="10:00">10:00</option>
+                                    <option value="10:30">10:30</option>
+                                    <option value="11:00">11:00</option>
+                                    <option value="11:30">11:30</option>
+                                    <option value="12:00">12:00</option>
+                                    <option value="12:30">12:30</option>
+                                    <option value="13:00">13:00</option>
+                                    <option value="13:30">13:30</option>
+                                    <option value="14:00">14:00</option>
+                                    <option value="14:30">14:30</option>
+                                    <option value="15:00">15:00</option>
+                                    <option value="15:30">15:30</option>
+                                    <option value="16:00">16:00</option>
+                                    <option value="16:30">16:30</option>
+                                    <option value="17:00">17:00</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="patient-phone">Cell Phone Number</label>
+                                <input type="tel" id="patient-phone" class="form-input" placeholder="000-0000-0000" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="primary-complaint">Primary Complaint</label>
+                                <select id="primary-complaint" class="form-input" required>
+                                    <option value="">Select complaint</option>
+                                    <option value="toothache">Toothache</option>
+                                    <option value="cleaning">Cleaning</option>
+                                    <option value="cavity">Cavity</option>
+                                    <option value="extraction">Extraction</option>
+                                    <option value="implant">Implant</option>
+                                    <option value="denture">Denture</option>
+                                    <option value="orthodontics">Orthodontics</option>
+                                    <option value="other">Other</option>
+                                </select>
+                                <textarea id="other-complaint" class="form-input other-complaint" placeholder="Specify other complaint" style="display: none; margin-top: 40px;"></textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" id="clear-reservation" class="btn btn-secondary">Clear</button>
+                                <button type="button" id="save-reservation" class="btn btn-primary">RSVD</button>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="daily-scheduler">
                         <div class="scheduler-header">
                             <span class="current-date"></span>
                         </div>
-                        <div class="time-grid">
-                            <!-- 시간대별 행 (JS로 동적 생성) -->
+                        <div class="scheduler-content">
+                            <div class="reserved-items-container">
+                                <!-- 예약된 항목들이 여기에 표시됩니다 -->
+                            </div>
                         </div>
                     </div>
                 </div>
