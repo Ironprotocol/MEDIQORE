@@ -369,18 +369,51 @@ async function handleReservationSave() {
         const q = query(patientRef, where('info.idNumber', '==', patientIdNumber));
         const querySnapshot = await getDocs(q);
         
+        let patientDocId;
+        let patientData;
+        
         if (querySnapshot.empty) {
-            alert('Patient not found. Please check the ID number or register the patient first.');
-            return;
+            // 환자가 존재하지 않으면 새로 등록
+            console.log("새 환자를 등록합니다:", patientName, patientIdNumber);
+            
+            // 환자 문서 ID 생성 (이름.ID번호 형식)
+            patientDocId = `${patientName}.${patientIdNumber}`;
+            
+            // 환자 기본 정보 생성
+            patientData = {
+                idNumber: patientIdNumber,
+                patientName: patientName,
+                phoneNumber: patientPhone,
+                // 나머지 필드는 비어있음
+                birthDate: null,
+                gender: null,
+                address: null,
+                insurance: {
+                    provider: null,
+                    cardNumber: null
+                }
+            };
+            
+            // 환자 정보 저장
+            const newPatientRef = doc(db, 'hospitals', hospitalName, 'patient', patientDocId);
+            await setDoc(newPatientRef, {
+                info: patientData,
+                timestamp: serverTimestamp()
+            });
+            
+            console.log("새 환자 등록 완료:", patientDocId);
+        } else {
+            // 기존 환자 정보 가져오기
+            const patientDoc = querySnapshot.docs[0];
+            patientDocId = patientDoc.id;
+            patientData = patientDoc.data().info;
         }
         
-        // 환자 문서 가져오기
-        const patientDoc = querySnapshot.docs[0];
-        const patientDocId = patientDoc.id;
-        const patientData = patientDoc.data().info;
-        
         // 1. 환자별 예약 기록 저장 - register.date 서브컬렉션에 저장
-        const registerDateId = `${currentDate.replace(/\./g, '_')}_${time.replace(':', '')}`;
+        // 'dd.mmm.yyyy_ttmmss' 형식으로 문서 ID 생성
+        const formattedHour = hour.padStart(2, '0');
+        const formattedMinute = minute.padStart(2, '0');
+        const registerDateId = `${day}.${month}.${year}_${formattedHour}${formattedMinute}00`;
         const registerDateRef = doc(db, 'hospitals', hospitalName, 'patient', patientDocId, 'register.date', registerDateId);
         await setDoc(registerDateRef, {
             timestamp: serverTimestamp(),
@@ -502,7 +535,7 @@ export async function updateSchedulerReservations(currentDate) {
             
             reservedItem.innerHTML = `
                 <div class="time">${reservation.time}</div>
-                <div class="patient-info">
+                <div class="patient-info-horizontal">
                     <div class="patient-name">${reservation.patientName}</div>
                     <div class="appointment-type">${reservation.primaryComplaint}</div>
                     <div class="patient-id">${reservation.patientId}</div>

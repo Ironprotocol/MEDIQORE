@@ -15,13 +15,15 @@ const editPatientForm = document.getElementById('edit-patient-form');
 const patientIdInput = document.getElementById('edit-patient-id');
 const patientNameInput = document.getElementById('edit-patient-name');
 const idNumberInput = document.getElementById('edit-id-number');
-const genderInputs = document.getElementsByName('edit-gender');
+const genderInputs = document.querySelectorAll('input[name="edit-gender"]');
 const birthDayInput = document.getElementById('edit-birth-day');
 const birthMonthInput = document.getElementById('edit-birth-month');
 const birthYearInput = document.getElementById('edit-birth-year');
 const phoneInput = document.getElementById('edit-phone');
-const addressInput = document.getElementById('edit-address');
-const hasInsuranceInputs = document.getElementsByName('edit-has-insurance');
+const districtInput = document.getElementById('edit-district');
+const cityInput = document.getElementById('edit-city');
+const stateInput = document.getElementById('edit-state');
+const hasInsuranceInputs = document.querySelectorAll('input[name="edit-has-insurance"]');
 const insuranceProviderInput = document.getElementById('edit-insurance-provider');
 const insuranceNumberInput = document.getElementById('edit-insurance-number');
 const insuranceDetailsDiv = document.getElementById('edit-insurance-details');
@@ -33,32 +35,53 @@ const birthErrorSpan = document.getElementById('edit-birth-error');
 const phoneErrorSpan = document.getElementById('edit-phone-error');
 const insuranceErrorSpan = document.getElementById('edit-insurance-error');
 
-// 초기화 함수
+// 생년월일 드롭다운 옵션 생성
+function populateBirthDateDropdowns() {
+    // 일(Day) 옵션 생성
+    birthDayInput.innerHTML = '<option value="">Day</option>';
+    for (let i = 1; i <= 31; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = i;
+        birthDayInput.appendChild(option);
+    }
+    
+    // 년도(Year) 옵션 생성
+    birthYearInput.innerHTML = '<option value="">Year</option>';
+    const currentYear = new Date().getFullYear();
+    for (let i = currentYear; i >= 1900; i--) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = i;
+        birthYearInput.appendChild(option);
+    }
+}
+
+// 모달 초기화
 export function initializePatientEdit() {
-    // 모달 닫기 이벤트 리스너
+    const closeModalBtn = document.querySelector('.close-modal');
+    const cancelEditBtn = document.getElementById('cancel-edit');
+    
+    // 생년월일 드롭다운 초기화
+    populateBirthDateDropdowns();
+    
+    // 닫기 버튼 이벤트
     closeModalBtn.addEventListener('click', closeModal);
     cancelEditBtn.addEventListener('click', closeModal);
     
-    // 모달 외부 클릭 시 닫기
-    window.addEventListener('click', (event) => {
-        if (event.target === editModal) {
-            closeModal();
-        }
-    });
-    
-    // 보험 정보 표시/숨김 처리
+    // 보험 필드 토글 처리
     for (const radio of hasInsuranceInputs) {
         radio.addEventListener('change', toggleInsuranceDetails);
     }
     
-    // 폼 입력 필드 유효성 검사 이벤트 리스너
+    // 수정 폼 유효성 검사 설정
     patientNameInput.addEventListener('blur', validateName);
     idNumberInput.addEventListener('blur', validateIdNumber);
     
-    // 생년월일 필드 유효성 검사
-    birthDayInput.addEventListener('blur', validateBirthDate);
-    birthMonthInput.addEventListener('blur', validateBirthDate);
-    birthYearInput.addEventListener('blur', validateBirthDate);
+    // Date of Birth 필드 유효성 검사
+    birthDayInput.addEventListener('change', validateBirthDate);
+    birthMonthInput.addEventListener('change', validateBirthDate);
+    birthYearInput.addEventListener('change', validateBirthDate);
     
     // 전화번호 필드 유효성 검사
     phoneInput.addEventListener('blur', validatePhone);
@@ -143,9 +166,20 @@ function populateForm(patientData) {
         birthYearInput.value = '';
     }
     
-    // 연락처 및 주소
+    // 주소 설정
+    if (patientData.address) {
+        const addressParts = patientData.address.split(', ');
+        districtInput.value = addressParts[0] || '';
+        cityInput.value = addressParts[1] || '';
+        stateInput.value = addressParts[2] || '';
+    } else {
+        districtInput.value = '';
+        cityInput.value = '';
+        stateInput.value = '';
+    }
+    
+    // 연락처
     phoneInput.value = patientData.phoneNumber || '';
-    addressInput.value = patientData.address || '';
     
     // 보험 정보 설정
     const hasInsurance = patientData.insurance && 
@@ -180,7 +214,7 @@ function closeModal() {
     const submitBtn = document.getElementById('save-patient');
     if (submitBtn) {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Save Changes';
+        submitBtn.textContent = 'Save';
     }
     
     currentPatientId = null;
@@ -211,7 +245,6 @@ async function handleFormSubmit(event, onSaveCallback) {
     try {
         // 로딩 상태 표시
         const submitBtn = document.getElementById('save-patient');
-        const originalBtnText = submitBtn.textContent;
         submitBtn.disabled = true;
         submitBtn.textContent = 'Saving...';
         
@@ -224,7 +257,7 @@ async function handleFormSubmit(event, onSaveCallback) {
         if (Object.keys(changedFields).length === 0) {
             alert('No changes were made.');
             submitBtn.disabled = false;
-            submitBtn.textContent = originalBtnText;
+            submitBtn.textContent = 'Save';
             return;
         }
         
@@ -240,6 +273,9 @@ async function handleFormSubmit(event, onSaveCallback) {
             onSaveCallback();
         }
         
+        // 전체 페이지 새로고침
+        window.location.reload();
+        
     } catch (error) {
         console.error('Error updating patient:', error);
         alert(`Error updating patient: ${error.message}`);
@@ -247,7 +283,7 @@ async function handleFormSubmit(event, onSaveCallback) {
         // 버튼 상태 복원
         const submitBtn = document.getElementById('save-patient');
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Save Changes';
+        submitBtn.textContent = 'Save';
     }
 }
 
@@ -271,6 +307,12 @@ function collectFormData() {
         }
     }
     
+    // 주소 처리
+    const district = districtInput.value.trim();
+    const city = cityInput.value.trim();
+    const state = stateInput.value.trim();
+    const address = `${district}, ${city}, ${state}`;
+    
     // 보험 정보 처리
     let insurance = null;
     const hasInsurance = document.querySelector('input[name="edit-has-insurance"][value="yes"]').checked;
@@ -289,7 +331,7 @@ function collectFormData() {
         gender: gender,
         birthDate: birthDate ? Timestamp.fromDate(birthDate) : null,
         phoneNumber: phoneInput.value.trim(),
-        address: addressInput.value.trim(),
+        address: address,
         insurance: insurance
     };
 }

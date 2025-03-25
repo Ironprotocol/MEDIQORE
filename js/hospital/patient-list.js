@@ -19,8 +19,16 @@ async function createPatientElement(hospitalName, patientData, patientId, type, 
     
     if (!patientDoc.exists()) return null;
 
-    const birthDate = patientDoc.data().info.birthDate.toDate();
-    const age = new Date().getFullYear() - birthDate.getFullYear();
+    // birthDate null 체크 추가
+    let age = '-';
+    if (patientDoc.data().info.birthDate) {
+        try {
+            const birthDate = patientDoc.data().info.birthDate.toDate();
+            age = new Date().getFullYear() - birthDate.getFullYear();
+        } catch (error) {
+            console.log('birthDate 변환 오류:', error);
+        }
+    }
     
     const patientElement = document.createElement('div');
     patientElement.className = 'patient-info-container';
@@ -75,12 +83,16 @@ async function createPatientElement(hospitalName, patientData, patientId, type, 
 
     patientElement.innerHTML = `
         <span class="patient-id-span">
-            <img src="image/${patientDoc.data().info.gender || 'unknown'}.png" 
-                 alt="${patientDoc.data().info.gender || 'unknown'}" 
-                 class="gender-icon">
+            <span style="display: inline-block; width: 10px; height: 14.5px; margin-right: 20px; vertical-align: middle;">
+                ${patientDoc.data().info.gender ? 
+                  `<img src="image/${patientDoc.data().info.gender}.png" 
+                        alt="${patientDoc.data().info.gender}" 
+                        style="width: 10px; height: 14.5px;">` : 
+                  ''}
+            </span>
             ${formatPatientId(patientId)}
         </span>
-        <span class="age-span">${age}years</span>
+        <span class="age-span">${age === '-' ? '-' : `${age}years`}</span>
         <span class="complaint-span">${formatComplaint(patientData.primaryComplaint)}</span>
         <span class="time-span">${timeString}</span>
         <span class="progress-span">
@@ -508,6 +520,16 @@ export async function initializePatientList(hospitalName, currentDate) {
             const key = `${patient.type}-${patient.element.querySelector('.patient-id-span').textContent}`;
             uniquePatients.set(key, patient);
         });
+        
+        // 환자 목록이 비어있는지 확인
+        if (uniquePatients.size === 0) {
+            patientListBody.innerHTML = `
+                <div class="empty-list-message">
+                    <p>No patients found.</p>
+                </div>
+            `;
+            return;
+        }
         
         // 중복이 제거된 환자 목록을 다시 배열로 변환하여 정렬
         Array.from(uniquePatients.values())

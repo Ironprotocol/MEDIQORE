@@ -188,6 +188,38 @@
             height: 28px;
         }
 
+        /* 환자 정보 수정 모달 날짜 입력 스타일 */
+        .date-inputs {
+            display: flex;
+            gap: 5px;
+            width: 100%;
+        }
+
+        .date-inputs select {
+            flex: 1;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            height: 35px;
+        }
+
+        /* 환자 정보 수정 모달 주소 입력 스타일 */
+        .address-inputs {
+            display: flex;
+            gap: 5px;
+            width: 100%;
+        }
+
+        .address-inputs input {
+            flex: 1;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            height: 35px;
+        }
+
         .address-select-group {
             display: flex;
             gap: 10px;

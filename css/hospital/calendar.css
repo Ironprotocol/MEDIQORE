@@ -379,7 +379,7 @@
             margin: 0;
             margin-top: 10px;
             margin-left: 0; /* 왼쪽 여백 제거 */
-            margin-right : 10px;
+            margin-right : 8px;
             border: 1px solid #e0e0e0;
             border-radius: 8px;
             overflow: auto;
@@ -390,10 +390,16 @@
         }
 
         .scheduler-header {
-            padding: 15px;
+            padding: 8px;
             border-bottom: 1px solid #e0e0e0;
             font-weight: bold;
             text-align: center;
+            color: #000000 !important; /* 글자 색상을 검정색으로 설정 - 우선순위 높임 */
+        }
+
+        /* 스케줄러 헤더 내부의 모든 요소도 검정색으로 설정 */
+        .scheduler-header * {
+            color: #000000 !important;
         }
 
         /* 스케줄러 콘텐츠 영역 - 빈 공간 */
@@ -401,7 +407,7 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            padding: 15px;
+            padding: 5px;
             overflow: auto;
         }
 
@@ -433,6 +439,7 @@
         .reserved-item .time {
             font-weight: bold;
             min-width: 60px;
+            font-size: 14px;
         }
 
         .reserved-item .patient-info {
@@ -442,11 +449,39 @@
 
         .reserved-item .patient-name {
             font-weight: bold;
+            color: #666;
         }
 
         .reserved-item .appointment-type {
             color: #666;
             font-size: 12px;
+        }
+
+        /* 환자 정보 가로 배열 스타일 추가 */
+        .reserved-item .patient-info-horizontal {
+            flex: 1;
+            padding: 0 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .reserved-item .patient-name {
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .reserved-item .appointment-type {
+            color: #666;
+            font-size: 12px;
+            flex: 1;
+            text-align: center;
+            padding: 0 5px;
+        }
+
+        .reserved-item .patient-id {
+            font-size: 12px;
+            color: #333;
         }
 
         /* 기존 셀 관련 스타일 제거 또는 숨김 */
@@ -609,6 +644,42 @@
             text-align: center;
             width: 100%;
             padding: 15px 0;
+        }
+
+        /* 환자 정보 가로 배열 스타일 수정 */
+        .reserved-item .patient-info-horizontal {
+            flex: 1;
+            padding: 0 10px;
+            display: grid;
+            grid-template-columns: 30% 40% 30%;
+            align-items: center;
+        }
+
+        .reserved-item .patient-name {
+            font-weight: bold;
+            font-size: 12px;
+            padding-right: 5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .reserved-item .appointment-type {
+            color: #666;
+            font-size: 12px;
+            padding: 0 5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .reserved-item .patient-id {
+            font-size: 12px;
+            color: #333;
+            text-align: right;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
 

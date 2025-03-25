@@ -30,10 +30,7 @@
 
     <!-- Include JavaScript files -->
     <script src="js/firebase-config.js" type="module"></script>
-    <script src="js/auth.js" type="module"></script>
-    <script src="js/hospital/hospital-main.js" type="module"></script>
     <script src="js/hospital/patient-list.js" type="module"></script>
-    <script src="js/hospital/treatment.js" type="module"></script>
     <script src="js/hospital/prescription.js" type="module"></script>
     <script src="js/hospital/calendar.js" type="module"></script>
     <script src="js/hospital/toast.js" type="module"></script>
@@ -398,7 +395,7 @@
                                 Staff
                             </button>
                             <button class="data-filter-btn" data-type="daily">
-                                <img src="image/history.png" alt="Daily" class="daily-icon"> Daily
+                             Daily
                             </button>
                         </div>
                     </div>
@@ -691,7 +688,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="patient-name">Name</label>
-                                <input type="text" id="patient-name" class="form-input" placeholder="Patient name" required>
+                                <input type="text" id="patient-name" class="form-input" placeholder="" required>
                             </div>
                             <div class="form-group">
                                 <label for="patient-phone">Cell Phone Number</label>
@@ -783,9 +780,29 @@
                     <div class="form-group">
                         <label>Date of Birth</label>
                         <div class="date-inputs">
-                            <input type="number" id="edit-birth-day" placeholder="Day" min="1" max="31" class="form-input date-input">
-                            <input type="number" id="edit-birth-month" placeholder="Month" min="1" max="12" class="form-input date-input">
-                            <input type="number" id="edit-birth-year" placeholder="Year" min="1900" max="2100" class="form-input date-input">
+                            <select id="edit-birth-day" class="form-input date-input">
+                                <option value="">Day</option>
+                                <!-- 1-31 날짜 옵션은 JavaScript에서 동적으로 생성 -->
+                            </select>
+                            <select id="edit-birth-month" class="form-input date-input">
+                                <option value="">Month</option>
+                                <option value="1">Jan</option>
+                                <option value="2">Feb</option>
+                                <option value="3">Mar</option>
+                                <option value="4">Apr</option>
+                                <option value="5">May</option>
+                                <option value="6">Jun</option>
+                                <option value="7">Jul</option>
+                                <option value="8">Aug</option>
+                                <option value="9">Sep</option>
+                                <option value="10">Oct</option>
+                                <option value="11">Nov</option>
+                                <option value="12">Dec</option>
+                            </select>
+                            <select id="edit-birth-year" class="form-input date-input">
+                                <option value="">Year</option>
+                                <!-- 년도 옵션은 JavaScript에서 동적으로 생성 -->
+                            </select>
                         </div>
                         <span class="error-message" id="edit-birth-error"></span>
                     </div>
@@ -797,8 +814,12 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="edit-address">Address</label>
-                        <input type="text" id="edit-address" class="form-input">
+                        <label>Address</label>
+                        <div class="address-inputs">
+                            <input type="text" id="edit-district" placeholder="District" class="form-input address-input">
+                            <input type="text" id="edit-city" placeholder="City" class="form-input address-input">
+                            <input type="text" id="edit-state" placeholder="State" class="form-input address-input">
+                        </div>
                     </div>
                     
                     <div class="form-group">
@@ -828,7 +849,7 @@
                     
                     <div class="form-actions">
                         <button type="button" id="cancel-edit" class="btn btn-secondary">Cancel</button>
-                        <button type="submit" id="save-patient" class="btn btn-primary">Save Changes</button>
+                        <button type="submit" id="save-patient" class="btn btn-primary">Save</button>
                     </div>
                 </form>
             </div>

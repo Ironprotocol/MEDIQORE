@@ -170,3 +170,17 @@
     margin-right: 20px;
     vertical-align: middle;
 }
+
+/* 환자 목록이 비어있을 때 표시되는 메시지 스타일 */
+.empty-list-message {
+    text-align: center;
+    padding: 20px;
+    color: #888;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.empty-list-message p {
+    font-size: 12px;
+}
