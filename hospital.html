@@ -39,7 +39,6 @@
     <script src="js/hospital/toast.js" type="module"></script>
     <script src="js/hospital/popup.js" type="module"></script>
     <script src="js/hospital/pay.js" type="module"></script>
-</head>
     <style>
         body {
             margin: 0;
@@ -51,6 +50,7 @@
             -webkit-user-select: none;  /* Safari용 */
             -moz-user-select: none;  /* Firefox용 */
             -ms-user-select: none;  /* IE용 */
+            visibility: hidden; /* 페이지 로드 중 숨김 처리 */
         }
     </style>
     <script type="module">
@@ -668,8 +668,19 @@
                         </div>
                     </div>
                     
+                    <div class="daily-scheduler">
+                        <div class="scheduler-header">
+                            <span class="current-date"></span>
+                        </div>
+                        <div class="scheduler-content">
+                            <div class="reserved-items-container">
+                                <!-- 예약된 항목들이 여기에 표시됩니다 -->
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="calendar-left-space">
-                        <div class="reservation-input-title">Enter reservation info</div>
+                        <div class="reservation-input-title">Enter reservation info<button class="reset-btn"><img src="image/reset.png" alt="Reset"></button></div>
                         <div class="reservation-form-container">
                             <!-- 예약 입력 폼 -->
                             <div class="form-group">
@@ -681,8 +692,13 @@
                             </div>
                             <div class="form-group">
                                 <label for="patient-name">Name</label>
-                                <input type="text" id="patient-name" class="form-input" placeholder="Enter patient name" required>
+                                <input type="text" id="patient-name" class="form-input" placeholder="Patient name" required>
                             </div>
+                            <div class="form-group">
+                                <label for="patient-phone">Cell Phone Number</label>
+                                <input type="tel" id="patient-phone" class="form-input" placeholder="" required>
+                            </div>
+
                             <div class="form-group">
                                 <label for="reservation-time">Time Selection</label>
                                 <select id="reservation-time" class="form-input">
@@ -706,10 +722,7 @@
                                     <option value="17:00">17:00</option>
                                 </select>
                             </div>
-                            <div class="form-group">
-                                <label for="patient-phone">Cell Phone Number</label>
-                                <input type="tel" id="patient-phone" class="form-input" placeholder="000-0000-0000" required>
-                            </div>
+
                             <div class="form-group">
                                 <label for="primary-complaint">Primary Complaint</label>
                                 <select id="primary-complaint" class="form-input" required>
@@ -723,22 +736,10 @@
                                     <option value="orthodontics">Orthodontics</option>
                                     <option value="other">Other</option>
                                 </select>
-                                <textarea id="other-complaint" class="form-input other-complaint" placeholder="Specify other complaint" style="display: none; margin-top: 40px;"></textarea>
+                                <textarea id="other-complaint" class="form-input other-complaint" placeholder="Specify other complaint" style="display: none; margin-top: 10px;"></textarea>
                             </div>
                             <div class="form-actions">
-                                <button type="button" id="clear-reservation" class="btn btn-secondary">Clear</button>
-                                <button type="button" id="save-reservation" class="btn btn-primary">RSVD</button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="daily-scheduler">
-                        <div class="scheduler-header">
-                            <span class="current-date"></span>
-                        </div>
-                        <div class="scheduler-content">
-                            <div class="reserved-items-container">
-                                <!-- 예약된 항목들이 여기에 표시됩니다 -->
+                                <button type="button" id="save-reservation" class="btn btn-primary">RSVD <span class="plus-sign">+</span></button>
                             </div>
                         </div>
                     </div>
@@ -876,5 +877,14 @@
             <!-- 달력은 JavaScript로 동적 생성됨 -->
         </div>
     </div>
+    
+    <script>
+        // 페이지 로드 완료 후 본문 표시
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                document.body.style.visibility = 'visible';
+            }, 300); // 0.3초 후 표시
+        });
+    </script>
 </body>
 </html>

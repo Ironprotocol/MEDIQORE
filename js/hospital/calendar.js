@@ -145,7 +145,7 @@ export function initializeScheduler() {
     
     // 예약 입력 폼 이벤트 리스너 설정
     const saveReservationBtn = document.getElementById('save-reservation');
-    const clearReservationBtn = document.getElementById('clear-reservation');
+    const resetBtn = document.querySelector('.reservation-input-title .reset-btn');
     const idCheckBtn = document.querySelector('.id-check-btn');
     const primaryComplaintSelect = document.getElementById('primary-complaint');
     const otherComplaintTextarea = document.getElementById('other-complaint');
@@ -154,8 +154,8 @@ export function initializeScheduler() {
         saveReservationBtn.addEventListener('click', handleReservationSave);
     }
     
-    if (clearReservationBtn) {
-        clearReservationBtn.addEventListener('click', clearReservationForm);
+    if (resetBtn) {
+        resetBtn.addEventListener('click', clearReservationForm);
     }
     
     // ID Check 버튼 이벤트 리스너
