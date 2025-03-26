@@ -1,21 +1,34 @@
 // QR 코드 생성 함수
 export function generateQRCodes(patientId, prescriptionData, hospitalName, doctorName) {
     try {
-        // 현재 날짜와 시간을 파이어베이스 경로에 맞는 형식으로 변환
-        const now = new Date();
+        // 환자 방문 시간(register time)을 파이어베이스 경로에 맞는 형식으로 사용
+        // 만약 prescriptionData에 registerDate가 있다면 그것을 사용하고 없으면 현재 시간 사용
+        let timestamp;
         
-        // 날짜 포맷 (YYYY.MM.DD)
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        
-        // 시간 포맷 (HH.MM.SS)
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const seconds = String(now.getSeconds()).padStart(2, '0');
-        
-        // 타임스탬프 생성
-        const timestamp = `${year}.${month}.${day}_${hours}.${minutes}.${seconds}`;
+        if (prescriptionData && prescriptionData.registerDate) {
+            // 이미 저장된 register date 사용 (환자가 방문한 실제 등록 시간)
+            timestamp = prescriptionData.registerDate;
+            console.log('환자 등록 시간 사용:', timestamp);
+        } else {
+            // 현재 시간을 Firebase 형식으로 변환 (dd.MMM.yyyy_HHMMSS)
+            const now = new Date();
+            
+            // 날짜 포맷 (dd.MMM.yyyy)
+            const formattedDate = now.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            }).replace(/ /g, '.');
+            
+            // 시간 포맷 (HHMMSS)
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            // 타임스탬프 생성 (dd.MMM.yyyy_HHMMSS)
+            timestamp = `${formattedDate}_${hours}${minutes}${seconds}`;
+            console.log('현재 시간 사용 (register 시간 없음, Firebase 형식):', timestamp);
+        }
         
         // Extract ID number from patientId (assuming format 'name.idNumber')
         const idNumber = patientId.split('.')[1];

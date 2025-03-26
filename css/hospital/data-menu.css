@@ -272,7 +272,7 @@ td[style*="text-align: center; padding: 20px"] {
     display: flex;
     justify-content: center;
     align-items: center;
-    border-top: 1px solid #ccc;
+
     background-color: #ffffff;
     position: absolute;
     bottom: 0;

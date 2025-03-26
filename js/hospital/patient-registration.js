@@ -337,11 +337,18 @@ export function initializeRegistrationForm() {
                     inputBirthDate.getMonth() === existingBirthDate.getMonth() && 
                     inputBirthDate.getDate() === existingBirthDate.getDate();
                 
-                if (patientName !== existingPatient.patientName || 
+                // 대소문자 구분 없이 비교하도록 수정
+                const isPatientNameMatching = patientName.toLowerCase() === (existingPatient.patientName || '').toLowerCase();
+                const isAddressMatching = inputAddress.toLowerCase() === (existingPatient.address || '').toLowerCase();
+                const isPhoneMatching = phoneNumber === existingPatient.phoneNumber;
+                // 성별은 대소문자 구분 없이 비교
+                const isGenderMatching = gender.toLowerCase() === (existingPatient.gender || '').toLowerCase();
+                
+                if (!isPatientNameMatching || 
                     !isBirthDateMatching || 
-                    inputAddress !== existingPatient.address || 
-                    phoneNumber !== existingPatient.phoneNumber || 
-                    gender !== existingPatient.gender || 
+                    !isAddressMatching || 
+                    !isPhoneMatching || 
+                    !isGenderMatching || 
                     !isInsuranceMatching) {
                     
                     alert("This patient is already registered. Please use the 'Check' button to retrieve patient information and register. For changing patient information, please use the 'Data' menu.");
@@ -640,7 +647,31 @@ function displayPatientInfo(patientData) {
         document.getElementById('patientName').value = patientData.patientName || '';
         document.getElementById('idNumber').value = patientData.idNumber || '';
         document.getElementById('phoneNumber').value = patientData.phoneNumber || '';
-        document.getElementById('gender').value = patientData.gender || '';
+        
+        // Gender 드롭다운 선택
+        const genderSelect = document.getElementById('gender');
+        if (genderSelect && patientData.gender) {
+            // 대소문자 일치 문제 해결을 위해 값 비교 방법 개선
+            const genderValue = patientData.gender.trim();
+            const options = Array.from(genderSelect.options);
+            
+            // 정확히 일치하는 옵션 찾기
+            const exactMatch = options.find(opt => opt.value === genderValue);
+            if (exactMatch) {
+                genderSelect.value = exactMatch.value;
+            } 
+            // 대소문자 무시하고 일치하는 옵션 찾기
+            else {
+                const caseInsensitiveMatch = options.find(
+                    opt => opt.value.toLowerCase() === genderValue.toLowerCase()
+                );
+                if (caseInsensitiveMatch) {
+                    genderSelect.value = caseInsensitiveMatch.value;
+                }
+            }
+            
+            console.log('Gender 설정:', genderValue, '선택된 값:', genderSelect.value);
+        }
 
         // 생년월일 채우기
         if (patientData.birthDate) {
@@ -664,9 +695,17 @@ function displayPatientInfo(patientData) {
         const insuranceDetails = document.querySelector('.insurance-details');
         const insuranceProviderDropdown = document.getElementById('insuranceProvider');
 
-        if (patientData.insurance && patientData.insurance.provider && patientData.insurance.cardNumber) {
+        // 보험 정보 존재 여부 체크 (provider와 cardNumber 모두 있는지 확인)
+        const hasValidInsurance = patientData.insurance && 
+                                patientData.insurance.provider && 
+                                patientData.insurance.cardNumber;
+        
+        if (hasValidInsurance) {
+            // 라디오 버튼 선택 상태 설정
             hasInsuranceRadio.checked = true;
             noInsuranceRadio.checked = false;
+            
+            // 보험 상세 정보 영역 표시
             insuranceDetails.style.display = 'block';
             
             // 보험사가 드롭다운에 있는지 확인
@@ -682,14 +721,17 @@ function displayPatientInfo(patientData) {
                 insuranceProviderDropdown.appendChild(newOption);
             }
             
-            // 보험사 선택
+            // 보험사 선택 및 보험 번호 입력
             insuranceProviderDropdown.value = patientData.insurance.provider;
             document.getElementById('insuranceNumber').value = patientData.insurance.cardNumber;
+            
+            console.log('보험 정보 설정:', patientData.insurance);
         } else {
+            // 보험 정보가 없는 경우
             hasInsuranceRadio.checked = false;
             noInsuranceRadio.checked = true;
             insuranceDetails.style.display = 'none';
-            document.getElementById('insuranceProvider').value = '';
+            insuranceProviderDropdown.value = '';
             document.getElementById('insuranceNumber').value = '';
         }
 

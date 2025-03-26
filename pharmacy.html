@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="css/pharmacy/topbar.css">
     <link rel="stylesheet" href="css/pharmacy/common.css">
     <link rel="stylesheet" href="css/pharmacy/pharmacy.css">
+    <link rel="stylesheet" href="css/pharmacy/prepare.css">
     <script type="module" src="js/pharmacy/pharmacy_menu.js"></script>
 </head>
 <style>
@@ -99,10 +100,16 @@
         <div id="prepare-content" class="content-container pharmacy-container">
             <div class="content-header">
                 <div class="content-title">Prepare</div>
-
             </div>
+            <div class="vertical-divider"></div>
             <div class="content-body">
                 <!-- Pharmacy 컨텐츠 내용 -->
+            </div>
+            <div class="content-footer pharmacy-footer">
+                <!-- 푸터 내용 -->
+                <button class="prepare-btn">
+                    Prepare <span class="plus-sign">+</span>
+                </button>
             </div>
         </div>
 
@@ -130,10 +137,12 @@
     <script type="module">
         import { auth } from './js/firebase-config.js';
         import { initializeTopBar } from './js/pharmacy/pharmacy_topbar.js';
+        import { initializePrepare } from './js/pharmacy/prepare.js';
         
-        // 페이지 로드 시 topbar 초기화
+        // 페이지 로드 시 초기화
         document.addEventListener('DOMContentLoaded', function() {
             initializeTopBar();
+            initializePrepare(); // prepare.js 초기화
         });
     </script>
 </body>

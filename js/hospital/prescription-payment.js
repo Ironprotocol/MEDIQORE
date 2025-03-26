@@ -149,6 +149,9 @@ async function loadPrescriptionDetails(patientId, container) {
             medicines: prescriptionData.medicines || []
         };
         
+        // registerDate를 prescriptionData에 추가 (QR 코드 생성에 사용)
+        prescriptionData.registerDate = registerDateDoc.id;
+        
         // 처방전 정보 표시 - 테이블 형식으로 변경
         container.innerHTML = `
             <div class="prescription-payment-details">

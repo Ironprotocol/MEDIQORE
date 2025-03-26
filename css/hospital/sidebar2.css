@@ -13,18 +13,11 @@
             flex-direction: column;
         }
         
-        /* patient-list-title: 환자 목록 제목 */
-        .patient-list-title {
-            padding: 20px;
-            font-size: 14px;
-            font-weight: 700;
-            color: rgb(0, 0, 0);
-        }
-
         /* submenu-container: 하위 메뉴 컨테이너 */
         .submenu-container {
             display: flex;
             padding: 0 10px;
+            margin-top: 13px;
             border-bottom: 1px solid hsl(0, 0%, 85%);
             align-items: center;  /* 세로 중앙 정렬 */
         }
