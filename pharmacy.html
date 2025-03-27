@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="css/pharmacy/common.css">
     <link rel="stylesheet" href="css/pharmacy/pharmacy.css">
     <link rel="stylesheet" href="css/pharmacy/prepare.css">
+    <link rel="stylesheet" href="css/pharmacy/inventory.css">
     <script type="module" src="js/pharmacy/pharmacy_menu.js"></script>
 </head>
 <style>
@@ -138,11 +139,13 @@
         import { auth } from './js/firebase-config.js';
         import { initializeTopBar } from './js/pharmacy/pharmacy_topbar.js';
         import { initializePrepare } from './js/pharmacy/prepare.js';
+        import { initializeInventory } from './js/pharmacy/inventory.js';
         
         // 페이지 로드 시 초기화
         document.addEventListener('DOMContentLoaded', function() {
             initializeTopBar();
             initializePrepare(); // prepare.js 초기화
+            initializeInventory(); // inventory.js 초기화
         });
     </script>
 </body>

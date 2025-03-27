@@ -1,0 +1,83 @@
+/* Inventory 상단 헤더의 업로드 컨테이너 스타일 */
+.upload-container {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 100%;
+}
+
+/* 업로드 버튼 컨테이너 */
+.upload-button-container {
+    margin-right: 15px;
+}
+
+/* 엑셀 업로드 버튼 스타일 */
+.excel-upload-label {
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.excel-upload-label:hover {
+    background-color: #45a049;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.excel-upload-label:active {
+    transform: translateY(1px);
+}
+
+/* 업로드 상태 표시 영역 스타일 */
+.upload-status {
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-left: 10px;
+    max-width: 300px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 상태 메시지 타입별 스타일 */
+.upload-status.info {
+    background-color: #e3f2fd;
+    color: #0d47a1;
+}
+
+.upload-status.success {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.upload-status.error {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+/* 모바일 반응형 스타일 */
+@media (max-width: 768px) {
+    .upload-container {
+        flex-direction: column;
+        right: 10px;
+    }
+    
+    .upload-button-container {
+        margin-right: 0;
+        margin-bottom: 5px;
+    }
+    
+    .upload-status {
+        font-size: 12px;
+        padding: 4px 8px;
+        max-width: 150px;
+    }
+}
