@@ -10,32 +10,49 @@ document.head.appendChild(script);
 export function initializeInventory() {
     console.log('Initializing Inventory Management');
     
-    // Inventory 헤더에 엑셀 업로드 버튼 추가
+    // Inventory 헤더 찾기
     const inventoryHeader = document.querySelector('#inventory-content .content-header');
+    
     if (!inventoryHeader) {
         console.error('Inventory header not found');
         return;
     }
     
-    // 업로드 버튼과 상태 표시 영역 생성
-    const uploadContainer = document.createElement('div');
-    uploadContainer.className = 'upload-container';
+    // 이미 생성된 버튼이 있는지 확인
+    if (document.querySelector('.excel-upload-btn')) {
+        console.log('Upload button already exists');
+        return;
+    }
     
-    uploadContainer.innerHTML = `
-        <div class="upload-button-container">
-            <label for="excel-upload" class="excel-upload-label">Upload Excel</label>
-            <input type="file" id="excel-upload" accept=".xlsx, .xls" style="display:none;">
-        </div>
-        <div class="upload-status" id="upload-status"></div>
-    `;
+    // 업로드 버튼 생성
+    const uploadButton = document.createElement('button');
+    uploadButton.className = 'excel-upload-btn';
+    uploadButton.innerHTML = 'Upload Excel <span class="plus-sign">+</span>';
     
-    inventoryHeader.appendChild(uploadContainer);
+    // 파일 입력 요소 생성
+    const uploadInput = document.createElement('input');
+    uploadInput.type = 'file';
+    uploadInput.id = 'excel-upload';
+    uploadInput.accept = '.xlsx, .xls';
+    uploadInput.style.display = 'none';
+    
+    // 상태 표시 요소 생성
+    const statusElem = document.createElement('div');
+    statusElem.id = 'upload-status';
+    statusElem.className = 'upload-status';
+    
+    // 헤더에 요소 추가
+    inventoryHeader.appendChild(uploadButton);
+    inventoryHeader.appendChild(uploadInput);
+    inventoryHeader.appendChild(statusElem);
+    
+    // 버튼 클릭 이벤트 리스너 설정
+    uploadButton.addEventListener('click', function() {
+        uploadInput.click();
+    });
     
     // 파일 업로드 이벤트 리스너 설정
-    const fileInput = document.getElementById('excel-upload');
-    if (fileInput) {
-        fileInput.addEventListener('change', handleFileUpload);
-    }
+    uploadInput.addEventListener('change', handleFileUpload);
 }
 
 // 파일 업로드 처리 함수

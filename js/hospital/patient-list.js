@@ -1,6 +1,7 @@
 import {  auth, db, collection, query, where, getDocs, 
     doc, getDoc, setDoc, serverTimestamp, Timestamp,
     onSnapshot, orderBy, updateDoc, deleteDoc } from '../firebase-config.js';
+import { showToast } from './toast.js';
 
 // 전역 상태로 환자 목록 관리
 let allPatients = [];
@@ -425,6 +426,9 @@ async function createPatientElement(hospitalName, patientData, patientId, type, 
     deleteBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
         
+        // 환자 이름 가져오기 - 안전하게 가져오도록 수정
+        let patientName = patientId.split('.')[0] || "Unknown";  // 기본적으로 patientId에서 추출
+        
         // 첫 번째 확인 창
         if (confirm('Are you sure you want to delete this patient?')) {
             // 두 번째 확인 창 - 커스텀 모달 사용
@@ -478,6 +482,12 @@ async function createPatientElement(hospitalName, patientData, patientId, type, 
                         }
                     });
                     document.dispatchEvent(patientDeletedEvent);
+                    
+                    // 삭제 성공 토스트 메시지 표시
+                    showToast(`'${patientName}' have been removed from the list.`, {
+                        type: 'success',
+                        duration: 5000
+                    });
 
                 } catch (error) {
                     console.error('Error deleting patient:', error);
@@ -650,90 +660,75 @@ export function clearPatientSelection() {
 // 커스텀 경고 모달 함수 추가
 function showWarningModal(message, title = 'Warning') {
     return new Promise((resolve) => {
-        // 기존 모달이 있으면 제거
-        const existingModal = document.getElementById('warning-modal');
-        if (existingModal) {
-            existingModal.remove();
+        // 기존 팝업이 있으면 제거
+        const existingPopup = document.querySelector('.popup');
+        if (existingPopup) {
+            existingPopup.remove();
+        }
+        
+        const existingOverlay = document.querySelector('.popup-overlay');
+        if (existingOverlay) {
+            existingOverlay.remove();
         }
 
-        // 모달 컨테이너 생성
-        const modalContainer = document.createElement('div');
-        modalContainer.id = 'warning-modal';
-        modalContainer.style.position = 'fixed';
-        modalContainer.style.top = '0';
-        modalContainer.style.left = '0';
-        modalContainer.style.width = '100%';
-        modalContainer.style.height = '100%';
-        modalContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-        modalContainer.style.display = 'flex';
-        modalContainer.style.justifyContent = 'center';
-        modalContainer.style.alignItems = 'center';
-        modalContainer.style.zIndex = '9999';
+        // 배경 오버레이 생성
+        const overlay = document.createElement('div');
+        overlay.className = 'popup-overlay';
+        
+        // 팝업 컨테이너 생성
+        const popup = document.createElement('div');
+        popup.className = 'popup';
 
-        // 모달 콘텐츠 생성
-        const modalContent = document.createElement('div');
-        modalContent.style.backgroundColor = 'white';
-        modalContent.style.padding = '20px';
-        modalContent.style.borderRadius = '5px';
-        modalContent.style.width = '400px';
-        modalContent.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
-
-        // 제목 생성
-        const titleElement = document.createElement('h3');
+        // 메시지 텍스트 추가
+        const messageContent = document.createElement('div');
+        messageContent.className = 'popup-content';
+        
+        // 제목 요소
+        const titleElement = document.createElement('div');
+        titleElement.className = 'popup-title';
         titleElement.textContent = title;
-        titleElement.style.color = '#d9534f'; // 빨간색 경고 색상
-        titleElement.style.textAlign = 'center';
-        titleElement.style.margin = '0 0 20px 0';
-        titleElement.style.fontWeight = 'bold';
-        titleElement.style.fontSize = '14px';
-
-        // 메시지 생성
-        const messageElement = document.createElement('p');
+        
+        // 메시지 요소
+        const messageElement = document.createElement('div');
+        messageElement.className = 'popup-message';
         messageElement.textContent = message;
-        messageElement.style.textAlign = 'center';
-        messageElement.style.margin = '0 0 20px 0';
-        messageElement.style.fontSize = '14px';
+        
+        // 메시지 컨텐츠에 제목과 메시지 추가
+        messageContent.appendChild(titleElement);
+        messageContent.appendChild(messageElement);
 
         // 버튼 컨테이너
         const buttonContainer = document.createElement('div');
-        buttonContainer.style.display = 'flex';
-        buttonContainer.style.justifyContent = 'center';
-        buttonContainer.style.gap = '10px';
+        buttonContainer.className = 'popup-actions';
 
         // Yes 버튼
         const yesButton = document.createElement('button');
         yesButton.textContent = 'Yes';
-        yesButton.style.padding = '8px 16px';
-        yesButton.style.backgroundColor = '#d9534f';
-        yesButton.style.color = 'white';
-        yesButton.style.border = 'none';
-        yesButton.style.borderRadius = '4px';
-        yesButton.style.cursor = 'pointer';
+        yesButton.className = 'popup-btn popup-btn-confirm';
 
         // No 버튼
         const noButton = document.createElement('button');
         noButton.textContent = 'No';
-        noButton.style.padding = '8px 16px';
-        noButton.style.backgroundColor = '#f0f0f0';
-        noButton.style.border = 'none';
-        noButton.style.borderRadius = '4px';
-        noButton.style.cursor = 'pointer';
+        noButton.className = 'popup-btn popup-btn-cancel';
 
         // 이벤트 리스너 추가
         yesButton.addEventListener('click', () => {
-            modalContainer.remove();
+            popup.remove();
+            overlay.remove();
             resolve(true);
         });
 
         noButton.addEventListener('click', () => {
-            modalContainer.remove();
+            popup.remove();
+            overlay.remove();
             resolve(false);
         });
-
-        // 모달 외부 클릭 시 닫기
-        modalContainer.addEventListener('click', (e) => {
-            if (e.target === modalContainer) {
-                modalContainer.remove();
+        
+        // 오버레이 클릭 시 닫기
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                popup.remove();
+                overlay.remove();
                 resolve(false);
             }
         });
@@ -742,13 +737,11 @@ function showWarningModal(message, title = 'Warning') {
         buttonContainer.appendChild(noButton);
         buttonContainer.appendChild(yesButton);
         
-        modalContent.appendChild(titleElement);
-        modalContent.appendChild(messageElement);
-        modalContent.appendChild(buttonContainer);
+        popup.appendChild(messageContent);
+        popup.appendChild(buttonContainer);
         
-        modalContainer.appendChild(modalContent);
-        
-        // 모달을 body에 추가
-        document.body.appendChild(modalContainer);
+        // 팝업과 오버레이를 body에 추가
+        document.body.appendChild(overlay);
+        document.body.appendChild(popup);
     });
 }

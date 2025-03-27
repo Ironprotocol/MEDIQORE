@@ -8,8 +8,8 @@
 }
 
 .toast {
-    width: 300px;
-    height: 50px;
+    width: 400px;
+    min-height: 50px;
     background-color: #0052CC;
     color: #ffffff;
     border-radius: 4px;
@@ -31,6 +31,23 @@
 .toast.visible {
     opacity: 1;
     transform: translateY(0);
+}
+
+/* Toast type styles */
+.toast-info {
+    background-color: #0052CC;
+}
+
+.toast-success {
+    background-color: #0052CC;
+}
+
+.toast-warning {
+    background-color: #FF8B00;
+}
+
+.toast-error {
+    background-color: #DE350B;
 }
 
 .toast-close {

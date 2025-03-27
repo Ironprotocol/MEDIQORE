@@ -1,47 +1,51 @@
-/* Inventory 상단 헤더의 업로드 컨테이너 스타일 */
-.upload-container {
-    display: flex;
-    align-items: center;
+/* 엑셀 업로드 버튼 스타일 */
+.excel-upload-btn {
     position: absolute;
     right: 20px;
     top: 50%;
     transform: translateY(-50%);
-    height: 100%;
-}
-
-/* 업로드 버튼 컨테이너 */
-.upload-button-container {
-    margin-right: 15px;
-}
-
-/* 엑셀 업로드 버튼 스타일 */
-.excel-upload-label {
-    display: inline-block;
     padding: 8px 16px;
-    background-color: #4CAF50;
+    background-color: #47D599;
     color: white;
-    border-radius: 4px;
+    border-radius: 20px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 12px;
+    width: 120px;
+    border: none;
+    outline: none;
     transition: all 0.2s ease;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
 }
 
-.excel-upload-label:hover {
-    background-color: #45a049;
+.excel-upload-btn .plus-sign {
+    font-size: 16px;
+    font-weight: bold;
+    margin-left: 2px;
+}
+
+.excel-upload-btn:hover {
+    background-color: #34a174;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-.excel-upload-label:active {
-    transform: translateY(1px);
+.excel-upload-btn:active {
+    transform: translateY(-50%) translateY(1px);
 }
 
 /* 업로드 상태 표시 영역 스타일 */
 .upload-status {
+    position: absolute;
+    right: 130px;
+    top: 50%;
+    transform: translateY(-50%);
     padding: 8px 12px;
     border-radius: 4px;
     font-size: 14px;
-    margin-left: 10px;
-    max-width: 300px;
+    max-width: 250px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -63,21 +67,3 @@
     color: #c62828;
 }
 
-/* 모바일 반응형 스타일 */
-@media (max-width: 768px) {
-    .upload-container {
-        flex-direction: column;
-        right: 10px;
-    }
-    
-    .upload-button-container {
-        margin-right: 0;
-        margin-bottom: 5px;
-    }
-    
-    .upload-status {
-        font-size: 12px;
-        padding: 4px 8px;
-        max-width: 150px;
-    }
-}
