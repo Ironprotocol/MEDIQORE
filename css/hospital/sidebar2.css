@@ -337,3 +337,110 @@
             border-bottom: none;
         }
        
+        /* 완료된 환자 항목 스타일 */
+        .complete-patient {
+            position: relative;
+            background-color: #f8f8f8;
+            border-left: 4px solid #6c757d;
+            margin-bottom: 8px;
+            padding: 10px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .complete-patient:hover {
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+            background-color: #f0f0f0;
+        }
+
+        .complete-patient-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            width: 100%;
+        }
+
+        .complete-patient .patient-name {
+            font-weight: bold;
+            font-size: 13px;
+            color: #333;
+            text-align: left;
+        }
+
+        .complete-patient .doctor-name {
+            font-size: 11px;
+            color: #333;
+            text-align: right;
+        }
+
+        .payment-info {
+            padding-top: 5px;
+            margin-top: 5px;
+            border-top: 1px dashed #ddd;
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #666;
+            width: 100%;
+        }
+
+        .payment-method-amount {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .payment-method {
+            color: #555;
+            line-height: 1;
+            padding: 0;
+            margin: 0;
+        }
+
+        .payment-amount-done {
+            color: #555;
+            line-height: 1;
+            padding: 0;
+            margin: 0;
+        }
+
+        .complete-time {
+            text-align: right;
+            color: #666;
+            line-height: 1;
+            padding: 0;
+            margin: 0;
+        }
+
+        .empty-message, .error-message {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .error-message {
+            color: #d9534f;
+        }
+
+        /* Done 목록 컨테이너의 스크롤바 스타일 */
+        .done-list-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .done-list-container::-webkit-scrollbar-track {
+            background: #f0f0f0;
+            border-radius: 4px;
+        }
+
+        .done-list-container::-webkit-scrollbar-thumb {
+            background-color: #6c757d;
+            border-radius: 4px;
+            border: 2px solid #f0f0f0;
+        }
+
+        .done-list-container::-webkit-scrollbar-thumb:hover {
+            background-color: #218838;
+        }
+       

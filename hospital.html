@@ -56,7 +56,7 @@
         import {checkUserPermissions, initializeMenuEvents, initializeHomePage} from './js/hospital/desk-menu.js';
         import {initializePatientList} from './js/hospital/patient-list.js';
         import {initializeRoomManagement, handleRoomLogout} from './js/hospital/room.js';
-        import {initializeSubmenuEvents, initializeSubmenuItemEvents } from './js/hospital/sidebar2.js';
+        import {initializeSubmenuEvents, initializeSubmenuItemEvents, removeCompletedPatientsFromRooms} from './js/hospital/sidebar2.js';
         import {CustomCalendar,initializeScheduler} from './js/hospital/calendar.js';
         import {handleComplaintChange, initializeNewPatientButton, loadDoctors, initializeAddressSearch, initializeInsuranceForm, initializeRegistrationForm} from './js/hospital/patient-registration.js';
         import {initializePrescription} from './js/hospital/prescription.js';
@@ -155,6 +155,9 @@
               await initializePatientList(hospitalName, currentDate); //patient-list.js - 환자 리스트 전체 관리
               roomUnsubscribe = await initializeRoomManagement(hospitalName);
               initializePrescription();  // Prescription 초기화
+              
+              // 페이지 로드 시 treatment room에서 complete 상태의 환자 제거
+              await removeCompletedPatientsFromRooms();
                 
               auth.onAuthStateChanged(async (user) => {
                     if (!user) {

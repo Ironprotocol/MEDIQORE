@@ -1,8 +1,8 @@
 // 결제 모달 관련 기능
-import { auth, db, doc, getDoc } from '../firebase-config.js';
+import { auth, db, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, serverTimestamp } from '../firebase-config.js';
 
 // 결제 모달 표시 함수
-export function showPaymentModal(patientId, registerDate, amount) {
+export function showPaymentModal(patientId, registerDate, amount, allowEdit = false) {
     // 결제 컨테이너 생성
     const modalContainer = document.createElement('div');
     modalContainer.className = 'payment-modal-container';
@@ -17,7 +17,10 @@ export function showPaymentModal(patientId, registerDate, amount) {
             <div class="payment-modal-body">
                 <div class="payment-amount">
                     <h4>Total Amount</h4>
-                    <p class="payment-amount-value">${amount ? amount.toLocaleString() : '0'} KRW</p>
+                    ${allowEdit ? 
+                        `<input type="number" class="payment-amount-input" placeholder="Suggested: ${amount ? amount.toLocaleString() : '0'} KRW">` : 
+                        `<p class="payment-amount-value">${amount ? amount.toLocaleString() : '0'} KRW</p>`
+                    }
                 </div>
                 
                 <div class="payment-method-selection">
@@ -67,9 +70,6 @@ export function showPaymentModal(patientId, registerDate, amount) {
                     </div>
                 </div>
             </div>
-            <div class="payment-modal-footer">
-                <button class="payment-cancel-btn">Cancel</button>
-            </div>
         </div>
     `;
     
@@ -78,20 +78,38 @@ export function showPaymentModal(patientId, registerDate, amount) {
     // 이벤트 리스너 설정
     setupPaymentModalListeners(modalContainer, patientId, registerDate, amount);
     
+    // 모달이 추가된 후 opacity 조정하여 애니메이션 적용
+    setTimeout(() => {
+        modalContainer.style.opacity = '1';
+        modalContainer.style.visibility = 'visible';
+    }, 10);
+    
+    // 사용자 입력 필드에 포커스
+    if (allowEdit) {
+        const inputField = modalContainer.querySelector('.payment-amount-input');
+        if (inputField) {
+            setTimeout(() => inputField.focus(), 100);
+        }
+    }
+    
     return modalContainer;
 }
 
 // 결제 모달 이벤트 리스너 설정
-function setupPaymentModalListeners(modalContainer, patientId, registerDate, amount) {
+function setupPaymentModalListeners(modalContainer, patientId, registerDate, suggestedAmount) {
     // 닫기 버튼
     modalContainer.querySelector('.payment-modal-close').addEventListener('click', () => {
         document.body.removeChild(modalContainer);
     });
     
-    // 취소 버튼
-    modalContainer.querySelector('.payment-cancel-btn').addEventListener('click', () => {
-        document.body.removeChild(modalContainer);
-    });
+    // 현재 금액 값 가져오기 함수
+    const getCurrentAmount = () => {
+        const amountInput = modalContainer.querySelector('.payment-amount-input');
+        if (amountInput) {
+            return parseFloat(amountInput.value) || suggestedAmount;
+        }
+        return suggestedAmount;
+    };
     
     // 결제 방법 선택 버튼
     modalContainer.querySelectorAll('.payment-method-btn').forEach(btn => {
@@ -117,6 +135,7 @@ function setupPaymentModalListeners(modalContainer, patientId, registerDate, amo
     // 현금 결제 금액 입력 처리
     const cashAmountInput = modalContainer.querySelector('.cash-amount-input');
     cashAmountInput.addEventListener('input', () => {
+        const amount = getCurrentAmount();
         const receivedAmount = parseFloat(cashAmountInput.value) || 0;
         const changeGroup = modalContainer.querySelector('.cash-change-group');
         const changeAmount = modalContainer.querySelector('.cash-change-amount');
@@ -147,7 +166,8 @@ function setupPaymentModalListeners(modalContainer, patientId, registerDate, amo
     });
     
     // 카드 결제 처리 버튼
-    modalContainer.querySelector('.card-payment-process').addEventListener('click', () => {
+    modalContainer.querySelector('.card-payment-process').addEventListener('click', async () => {
+        const amount = getCurrentAmount();
         const cardNumber = modalContainer.querySelector('.card-number-input').value.trim();
         const cardCompany = modalContainer.querySelector('.card-company-select').value;
         
@@ -165,16 +185,22 @@ function setupPaymentModalListeners(modalContainer, patientId, registerDate, amo
         modalContainer.querySelector('.card-payment-simulate').style.display = 'none';
         modalContainer.querySelector('.card-payment-status').style.display = 'block';
         
-        // 여기서는 실제 결제 처리를 시뮬레이션만 하고, 실제 Firebase 저장 등은 하지 않음
-        setTimeout(() => {
-            // 성공적인 결제 처리 시뮬레이션
-            showPaymentSuccessUI(modalContainer, {
+        try {
+            // 결제 정보 객체
+            const paymentInfo = {
                 method: 'card',
                 amount: amount,
                 cardNumber: maskCardNumber(cardNumber),
                 cardCompany: cardCompany,
-                approvalNumber: generateApprovalNumber()
-            });
+                approvalNumber: generateApprovalNumber(),
+                timestamp: new Date()
+            };
+            
+            // payment → complete 상태 변경 처리
+            await processPaymentCompletion(patientId, registerDate, paymentInfo);
+            
+            // 성공적인 결제 처리 UI 표시
+            showPaymentSuccessUI(modalContainer, paymentInfo);
             
             // 3초 후 모달 닫기
             setTimeout(() => {
@@ -182,11 +208,19 @@ function setupPaymentModalListeners(modalContainer, patientId, registerDate, amo
                     document.body.removeChild(modalContainer);
                 }
             }, 3000);
-        }, 2000);
+        } catch (error) {
+            console.error('Payment processing error:', error);
+            alert('Payment processing failed: ' + error.message);
+            
+            // 에러 발생 시 카드 결제 입력 화면으로 되돌리기
+            modalContainer.querySelector('.card-payment-simulate').style.display = 'block';
+            modalContainer.querySelector('.card-payment-status').style.display = 'none';
+        }
     });
     
     // 현금 결제 처리 버튼
-    modalContainer.querySelector('.cash-payment-process').addEventListener('click', () => {
+    modalContainer.querySelector('.cash-payment-process').addEventListener('click', async () => {
+        const amount = getCurrentAmount();
         const receivedAmount = parseFloat(modalContainer.querySelector('.cash-amount-input').value) || 0;
         
         if (receivedAmount < amount) {
@@ -194,20 +228,32 @@ function setupPaymentModalListeners(modalContainer, patientId, registerDate, amo
             return;
         }
         
-        // 성공적인 결제 처리 시뮬레이션
-        showPaymentSuccessUI(modalContainer, {
-            method: 'cash',
-            amount: amount,
-            receivedAmount: receivedAmount,
-            change: receivedAmount - amount
-        });
-        
-        // 3초 후 모달 닫기
-        setTimeout(() => {
-            if (document.body.contains(modalContainer)) {
-                document.body.removeChild(modalContainer);
-            }
-        }, 3000);
+        try {
+            // 결제 정보 객체
+            const paymentInfo = {
+                method: 'cash',
+                amount: amount,
+                receivedAmount: receivedAmount,
+                change: receivedAmount - amount,
+                timestamp: new Date()
+            };
+            
+            // payment → complete 상태 변경 처리
+            await processPaymentCompletion(patientId, registerDate, paymentInfo);
+            
+            // 성공적인 결제 처리 UI 표시
+            showPaymentSuccessUI(modalContainer, paymentInfo);
+            
+            // 3초 후 모달 닫기
+            setTimeout(() => {
+                if (document.body.contains(modalContainer)) {
+                    document.body.removeChild(modalContainer);
+                }
+            }, 3000);
+        } catch (error) {
+            console.error('Payment processing error:', error);
+            alert('Payment processing failed: ' + error.message);
+        }
     });
 }
 
@@ -227,30 +273,126 @@ function generateApprovalNumber() {
     return Math.floor(10000000 + Math.random() * 90000000).toString();
 }
 
-// 결제 성공 UI 표시
+// 결제 완료 UI 표시
 function showPaymentSuccessUI(modalContainer, paymentData) {
-    // 모달 내용 교체
     const modalBody = modalContainer.querySelector('.payment-modal-body');
     
+    // 결제 방법에 따른 상세 내용 생성
+    let detailsHTML = '';
+    if (paymentData.method === 'card') {
+        detailsHTML = `
+            <p><strong>Amount:</strong> ${paymentData.amount.toLocaleString()} KRW</p>
+            <p><strong>Card Number:</strong> ${paymentData.cardNumber}</p>
+            <p><strong>Card Company:</strong> ${paymentData.cardCompany}</p>
+            <p><strong>Approval Number:</strong> ${paymentData.approvalNumber}</p>
+        `;
+    } else if (paymentData.method === 'cash') {
+        detailsHTML = `
+            <p><strong>Amount:</strong> ${paymentData.amount.toLocaleString()} KRW</p>
+            <p><strong>Received:</strong> ${paymentData.receivedAmount.toLocaleString()} KRW</p>
+            <p><strong>Change:</strong> ${paymentData.change.toLocaleString()} KRW</p>
+        `;
+    }
+    
+    // 결제 성공 UI로 교체
     modalBody.innerHTML = `
         <div class="payment-success">
             <div class="payment-success-icon">✓</div>
-            <h3>Payment Successful</h3>
+            <h3>Payment Successful!</h3>
             <div class="payment-success-details">
-                <p><strong>Method:</strong> ${paymentData.method === 'card' ? 'Card' : 'Cash'}</p>
-                <p><strong>Amount:</strong> ${paymentData.amount.toLocaleString()} KRW</p>
-                ${paymentData.method === 'card' ? 
-                    `<p><strong>Card Company:</strong> ${paymentData.cardCompany}</p>
-                     <p><strong>Approval Number:</strong> ${paymentData.approvalNumber}</p>` : 
-                    `<p><strong>Received:</strong> ${paymentData.receivedAmount.toLocaleString()} KRW</p>
-                     <p><strong>Change:</strong> ${paymentData.change.toLocaleString()} KRW</p>`
-                }
-                <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
+                ${detailsHTML}
+                <p><strong>Method:</strong> ${paymentData.method === 'card' ? 'Card Payment' : 'Cash Payment'}</p>
             </div>
         </div>
     `;
-    
-    // 닫기 및 취소 버튼 숨기기
-    modalContainer.querySelector('.payment-modal-close').style.display = 'none';
-    modalContainer.querySelector('.payment-modal-footer').style.display = 'none';
+}
+
+// payment → complete 상태 변경 처리 함수
+async function processPaymentCompletion(patientId, registerDate, paymentInfo) {
+    try {
+        const [hospitalName] = auth.currentUser.email.split('@')[0].split('.');
+        
+        // 오늘 날짜 가져오기
+        const today = new Date();
+        const formattedDate = today.toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
+        }).replace(/ /g, '.');
+        
+        // 1. register.date 문서 업데이트 - 정확한 registerDate ID 사용
+        const registerDocRef = doc(db, 'hospitals', hospitalName, 'patient', patientId, 'register.date', registerDate);
+        
+        // 문서가 존재하는지 확인
+        const registerDocSnap = await getDoc(registerDocRef);
+        if (!registerDocSnap.exists()) {
+            console.error(`Register document not found at path: ${registerDocRef.path}`);
+            throw new Error(`Register document not found: ${registerDocRef.path}`);
+        }
+        
+        // 문서 업데이트
+        await updateDoc(registerDocRef, {
+            progress: 'complete',
+            payment: paymentInfo
+        });
+        
+        // 2. 환자 정보 가져오기 (payment 컬렉션에서)
+        const paymentRef = doc(db, 'hospitals', hospitalName, 'dates', formattedDate, 'payment', patientId);
+        const paymentDoc = await getDoc(paymentRef);
+        
+        if (!paymentDoc.exists()) {
+            console.error(`Payment document not found at path: ${paymentRef.path}`);
+            throw new Error('Patient payment record not found');
+        }
+        
+        const patientData = paymentDoc.data();
+        
+        // 3. complete 컬렉션에 환자 데이터 생성
+        const completeRef = doc(db, 'hospitals', hospitalName, 'dates', formattedDate, 'complete', patientId);
+        
+        await setDoc(completeRef, {
+            ...patientData,
+            progress: 'complete',  // 명시적으로 progress 설정
+            completeTime: serverTimestamp(),
+            payment: paymentInfo
+        });
+        
+        // 4. payment 문서 삭제
+        await deleteDoc(paymentRef);
+        
+        // 5. treatment.room의 patients 배열 업데이트
+        const roomsRef = collection(db, 'hospitals', hospitalName, 'treatment.room');
+        const roomsSnapshot = await getDocs(roomsRef);
+        
+        let roomUpdated = false;
+        
+        for (const roomDoc of roomsSnapshot.docs) {
+            const roomData = roomDoc.data();
+            if (roomData.patients && roomData.patients.some(patient => patient.id === patientId)) {
+                const updatedPatients = roomData.patients.map(patient => {
+                    if (patient.id === patientId) {
+                        // 진료실에서 환자 업데이트
+                        return {
+                            ...patient,
+                            progress: 'complete'
+                        };
+                    }
+                    return patient;
+                });
+                
+                await updateDoc(roomDoc.ref, { patients: updatedPatients });
+                roomUpdated = true;
+                break;
+            }
+        }
+        
+        // 6. 확인을 위해 업데이트된 문서 가져오기
+        const updatedRegisterDoc = await getDoc(registerDocRef);
+        const updatedCompleteDoc = await getDoc(completeRef);
+        
+        return true;
+    } catch (error) {
+        console.error('Error processing payment completion:', error);
+        throw error;
+    }
 }

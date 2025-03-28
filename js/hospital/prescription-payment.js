@@ -290,10 +290,12 @@ async function loadPrescriptionDetails(patientId, container) {
                     return price;
                 };
                 
-                const totalPrice = calculatePrice(prescriptionData);
+                // 계산 금액을 계산하지만 자동 입력하지 않고 제안 금액으로만 표시
+                const suggestedPrice = calculatePrice(prescriptionData);
                 
-                // 결제 모달 표시
-                showPaymentModal(patientId, formattedDate, totalPrice);
+                // 결제 모달 표시 - 직접 입력 가능하도록 수정
+                // 중요: 정확한 register.date 문서 ID를 사용
+                showPaymentModal(patientId, prescriptionData.registerDate, suggestedPrice, true);
             });
         }
         
