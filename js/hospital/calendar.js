@@ -355,6 +355,13 @@ async function handleReservationSave() {
         const rsvdDateTime = new Date(parseInt(year), monthIndex, parseInt(day));
         rsvdDateTime.setHours(parseInt(hour), parseInt(minute), 0, 0);
         
+        // 현재 시간과 비교
+        const now = new Date();
+        if (rsvdDateTime < now) {
+            alert('Cannot make reservation for a past time. Please select a future time.');
+            return;
+        }
+        
         // 현재 로그인한 사용자의 병원 정보
         const user = auth.currentUser;
         if (!user) {
@@ -363,6 +370,25 @@ async function handleReservationSave() {
         }
         
         const [hospitalName] = user.email.split('@')[0].split('.');
+        
+        // 환자가 이미 patient list에 있는지 확인 (waiting, active, payment 컬렉션)
+        const collections = ['waiting', 'active', 'payment'];
+        
+        for (const collectionName of collections) {
+            const patientListRef = collection(db, 'hospitals', hospitalName, 'dates', currentDate, collectionName);
+            const patientListSnapshot = await getDocs(patientListRef);
+            
+            // 환자 ID로 환자 정보 찾기
+            const matchingPatient = patientListSnapshot.docs.find(doc => {
+                const patientData = doc.data();
+                return doc.id.includes(patientIdNumber) || (patientData.idNumber && patientData.idNumber === patientIdNumber);
+            });
+            
+            if (matchingPatient) {
+                alert(`This patient is already in the ${collectionName} list. Cannot make a new reservation.`);
+                return;
+            }
+        }
         
         // 환자 정보 조회
         const patientRef = collection(db, 'hospitals', hospitalName, 'patient');
@@ -492,11 +518,16 @@ export async function updateSchedulerReservations(currentDate) {
     const [hospitalName] = user.email.split('@')[0].split('.');
     
     try {
-        // 해당 날짜의 예약 정보 조회
+        // 해당 날짜의 예약 정보 조회 - active reservation 조회
         const reservationRef = collection(db, 'hospitals', hospitalName, 'dates', currentDate, 'reservation');
-        const snapshot = await getDocs(reservationRef);
+        const reservationSnapshot = await getDocs(reservationRef);
         
-        if (snapshot.empty) {
+        // 예약 기록 조회 - reservationRecords 컬렉션
+        const recordsRef = collection(db, 'hospitals', hospitalName, 'dates', currentDate, 'reservationRecords');
+        const recordsSnapshot = await getDocs(recordsRef);
+        
+        // 두 컬렉션 모두 비어있는 경우
+        if (reservationSnapshot.empty && recordsSnapshot.empty) {
             // 예약이 없는 경우 메시지 표시
             reservedItemsContainer.innerHTML = '<div class="no-reservations">No reservations for this date</div>';
             return;
@@ -505,8 +536,8 @@ export async function updateSchedulerReservations(currentDate) {
         // 예약 정보를 시간순으로 정렬할 배열
         const reservations = [];
         
-        // 각 예약에 대해 정보 수집
-        for (const doc of snapshot.docs) {
+        // 현재 예약 정보 수집
+        reservationSnapshot.forEach(doc => {
             const reservationData = doc.data();
             const patientId = doc.id;
             
@@ -519,9 +550,29 @@ export async function updateSchedulerReservations(currentDate) {
                 time: formattedTime,
                 patientId: reservationData.idNumber || patientId,
                 patientName: reservationData.patientName || 'Unknown',
-                primaryComplaint: reservationData.primaryComplaint || 'Not specified'
+                primaryComplaint: reservationData.primaryComplaint || 'Not specified',
+                status: 'active' // 현재 예약 상태
             });
-        }
+        });
+        
+        // 예약 기록 정보 수집
+        recordsSnapshot.forEach(doc => {
+            const recordData = doc.data();
+            const patientId = doc.id;
+            
+            // 시간 포맷팅
+            const rsvdTime = recordData.rsvdTime.toDate();
+            const formattedTime = `${rsvdTime.getHours().toString().padStart(2, '0')}:${rsvdTime.getMinutes().toString().padStart(2, '0')}`;
+            
+            // 예약 정보 저장
+            reservations.push({
+                time: formattedTime,
+                patientId: recordData.idNumber || patientId,
+                patientName: recordData.patientName || 'Unknown',
+                primaryComplaint: recordData.primaryComplaint || 'Not specified',
+                status: 'completed' // 이미 처리된 예약
+            });
+        });
         
         // 시간순으로 정렬
         reservations.sort((a, b) => {
@@ -531,7 +582,7 @@ export async function updateSchedulerReservations(currentDate) {
         // 예약 정보 표시
         reservations.forEach(reservation => {
             const reservedItem = document.createElement('div');
-            reservedItem.className = 'reserved-item';
+            reservedItem.className = `reserved-item${reservation.status === 'completed' ? ' completed' : ''}`;
             
             reservedItem.innerHTML = `
                 <div class="time">${reservation.time}</div>
@@ -540,6 +591,7 @@ export async function updateSchedulerReservations(currentDate) {
                     <div class="appointment-type">${reservation.primaryComplaint}</div>
                     <div class="patient-id">${reservation.patientId}</div>
                 </div>
+
             `;
             
             reservedItemsContainer.appendChild(reservedItem);
@@ -563,16 +615,22 @@ async function updateCalendarReservations(hospitalName) {
         const currentDate = new Date(document.querySelector('.month-year').textContent);
         const formattedDate = `${day.padStart(2, '0')}.${months[currentDate.getMonth()]}.${currentDate.getFullYear()}`;
         
+        // 현재 예약 환자 수 가져오기
         const reservationRef = collection(db, 'hospitals', hospitalName, 'dates', formattedDate, 'reservation');
-        const snapshot = await getDocs(reservationRef);
-      
+        const reservationSnapshot = await getDocs(reservationRef);
         
-        if (snapshot.size > 0) {
+        // reservationRecords 컬렉션에서 기록 가져오기
+        const reservationRecordsRef = collection(db, 'hospitals', hospitalName, 'dates', formattedDate, 'reservationRecords');
+        const recordsSnapshot = await getDocs(reservationRecordsRef);
+        
+        // 두 컬렉션의 문서 수를 합산
+        const totalReservations = reservationSnapshot.size + recordsSnapshot.size;
+        
+        if (totalReservations > 0) {
             const countDiv = document.createElement('div');
             countDiv.className = 'reservation-count';
-            countDiv.textContent = snapshot.size;
+            countDiv.textContent = totalReservations;
             dateDiv.appendChild(countDiv);
-        
         }
     });
 }

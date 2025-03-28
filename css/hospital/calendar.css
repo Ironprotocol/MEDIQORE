@@ -680,4 +680,22 @@
             white-space: nowrap;
         }
 
+        /* 완료된 예약 스타일 */
+        .reserved-item.completed {
+            background-color: #f8f8f8;
+            opacity: 0.8;
+            border-left: 3px solid #6c757d;
+        }
+
+        .reserved-item .status-tag {
+            font-size: 10px;
+            padding: 2px 6px;
+            background-color: #6c757d;
+            color: white;
+            border-radius: 10px;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+        }
+
  

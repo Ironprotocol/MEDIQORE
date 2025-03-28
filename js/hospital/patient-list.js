@@ -333,11 +333,21 @@ async function createPatientElement(hospitalName, patientData, patientId, type, 
                             progress: 'waiting',
                             primaryComplaint: patientData.primaryComplaint,
                             timestamp: serverTimestamp(),
-                            gender: patientData.gender  // reservation의 gender 필드 가져오기
+                            gender: patientData.gender,
+                            rsvdTime: patientData.rsvdTime  // 예약 시간 정보 보존
                         });
 
-                        // 3. reservation 문서 삭제
+                        // 3. reservation 문서를 reservationRecords에 복사
                         const reservationRef = doc(db, 'hospitals', hospitalName, 'dates', currentDate, 'reservation', patientId);
+                        const reservationDoc = await getDoc(reservationRef);
+                        
+                        if (reservationDoc.exists()) {
+                            // reservationRecords 컬렉션에 저장
+                            const reservationRecordsRef = doc(db, 'hospitals', hospitalName, 'dates', currentDate, 'reservationRecords', patientId);
+                            await setDoc(reservationRecordsRef, reservationDoc.data());
+                        }
+                        
+                        // 4. 원본 reservation 문서 삭제
                         await deleteDoc(reservationRef);
                     }
 
